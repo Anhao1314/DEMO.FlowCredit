@@ -251,7 +251,7 @@
       host.innerHTML =
         '<div class="view-wrap">' +
         '<div class="page-head"><div>' +
-        '<div class="page-title">' + ui.icon("pulse", 22) + " P2 · AI Audit Engine</div>" +
+        '<div class="page-title">' + ui.icon("pulse", 22) + " P2 · AI Risk Assessment</div>" +
         '<div class="page-sub">Pipeline: collect ledgers → normalize → filter wash traffic → anchor check → score. ' +
         "Every number below is computed live from the mock dataset.</div></div></div>" +
         '<div class="card" style="margin-bottom:14px"><div class="audit-bar">' +
@@ -270,7 +270,7 @@
       if (s >= 4 && lineSlot) { App.ui.lineChart(lineSlot, d.R, d.C, d.devAlert ? 5 : null); }
       bind(host, st);
     } catch (e) {
-      host.innerHTML = '<div class="card"><div class="card-title">AI Audit Engine — render fallback</div>' +
+      host.innerHTML = '<div class="card"><div class="card-title">AI Risk Assessment — render fallback</div>' +
         '<p class="note-italic" style="margin-top:8px">A view error occurred; state remains intact. Press Reset or reload.</p></div>';
       if (App.ui) { App.ui.toast("View error — see console", "err"); }
     }

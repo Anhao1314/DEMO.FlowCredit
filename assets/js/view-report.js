@@ -222,7 +222,7 @@
       host.innerHTML =
         '<div class="view-wrap">' + bannerHtml(st.stress) +
         '<div class="page-head"><div>' +
-        '<div class="page-title">' + ui.icon("shield", 22) + " P3 · Verified Report</div>" +
+        '<div class="page-title">' + ui.icon("shield", 22) + " P3 · Risk Monitoring &amp; Response</div>" +
         '<div class="page-sub">One-page trusted audit report + dynamic response to value volatility. ' +
         "State is shared with P1/P2 — return here after anchoring and auditing.</div></div></div>" +
         reportHtml + stressHtml +
@@ -247,7 +247,7 @@
         recoverBtn.addEventListener("click", function () { App.act.stressReset(); });
       }
     } catch (e) {
-      host.innerHTML = '<div class="card"><div class="card-title">Verified Report — render fallback</div>' +
+      host.innerHTML = '<div class="card"><div class="card-title">Risk Monitoring — render fallback</div>' +
         '<p class="note-italic" style="margin-top:8px">A view error occurred; state remains intact. Press Reset or reload.</p></div>';
       if (App.ui) { App.ui.toast("View error — see console", "err"); }
     }

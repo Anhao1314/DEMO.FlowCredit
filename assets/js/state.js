@@ -11,7 +11,7 @@
   var App = window.App = window.App || {};
   var listeners = [];
   var state = {
-    route: "#/overview",
+    route: "#/landing",
     subject: "healthy",
     auditStage: -1,   // -1 idle, 0..4 = L0..L4 reached
     running: false,

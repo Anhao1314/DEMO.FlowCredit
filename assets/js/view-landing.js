@@ -18,6 +18,7 @@
 (function () {
   var App = window.App = window.App || {};
   var introSvg = null;
+  var prevRoute = null; // last state.route seen — intro plays only on true entry into #/landing
 
   /* ---------- intro reset: any clearTimers() snaps back to the full state ---------- */
   function resetIntro() {
@@ -213,6 +214,10 @@
   }
 
   /* ---------- delegated click: pick a case → switch subject → enter P2 ---------- */
+  // The anchor keeps its href as an a11y fallback, but navigation is
+  // driven here: preventDefault first (no double-route race), switch the
+  // global subject, then move to P2 via App.nav — switchSubject's
+  // same-route re-render never replays the intro.
   function bind(host) {
     var root = host.querySelector("#ld-root");
     if (!root || !root.addEventListener) { return; }
@@ -224,9 +229,11 @@
       }
       if (!n || n === root || !n.getAttribute) { return; }
       var key = n.getAttribute("data-subject");
+      if (ev.preventDefault) { ev.preventDefault(); }
       if (key && App.act && typeof App.act.switchSubject === "function") {
-        try { App.act.switchSubject(key); } catch (e) { /* default anchor nav still proceeds */ }
+        try { App.act.switchSubject(key); } catch (e) { /* ignore — still open P2 */ }
       }
+      if (App.nav) { App.nav("#/audit"); }
     });
   }
 
@@ -256,10 +263,12 @@
 
   function render(host) {
     toastOnce.fired = false;
+    var enterLanding = prevRoute !== App.state.route;
+    prevRoute = App.state.route;
     try {
       host.innerHTML = '<div class="ld-page" id="ld-root">' + pageHtml() + "</div>";
       bind(host);
-      playIntro(host);
+      if (enterLanding) { playIntro(host); }
     } catch (e) {
       resetIntro();
       try { host.innerHTML = fallbackHtml(); } catch (e2) { /* host stays readable */ }

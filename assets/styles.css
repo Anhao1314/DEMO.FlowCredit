@@ -531,11 +531,7 @@ button{font-family:inherit}
 .ld-hero-copy{flex:1 1 330px;min-width:0}
 .ld-eyebrow{font:600 10px var(--mono);color:#38BDF8;letter-spacing:1.6px}
 .ld-h1{margin:13px 0 10px;font:800 33px/1.14 var(--sans);color:var(--text);letter-spacing:-.01em}
-.ld-grad{color:#9ADCF4}
-@supports ((-webkit-background-clip:text) or (background-clip:text)){
-  .ld-grad{background:linear-gradient(92deg,#2DD4BF 0%,#38BDF8 100%);
-    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
-}
+.ld-grad{background:linear-gradient(90deg,#2DD4BF,#38BDF8);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 .ld-slogan{margin:0 0 9px;font-size:13px;font-weight:600;color:#2DD4BF;letter-spacing:.01em}
 .ld-sub{margin:0;max-width:440px;font-size:12px;line-height:1.6;color:#9DB4B8}
 .ld-cta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:19px}
@@ -763,18 +759,6 @@ button.hb-step:hover{border-color:rgba(45,212,191,.55);background:rgba(45,212,19
 /* ---- block 4: one-line note ---- */
 .hn-note{margin:15px 4px 0;text-align:center;font-size:11px;color:var(--text3);letter-spacing:.02em;font-style:italic}
 
-/* ---- per-page task line (top of P1/P2/P3) ---- */
-.pg-task{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin:0 0 14px;padding:9px 12px;
-  border:1px solid var(--line);border-radius:12px;background:var(--card);
-  box-shadow:0 10px 26px rgba(3,8,16,.22)}
-.pg-task-ledger{display:inline-flex;align-items:center;gap:7px;padding-right:12px;margin-right:2px;
-  border-right:1px solid var(--line);font:700 11px var(--mono);letter-spacing:.04em;
-  color:#D6F9F4;white-space:nowrap}
-.pg-task-t{flex:1;min-width:200px;font-size:11.5px;color:var(--text2);line-height:1.5}
-.pg-task-home{font:600 11px var(--mono);white-space:nowrap;color:var(--teal);text-decoration:none;
-  transition:color .2s}
-.pg-task-home:hover{color:#5EEAD4;text-decoration:underline}
-
 @media (max-width:560px){
   .hb-bar{padding:12px;gap:8px}
   .hb-step{padding:3px 8px;font-size:10px}
@@ -782,15 +766,12 @@ button.hb-step:hover{border-color:rgba(45,212,191,.55);background:rgba(45,212,19
   .ln-grid{grid-template-columns:1fr}
   .lg-row{gap:6px;row-gap:8px}
   .ln-chip{padding:4px 8px;font-size:10px}
-  .pg-task-ledger{border-right:0;padding-right:0}
 }
 @media (max-width:420px){
   .ln-head-s{flex-basis:100%}
   .ln-top{gap:6px}
   .lg-head-t{font-size:12.5px}
   .lg-bd{padding:0 2px;white-space:normal;text-align:center}
-  .pg-task{padding:8px 10px}
-  .pg-task-t{min-width:0}
 }
 @media (prefers-reduced-motion:reduce){
   .hb-dot.next{animation:none;box-shadow:0 0 0 1px rgba(45,212,191,.65)}

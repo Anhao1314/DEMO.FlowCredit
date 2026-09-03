@@ -6,23 +6,11 @@
 (function () {
   var App = window.App = window.App || {};
   var TABS = [
-    { hash: "#/overview", key: "overview", label: "Home", icon: "layers" },
+    { hash: "#/overview", key: "overview", label: "Overview", icon: "layers" },
     { hash: "#/ingest", key: "ingest", label: "Ingest", sub: "P1", icon: "db" },
-    { hash: "#/audit", key: "audit", label: "Audit", sub: "P2", icon: "pulse" },
-    { hash: "#/report", key: "report", label: "Report", sub: "P3", icon: "shield" }
+    { hash: "#/audit", key: "audit", label: "Risk", sub: "P2", icon: "pulse" },
+    { hash: "#/report", key: "report", label: "Monitor", sub: "P3", icon: "shield" }
   ];
-  var PAGE_TASK = {
-    ingest: "Sign the four sources, then anchor one Merkle fingerprint — fresh nonce per anchor.",
-    audit: "Run the audit pipeline: normalize, filter wash traffic, cross-check five anchors, score.",
-    report: "Verify the on-chain proof, then stress the facility (approved ledgers only)."
-  };
-  function taskBarHtml(text) {
-    var d = SUBJECTS[App.state.subject];
-    var label = d ? d.label : App.state.subject;
-    return '<div class="pg-task"><span class="pg-task-ledger"><i class="hb-dot done"></i>' + label + "</span>" +
-      '<span class="pg-task-t">' + text + '</span>' +
-      '<a class="pg-task-home" href="#/overview">← Back to Home</a></div>';
-  }
   var rootEl = null;
   var mainEl = null;
   var walletConnected = false;
@@ -30,7 +18,7 @@
 
   function routeKey(hash) {
     var m = String(hash || "").match(/^#\/(landing|overview|ingest|audit|report)$/);
-    return m ? m[1] : "overview";
+    return m ? m[1] : "landing";
   }
   function currentRoute() {
     return routeKey(location.hash);
@@ -142,7 +130,7 @@
       '<span id="wallet-label">Connect Wallet</span></button>' +
       "</div></div></header>" +
       '<main class="content" id="view-main" tabindex="-1"></main>' +
-      '<footer class="foot"><div class="line1">Demo flow: P1 anchor → P2 run audit &amp; compare ledgers → P3 verify &amp; stress test</div>' +
+      '<footer class="foot"><div class="line1">Demo flow: Landing → P1 attest &amp; anchor → P2 risk score → P3 verify &amp; active response</div>' +
       '<div class="line2">Testnet demo · simulated data · not financial advice · demo calibration</div></footer>' +
       "</div>";
     mainEl = rootEl.querySelector("#view-main");
@@ -209,7 +197,6 @@
     syncShell();
     var view = App.views[route] || App.views.overview;
     view.render(mainEl);
-    if (PAGE_TASK[route] && mainEl.insertAdjacentHTML) { mainEl.insertAdjacentHTML("afterbegin", taskBarHtml(PAGE_TASK[route])); }
     highlightTabs();
 
     if (mainEl.scrollTop) { window.scrollTo(0, 0); }
@@ -222,7 +209,7 @@
   function applyRoute() {
     var route = currentRoute();
     syncShell();
-    var changed = route !== (App.state.route || "#/overview").slice(2);
+    var changed = route !== (App.state.route || "#/landing").slice(2);
     var flight = App.fn.stressFlying();
     App.fn.clearTimers();
     var patch = { route: "#/" + route, running: false };
@@ -239,7 +226,7 @@
     buildShell();
     window.addEventListener("hashchange", applyRoute);
     if (!location.hash || !/^#\/(landing|overview|ingest|audit|report)$/.test(location.hash)) {
-      try { history.replaceState(null, "", "#/overview"); } catch (e) { location.hash = "#/overview"; }
+      try { history.replaceState(null, "", "#/landing"); } catch (e) { location.hash = "#/landing"; }
     }
     App.nav = nav;
     App.navTo = navTo;
