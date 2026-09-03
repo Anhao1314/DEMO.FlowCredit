@@ -145,7 +145,7 @@
           '<div class="spacer"></div>' +
           '<button type="button" class="btn btn-primary btn-sm" id="verify-btn">' + ui.icon("shield", 13) + " Verify On-Chain</button></div>"
         : '<div class="proof-row"><span class="proof-label">On-chain proof · Merkle root</span>' +
-          '<span class="chip chip-amber">not anchored — anchor data in P1 first</span>' +
+          '<span class="tag tag-warning">not anchored — anchor data in P1 first</span>' +
           '<div class="spacer"></div>' +
           '<button type="button" class="btn btn-primary btn-sm" id="verify-btn">' + ui.icon("shield", 13) + " Verify On-Chain</button></div>";
 
@@ -222,6 +222,7 @@
       host.innerHTML =
         '<div class="view-wrap">' + bannerHtml(st.stress) +
         '<div class="page-head"><div>' +
+        '<div class="crumbs"><a href="#/landing">Landing</a><span>/</span><span class="cur">Monitor · P3</span></div>' +
         '<div class="page-title">' + ui.icon("shield", 22) + " P3 · Risk Monitoring &amp; Response</div>" +
         '<div class="page-sub">One-page trusted audit report + dynamic response to value volatility. ' +
         "State is shared with P1/P2 — return here after anchoring and auditing.</div></div></div>" +

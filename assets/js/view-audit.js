@@ -195,12 +195,12 @@
     var u = App.ui;
     if (st.anchored && st.anchor) {
       return '<div class="anchor-state">' +
-        '<span class="chip chip-green">' + u.icon("check", 10) + " result anchored ✓</span>" +
+        '<span class="tag tag-success">' + u.icon("check", 10) + " result anchored ✓</span>" +
         '<span class="root-hash num" style="font-size:13px">root ' + u.esc(st.anchor.root) + "</span></div>" +
         howBlock(["The P1 Merkle root fingerprints this audit subject on the testnet. Only the root is stored — raw details stay off-chain."]);
     }
     return '<div class="anchor-state">' +
-      '<span class="chip chip-amber">pending anchor (go to P1)</span>' +
+      '<span class="tag tag-warning">pending anchor (go to P1)</span>' +
       '<button type="button" class="btn btn-sm btn-ghost" id="go-p1">' + u.icon("anchor", 12) + " Open P1 · Truth Ingest</button></div>" +
       howBlock(["L5 completes only after P1 anchors the four source digests into a Merkle root. The root is then shown here and in the P3 report."]);
   }
@@ -251,6 +251,7 @@
       host.innerHTML =
         '<div class="view-wrap">' +
         '<div class="page-head"><div>' +
+        '<div class="crumbs"><a href="#/landing">Landing</a><span>/</span><span class="cur">Risk · P2</span></div>' +
         '<div class="page-title">' + ui.icon("pulse", 22) + " P2 · AI Risk Assessment</div>" +
         '<div class="page-sub">Pipeline: collect ledgers → normalize → filter wash traffic → anchor check → score. ' +
         "Every number below is computed live from the mock dataset.</div></div></div>" +

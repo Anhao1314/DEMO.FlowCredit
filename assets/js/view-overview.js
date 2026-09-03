@@ -209,6 +209,11 @@
       var st = App.state;
       var subjectKey = SUBJECTS[st.subject] ? st.subject : "healthy";
       host.innerHTML = '<div class="view-wrap" id="ov-root">' +
+        '<div class="page-head"><div>' +
+        '<div class="crumbs"><a href="#/landing">Landing</a><span>/</span><span class="cur">Overview</span></div>' +
+        '<div class="page-title">' + ui.icon("layers", 22) + " Run Console</div>" +
+        '<div class="page-sub">Follow the guided run: anchor → assess → verify → stress. Every metric computes live from the selected ledger.</div>' +
+        '</div></div>' +
         statusBarHtml(journey(st)) +
         linesHtml(subjectKey) +
         legendHtml() +

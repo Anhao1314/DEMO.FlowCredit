@@ -576,3 +576,100 @@ button.hb-step:hover{border-color:rgba(45,212,191,.55);background:rgba(45,212,19
   .hb-dot.next{animation:none;box-shadow:0 0 0 1px rgba(45,212,191,.65)}
   .ln-chip,.ln-card,button.hb-step{transition:none}
 }
+
+/* ===== P0 enterprise components =====
+   Aliyun/AntD-aligned visual system, dark theme. Appended only —
+   earlier selectors are untouched; same-specificity overrides win.
+   No logic/number/class/id changes elsewhere. ==================== */
+
+/* ---- P0 PageHeader: breadcrumbs + unified title block ---- */
+.crumbs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px;
+  font:600 11px var(--sans);letter-spacing:.02em;color:var(--text3)}
+.crumbs a{color:var(--teal);text-decoration:none;transition:color .2s}
+.crumbs a:hover{color:#5EEAD4;text-decoration:underline}
+.crumbs .cur{color:var(--text2)}
+.page-head{margin:0 0 14px;gap:8px 14px;align-items:flex-end}
+.page-head>div{min-width:0}
+.page-title{font-size:16px;font-weight:600;align-items:center;gap:8px;line-height:1.3}
+.page-title svg{flex:none}
+.page-title .ico{width:20px;height:20px}
+.page-sub{font-size:12px;color:var(--text3);line-height:1.55;margin-top:3px;max-width:760px}
+@media (max-width:420px){
+  .page-head{flex-direction:column;align-items:flex-start;gap:6px 10px}
+  .page-head>div{width:100%}
+  .page-title{font-size:15px}
+  .page-head .chip{margin-left:0}
+}
+
+/* ---- P0 Steps (AntD-style) — visual only, stepState untouched ---- */
+.steps{display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:8px;margin:8px 0 0}
+.step{display:inline-flex;align-items:center;gap:7px;padding:2px 0;border-radius:8px}
+.step-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none;
+  border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--text3);
+  font:700 11px var(--mono);
+  transition:border-color .25s,background .25s,color .25s,box-shadow .25s}
+.step-name{font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.step.done .step-dot{background:rgba(45,212,191,.16);border-color:var(--teal);color:#5EEAD4}
+.step.done .step-name{color:var(--text)}
+.step.cur .step-dot{border-color:var(--teal);color:#5EEAD4;background:rgba(45,212,191,.07);
+  animation:p0CurPulse 1.5s ease-in-out infinite}
+.step.cur .step-name{color:#B7F5EC}
+.step.lock .step-dot{background:transparent}
+.step.lock .step-name{color:var(--text3)}
+.step-conn{width:26px;min-width:10px;height:1px;background:var(--line);margin:0 6px;align-self:center;flex:none}
+.step.done + .step-conn{background:rgba(45,212,191,.38)}
+@keyframes p0CurPulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.4)}50%{box-shadow:0 0 0 5px rgba(45,212,191,0)}}
+
+/* ---- P0 Tag (four states) ---- */
+.tag{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--mono);letter-spacing:.03em;
+  padding:2px 9px;border-radius:999px;border:1px solid;line-height:1.6;white-space:nowrap}
+.tag svg{width:11px;height:11px;flex:none}
+.tag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.tag-success{color:#34D399;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
+.tag-processing{color:#38BDF8;border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08)}
+.tag-warning{color:#F59E0B;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
+.tag-error{color:#F87171;border-color:rgba(248,113,113,.45);background:rgba(248,113,113,.08)}
+
+/* ---- P0 Alert (left accent bar + tinted surface) ---- */
+.risk-banner{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:60;max-width:94%;
+  display:inline-flex;align-items:center;gap:9px;border-radius:10px;padding:9px 14px;
+  font:600 12.5px var(--mono);letter-spacing:.04em;white-space:nowrap;
+  color:#FECACA;border:1px solid rgba(248,113,113,.45);border-left:3px solid #F87171;
+  background:rgba(248,113,113,.08);box-shadow:0 8px 26px rgba(3,8,16,.45);
+  animation:riskIn .3s ease-out both}
+.risk-banner svg{width:15px;height:15px;color:#F87171;flex:none}
+.risk-banner.leave{animation:riskOut .3s ease-in both;pointer-events:none}
+.card.veto{border:1px solid rgba(248,113,113,.4);border-left:3px solid #F87171;
+  background:rgba(248,113,113,.06);border-radius:10px;padding:12px 14px;box-shadow:none}
+.veto-title{font-weight:600;font-size:13px;color:#FCA5A5;display:flex;align-items:center;gap:8px}
+.reject-panel{border:1px solid rgba(248,113,113,.4);border-left:3px solid #F87171;
+  background:rgba(248,113,113,.06);border-radius:10px;padding:13px 14px;box-shadow:none}
+.reject-panel .r-title{font-weight:600;color:#FCA5A5;display:flex;align-items:center;gap:9px}
+
+/* ---- P0 Statistic (unified label / value / note) ---- */
+.metric-tiles{gap:10px}
+.metric{padding:13px 14px;border-radius:12px}
+.metric .m-label,.report-big .m-label{font-size:10px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3)}
+.metric .m-value,.report-big .m-value{font-family:var(--mono);font-weight:600;
+  font-variant-numeric:tabular-nums;line-height:1.15}
+.metric .m-value{font-size:22px;margin-top:3px}
+.metric .m-note,.report-big .m-note{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.45}
+.report-big{padding:14px;border-radius:12px}
+.report-big .m-value{font-size:26px;margin-top:5px}
+.report-big .m-value small{font-size:12px !important;color:var(--text3) !important;font-weight:600 !important}
+.hf-num{font-family:var(--mono);font-weight:600;font-size:26px;letter-spacing:.01em;
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.hf-num.danger{color:var(--red);animation:hfBlink 1s ease-in-out infinite}
+.hf-caption{font-size:11px;color:var(--text3);margin-top:3px}
+.stress-metrics{gap:10px}
+.stress-metrics .m-label{font-size:10px !important;font-weight:600 !important;letter-spacing:.1em !important;
+  text-transform:uppercase !important;color:var(--text3) !important}
+.flag-ok{color:#6EE7B7;display:inline-flex;align-items:center;gap:7px;font:600 11.5px var(--mono)}
+.flag-ok svg{width:14px;height:14px}
+
+/* ---- P0 reduced-motion guard (static complete) ---- */
+@media (prefers-reduced-motion:reduce){
+  .step-dot,.step.cur .step-dot,.risk-banner,.veto-title,.r-title{animation:none !important;
+    box-shadow:none !important;transition:none !important}
+}

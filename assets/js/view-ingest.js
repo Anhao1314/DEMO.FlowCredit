@@ -99,7 +99,8 @@
       host.innerHTML =
         '<div class="view-wrap">' +
         '<div class="page-head">' +
-        '<div><div class="page-title">' + ui.icon("db", 22) + " P1 · Truth Ingest</div>" +
+        '<div><div class="crumbs"><a href="#/landing">Landing</a><span>/</span><span class="cur">Ingest · P1</span></div>' +
+        '<div class="page-title">' + ui.icon("db", 22) + " P1 · Truth Ingest</div>" +
         '<div class="page-sub">Prove the numbers are not self-reported and cannot be tampered with. ' +
         "Four signed sources feed a mock Merkle root; only the fingerprint goes on-chain.</div></div>" +
         '<span class="chip">subject · ' + ui.esc(d.label) + "</span>" +
