@@ -5,6 +5,7 @@
    ============================================================ */
 (function () {
   var App = window.App = window.App || {};
+  var PAGE_NEW = 1;
   var TABS = [
     { hash: "#/overview", key: "overview", label: "Overview", icon: "layers" },
     { hash: "#/ingest", key: "ingest", label: "Ingest", sub: "P1", icon: "db" },
