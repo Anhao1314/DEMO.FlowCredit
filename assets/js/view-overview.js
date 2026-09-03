@@ -145,7 +145,7 @@
       stepChip("report:proof", "Verdict · P3") +
       '</span><span class="gd-note">veto path · red flags hold the line at zero</span></div>' +
       '</div>' +
-      '<p class="gd-foot">Same pipeline, opposite verdict. Jump with the strip above or the ← → keys; run progress below tracks the current ledger.</p>' +
+      '<p class="gd-foot">Same pipeline, opposite verdict — switch pages from the top tabs; run progress below tracks the current ledger.</p>' +
       '</section>';
   }
   /* ---------- shared section chrome ---------- */
