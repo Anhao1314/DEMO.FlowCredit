@@ -11,6 +11,18 @@
     { hash: "#/audit", key: "audit", label: "Audit", sub: "P2", icon: "pulse" },
     { hash: "#/report", key: "report", label: "Report", sub: "P3", icon: "shield" }
   ];
+  var PAGE_TASK = {
+    ingest: "Sign the four sources, then anchor one Merkle fingerprint — fresh nonce per anchor.",
+    audit: "Run the audit pipeline: normalize, filter wash traffic, cross-check five anchors, score.",
+    report: "Verify the on-chain proof, then stress the facility (approved ledgers only)."
+  };
+  function taskBarHtml(text) {
+    var d = SUBJECTS[App.state.subject];
+    var label = d ? d.label : App.state.subject;
+    return '<div class="pg-task"><span class="pg-task-ledger"><i class="hb-dot done"></i>' + label + "</span>" +
+      '<span class="pg-task-t">' + text + '</span>' +
+      '<a class="pg-task-home" href="#/overview">← Back to Home</a></div>';
+  }
   var rootEl = null;
   var mainEl = null;
   var walletConnected = false;
@@ -197,6 +209,7 @@
     syncShell();
     var view = App.views[route] || App.views.overview;
     view.render(mainEl);
+    if (PAGE_TASK[route] && mainEl.insertAdjacentHTML) { mainEl.insertAdjacentHTML("afterbegin", taskBarHtml(PAGE_TASK[route])); }
     highlightTabs();
 
     if (mainEl.scrollTop) { window.scrollTo(0, 0); }
