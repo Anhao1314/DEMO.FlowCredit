@@ -6,7 +6,7 @@
 (function () {
   var App = window.App = window.App || {};
   var TABS = [
-    { hash: "#/overview", key: "overview", label: "Home", icon: "layers" },
+    { hash: "#/overview", key: "overview", label: "Overview", icon: "layers" },
     { hash: "#/ingest", key: "ingest", label: "Ingest", sub: "P1", icon: "db" },
     { hash: "#/audit", key: "audit", label: "Audit", sub: "P2", icon: "pulse" },
     { hash: "#/report", key: "report", label: "Report", sub: "P3", icon: "shield" }
@@ -17,8 +17,8 @@
   var booted = false;
 
   function routeKey(hash) {
-    var m = String(hash || "").match(/^#\/(overview|ingest|audit|report)$/);
-    return m ? m[1] : "overview";
+    var m = String(hash || "").match(/^#\/(landing|overview|ingest|audit|report)$/);
+    return m ? m[1] : "landing";
   }
   function currentRoute() {
     return routeKey(location.hash);
@@ -125,6 +125,7 @@
       '<div class="seg" role="group" aria-label="network mode">' +
       '<button type="button" class="seg-btn on" id="mode-mock">Mock</button>' +
       '<button type="button" class="seg-btn is-off" id="mode-live">Live</button></div>' +
+      '<a class="launch-cta" href="#/overview">Launch App →</a>' +
       '<button type="button" class="btn btn-sm wallet-btn" id="wallet-btn">' + u.icon("wallet", 13) +
       '<span id="wallet-label">Connect Wallet</span></button>' +
       "</div></div></header>" +
@@ -182,9 +183,18 @@
     }
   }
 
+  // Landing is the marketing front door: hide app chrome while on #/landing.
+  function syncShell() {
+    if (!rootEl) { return; }
+    var shell = rootEl.querySelector(".shell");
+    if (!shell) { return; }
+    shell.classList.toggle("is-landing", currentRoute() === "landing");
+  }
+
   function renderCurrent() {
     if (!mainEl || !booted) { return; }
     var route = currentRoute();
+    syncShell();
     var view = App.views[route] || App.views.overview;
     view.render(mainEl);
     highlightTabs();
@@ -198,7 +208,8 @@
   // states (idle / recover) are preserved by state.
   function applyRoute() {
     var route = currentRoute();
-    var changed = route !== (App.state.route || "#/audit").slice(2);
+    syncShell();
+    var changed = route !== (App.state.route || "#/landing").slice(2);
     var flight = App.fn.stressFlying();
     App.fn.clearTimers();
     var patch = { route: "#/" + route, running: false };
@@ -214,8 +225,8 @@
     if (bootMsg && bootMsg.parentNode) { bootMsg.parentNode.removeChild(bootMsg); }
     buildShell();
     window.addEventListener("hashchange", applyRoute);
-    if (!location.hash || !/^#\/(overview|ingest|audit|report)$/.test(location.hash)) {
-      try { history.replaceState(null, "", "#/overview"); } catch (e) { location.hash = "#/overview"; }
+    if (!location.hash || !/^#\/(landing|overview|ingest|audit|report)$/.test(location.hash)) {
+      try { history.replaceState(null, "", "#/landing"); } catch (e) { location.hash = "#/landing"; }
     }
     App.nav = nav;
     App.navTo = navTo;
