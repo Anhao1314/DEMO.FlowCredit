@@ -675,3 +675,32 @@ a.pj-go:hover{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.08);
   .pj-hint{display:none}
   .pj-pill{padding:5px 10px;font-size:11px}
 }
+/* ---------- usage guide (top of Home / Overview) ---------- */
+.gd-card{padding:16px 18px}
+.gd-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.gd-title{font-weight:800;font-size:15px;letter-spacing:.01em;color:var(--text)}
+.gd-badges{display:inline-flex;align-items:center;gap:7px}
+.gd-sub{margin:9px 0 0;font-size:11.5px;line-height:1.6;color:var(--text2);max-width:840px}
+.gd-lines{display:flex;flex-direction:column;gap:9px;margin-top:13px}
+.gd-line{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  border:1px solid var(--line);border-radius:12px;background:var(--card2);padding:10px 12px;
+  transition:border-color .2s,background .2s}
+.gd-line-ok.on{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.06)}
+.gd-line-rej.on{border-color:rgba(248,113,113,.55);background:rgba(248,113,113,.05)}
+.gd-name{font:700 11px var(--mono);letter-spacing:.05em;white-space:nowrap}
+.gd-name.gd-ok{color:#5EEAD4}
+.gd-name.gd-rej{color:#F87171}
+.gd-steps{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.gd-chip{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text2);
+  font:600 10.5px var(--mono);padding:5px 10px;border-radius:999px;cursor:pointer;letter-spacing:.02em;
+  transition:border-color .2s,color .2s,background .2s,transform .15s}
+.gd-chip:hover{border-color:rgba(45,212,191,.6);color:#B7F5EC;background:rgba(45,212,191,.08);transform:translateY(-1px)}
+.gd-chip-sybil:hover{border-color:rgba(248,113,113,.6);color:#FECACA;background:rgba(248,113,113,.07)}
+.gd-ar{font:600 11px var(--mono);color:var(--text3)}
+.gd-note{font-size:10px;color:var(--text3);white-space:nowrap;margin-left:auto}
+.gd-foot{margin:11px 0 0;font-size:10px;color:var(--text3);letter-spacing:.02em}
+@media (max-width:560px){
+  .gd-card{padding:13px 12px}
+  .gd-line{padding:9px 10px}
+  .gd-note{white-space:normal;margin-left:0}
+}

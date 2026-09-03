@@ -114,6 +114,40 @@
       allDone: veto ? false : stressDone, steps: steps, next: next
     };
   }
+  /* ---------- usage guide: how to run the two demo lines ---------- */
+  function stepChip(go, label) {
+    return '<button type="button" class="gd-chip" data-go="' + go + '">' + label + "</button>";
+  }
+  function guideHtml(subjectKey) {
+    var onOk = subjectKey === "healthy" ? " on" : "";
+    var onRej = subjectKey === "sybil" ? " on" : "";
+    return '<section class="card gd-card" id="ov-guide">' +
+      '<div class="gd-head"><span class="gd-title">How to run this demo</span>' +
+      '<span class="gd-badges"><span class="badge-testnet">Testnet</span>' +
+      '<span class="chip chip-teal num">Mock data</span></span></div>' +
+      '<p class="gd-sub">One pipeline, two ledgers. Pick a run below and follow the steps — every number is computed live from the selected ledger, then anchored on-chain and stress-tested in P3.</p>' +
+      '<div class="gd-lines">' +
+      '<div class="gd-line gd-line-ok' + onOk + '">' +
+      '<span class="gd-name gd-ok">Run 1 · Healthy Merchant</span>' +
+      '<span class="gd-steps">' +
+      stepChip("ingest:anchor", "Anchor · P1") + '<i class="gd-ar">→</i>' +
+      stepChip("audit:l0", "Run audit · P2") + '<i class="gd-ar">→</i>' +
+      stepChip("report:proof", "Verify · P3") + '<i class="gd-ar">→</i>' +
+      stepChip("report:stress", "Stress · P3") +
+      '</span><span class="gd-note">approved path · no material flags</span></div>' +
+      '<div class="gd-line gd-line-rej' + onRej + '">' +
+      '<span class="gd-name gd-rej">Run 2 · Sybil Address</span>' +
+      '<span class="gd-steps">' +
+      '<button type="button" class="gd-chip gd-chip-sybil" data-guide-sybil="">Use Sybil ledger</button>' +
+      '<i class="gd-ar">→</i>' +
+      stepChip("ingest:anchor", "Anchor · P1") + '<i class="gd-ar">→</i>' +
+      stepChip("audit:l0", "Run audit · P2") + '<i class="gd-ar">→</i>' +
+      stepChip("report:proof", "Verdict · P3") +
+      '</span><span class="gd-note">veto path · red flags hold the line at zero</span></div>' +
+      '</div>' +
+      '<p class="gd-foot">Same pipeline, opposite verdict. Jump with the strip above or the ← → keys; run progress below tracks the current ledger.</p>' +
+      '</section>';
+  }
   /* ---------- shared section chrome ---------- */
   function hpHead(title, lead) {
     var u = App.ui;
@@ -596,6 +630,8 @@
       var vH = derive("healthy");
       host.innerHTML =
         '<div class="view-wrap" id="ov-root">' +
+
+        guideHtml(subjectKey) +
         heroHtml(vH) +
         runProgressHtml(journey(st)) +
         statsHtml() +
@@ -643,6 +679,11 @@
         if (n.getAttribute) {
           var ds = n.getAttribute("data-subject");
           if (ds) { App.act.switchSubject(ds); return; }
+          var gs = n.getAttribute("data-guide-sybil");
+          if (gs !== null) {
+            if (App.act && App.act.switchSubject) { App.act.switchSubject("sybil"); }
+            return;
+          }
           var dg = n.getAttribute("data-go");
           if (dg && App.navTo) {
             var dp = dg.split(":");

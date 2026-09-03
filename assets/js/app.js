@@ -12,9 +12,8 @@
     { hash: "#/report", key: "report", label: "Report", sub: "P3", icon: "shield" }
   ];
   var rootEl = null;
-  // Page-jump strip order (marketing front door first, then the app flow).
+  // Page-jump order (Overview → P1 → P2 → P3).
   var PAGE_ORDER = [
-    { hash: "#/landing", key: "landing", label: "Landing" },
     { hash: "#/overview", key: "overview", label: "Overview" },
     { hash: "#/ingest", key: "ingest", label: "Ingest · P1" },
     { hash: "#/audit", key: "audit", label: "Audit · P2" },
@@ -27,7 +26,7 @@
 
   function routeKey(hash) {
     var m = String(hash || "").match(/^#\/(landing|overview|ingest|audit|report)$/);
-    return m ? m[1] : "landing";
+    return m ? m[1] : "overview";
   }
   function currentRoute() {
     return routeKey(location.hash);
@@ -249,7 +248,7 @@
     syncShell();
     var view = App.views[route] || App.views.overview;
     view.render(mainEl);
-    if (mainEl.insertAdjacentHTML) { mainEl.insertAdjacentHTML("beforeend", pageNavHtml()); }
+    if (mainEl.insertAdjacentHTML) { mainEl.insertAdjacentHTML("afterbegin", pageNavHtml()); }
     highlightTabs();
 
     if (mainEl.scrollTop) { window.scrollTo(0, 0); }
@@ -262,7 +261,7 @@
   function applyRoute() {
     var route = currentRoute();
     syncShell();
-    var changed = route !== (App.state.route || "#/landing").slice(2);
+    var changed = route !== (App.state.route || "#/overview").slice(2);
     var flight = App.fn.stressFlying();
     App.fn.clearTimers();
     var patch = { route: "#/" + route, running: false };
@@ -280,7 +279,7 @@
     window.addEventListener("hashchange", applyRoute);
     window.addEventListener("keydown", onKeyJump);
     if (!location.hash || !/^#\/(landing|overview|ingest|audit|report)$/.test(location.hash)) {
-      try { history.replaceState(null, "", "#/landing"); } catch (e) { location.hash = "#/landing"; }
+      try { history.replaceState(null, "", "#/overview"); } catch (e) { location.hash = "#/overview"; }
     }
     App.nav = nav;
     App.navTo = navTo;
