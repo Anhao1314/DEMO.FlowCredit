@@ -5,21 +5,13 @@
    ============================================================ */
 (function () {
   var App = window.App = window.App || {};
-    var TABS = [
+  var TABS = [
     { hash: "#/overview", key: "overview", label: "Home", icon: "layers" },
     { hash: "#/ingest", key: "ingest", label: "Ingest", sub: "P1", icon: "db" },
     { hash: "#/audit", key: "audit", label: "Audit", sub: "P2", icon: "pulse" },
     { hash: "#/report", key: "report", label: "Report", sub: "P3", icon: "shield" }
   ];
   var rootEl = null;
-  // Page-jump order (Overview → P1 → P2 → P3).
-  var PAGE_ORDER = [
-    { hash: "#/overview", key: "overview", label: "Overview" },
-    { hash: "#/ingest", key: "ingest", label: "Ingest · P1" },
-    { hash: "#/audit", key: "audit", label: "Audit · P2" },
-    { hash: "#/report", key: "report", label: "Report · P3" }
-  ];
-
   var mainEl = null;
   var walletConnected = false;
   var booted = false;
