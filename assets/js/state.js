@@ -1,0 +1,293 @@
+/* ============================================================
+   state.js — global store, pure metric functions, pipeline &
+   stress state machines, timer discipline.
+   Self-test (node, stubbed window):
+     cci(healthy)=768, cci(sybil)=320
+     pd(768)=3.1%, pd(320)=85.0%
+     validNT_M: 66.2 / 36.7
+     efficiency: 22500 / 514286
+   ============================================================ */
+(function () {
+  var App = window.App = window.App || {};
+  var listeners = [];
+  var state = {
+    route: "#/audit",
+    subject: "healthy",
+    auditStage: -1,   // -1 idle, 0..4 = L0..L4 reached
+    running: false,
+    anchored: false,  // per-subject anchor flag
+    chainLogs: [],    // newest first
+    anchor: null,     // { root, block, time, nonce, leafHashes, levelHashes }
+    nonce: 0,         // per-subject anchor counter (resets with subject)
+    stress: "idle",   // idle|shock|derisk|notify|partial|recover
+    timer: []         // every pending handle registered here
+  };
+  App.state = state;
+
+  /* ---------- pure metric functions (computed, never hard-coded) ---------- */
+  function validNT_M(d) { return +(d.rawNT_M * d.validRate).toFixed(1); }               // healthy 66.2 / sybil 36.7
+  function efficiency(d) { return Math.round(d.rawNT_M * 1e6 / d.gpuHours); }           // healthy 22500 / sybil 514286
+  function cci(d) {                                                                     // healthy 768 / sybil 320
+    var s = 0;
+    for (var i = 0; i < ANCHOR_W.length && i < d.anchors.length; i++) {
+      s += d.anchors[i][3] * ANCHOR_W[i];
+    }
+    return Math.round(s * 10);
+  }
+  function pd(value) { return 100 / (1 + Math.exp(0.01156 * value - 5.433)); }          // pd(768)=3.1% pd(320)=85.0%
+  function deviation(d) { return { pct: d.deviationPct, alert: d.devAlert }; }          // +4% normal / +186% >2σ
+  function ntM(d) { return d.rawNT_M; }                                                 // NT (M), w_model x w_task applied — see data.js
+  function scuOf(d) { return Math.round(d.gpuHours * d.util * d.coef.c_gpu * 10) / 10; } // healthy 2496 / sybil 86.1
+  function vetoed(d) { return !!(d.redflags && d.redflags.length); }
+  function creditLine(d) { return vetoed(d) ? 0 : d.creditLine; }                       // veto forces 0
+
+  /* ---------- source cards (P1) derived from the subject's raw records ---------- */
+  function sourceCards(d) {
+    return [
+      { id: "billing", name: "Cloud / API Billing",
+        fields: [["Input tokens", d.l0.compute.Input], ["Output tokens", d.l0.compute.Output],
+                 ["Raw tokens", d.l0.compute.Raw], ["Requests", d.l0.compute.Requests]] },
+      { id: "gpu", name: "GPU Telemetry",
+        fields: [["GPU hours", d.l0.physical.GPUh], ["GPU fleet", d.l0.physical.GPU], ["Utilization", d.l0.physical.Util]] },
+      { id: "treasury", name: "Treasury System",
+        fields: [["Spend", d.l0.business.Spend], ["Customers", d.l0.business.Customers],
+                 ["Top-5 share", d.l0.business.Top5], ["Repayment", d.l0.business.Repayment]] },
+      { id: "chain", name: "On-chain Address",
+        fields: [["Periods", String(d.R.length)], ["R declared range", minMax(d.R)],
+                 ["C verified range", minMax(d.C)], ["Wash-loop rate", d.l0.business.Loop]] }
+    ];
+  }
+  function minMax(arr) { return Math.min.apply(null, arr) + "-" + Math.max.apply(null, arr); }
+  function leafDigest(card, d) { return card.name + "|" + card.fields.map(function (f) { return f.join("="); }).join("&"); }
+
+  /* ---------- simplified deterministic mock hash / merkle (no crypto.subtle) ---------- */
+  function mockHash(str) {
+    var out = "";
+    for (var r = 0; r < 5; r++) {
+      var h = 2166136261 >>> 0;
+      var input = str + "::round" + r;
+      for (var i = 0; i < input.length; i++) {
+        h ^= input.charCodeAt(i);
+        h = Math.imul(h, 16777619) >>> 0;
+      }
+      out += ("0000000" + h.toString(16)).slice(-8);
+    }
+    return out;
+  }
+  // merkleBuild(digests, ts, nonce) — data + timestamp + nonce feed every node,
+  // so each anchor produces a different root.
+  function merkleBuild(digests, ts, nonce) {
+    var level = digests.map(function (s, i) { return mockHash(s + "|" + ts + "|" + nonce + "|leaf" + i); });
+    var levels = [level];
+    while (level.length > 1) {
+      var next = [];
+      for (var i = 0; i < level.length; i += 2) {
+        var pair = level[i] + "|" + (level[i + 1] || level[i]);
+        next.push(mockHash(pair + "|" + ts + "|" + nonce + "|mid" + levels.length));
+      }
+      levels.push(next);
+      level = next;
+    }
+    return { root: "0x" + levels[levels.length - 1][0], levels: levels };
+  }
+
+  /* ---------- time helpers ---------- */
+  function nowStamp() {
+    var d2 = new Date();
+    return d2.toISOString().replace("T", " ").slice(0, 19) + " UTC";
+  }
+  function nowShort() {
+    var d2 = new Date();
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return p(d2.getHours()) + ":" + p(d2.getMinutes()) + ":" + p(d2.getSeconds()) + " UTC";
+  }
+
+  /* ---------- notify (ui may not be loaded yet at definition time) ---------- */
+  function notify(msg, kind) {
+    if (App.ui && App.ui.toast) { App.ui.toast(msg, kind); }
+  }
+
+  /* ---------- timer discipline: every handle lives in state.timer ---------- */
+  var clearHooks = [];
+  function addClearHook(fn) { if (typeof fn === "function") { clearHooks.push(fn); } }
+  function dropHandle(type, id) {
+    var arr = state.timer;
+    for (var i = arr.length - 1; i >= 0; i--) {
+      if (arr[i] && arr[i].type === type && arr[i].id === id) { arr.splice(i, 1); }
+    }
+  }
+  function timeout(fn, ms) {
+    var rec = { type: "timeout", id: 0 };
+    rec.id = setTimeout(function () {
+      dropHandle("timeout", rec.id);
+      try { fn(); } catch (e) { safeFail(e); }
+    }, ms);
+    state.timer.push(rec);
+    return rec.id;
+  }
+  function raf(fn) {
+    var rec = { type: "raf", id: 0 };
+    rec.id = requestAnimationFrame(function () {
+      dropHandle("raf", rec.id);
+      try { fn(); } catch (e) { safeFail(e); }
+    });
+    state.timer.push(rec);
+    return rec.id;
+  }
+  function clearTimers() {
+    var arr = state.timer || [];
+    for (var i = 0; i < arr.length; i++) {
+      try {
+        if (arr[i].type === "raf") { cancelAnimationFrame(arr[i].id); }
+        else { clearTimeout(arr[i].id); }
+      } catch (e) { /* ignore */ }
+    }
+    state.timer = [];
+    for (var j = 0; j < clearHooks.length; j++) {
+      try { clearHooks[j](); } catch (e) { /* ignore */ }
+    }
+  }
+  function safeFail(e) {
+    if (App.ui && App.ui.toast) { App.ui.toast("Unexpected error — see console", "err"); }
+    if (window.console && console.error) { console.error(e); }
+  }
+
+  /* ---------- subscription / set ---------- */
+  function setState(patch) {
+    for (var k in patch) {
+      if (Object.prototype.hasOwnProperty.call(patch, k)) { state[k] = patch[k]; }
+    }
+    emit();
+  }
+  function emit() {
+    for (var i = 0; i < listeners.length; i++) {
+      try { listeners[i](state); } catch (e) { /* one bad listener must not break others */ }
+    }
+  }
+  function onChange(cb) { listeners.push(cb); }
+
+  /* ---------- P2 audit pipeline ---------- */
+  function runAudit() {
+    if (state.running) { notify("Audit already running — press Reset or wait", "warn"); return; }
+    clearTimers();
+    setState({ auditStage: -1, running: true });
+    var d = SUBJECTS[state.subject];
+    (function step(k) {
+      setState({ auditStage: k, running: k < 4 });
+      if (k === 4) {
+        notify("Compute complete · CCI " + cci(d));
+        return;
+      }
+      timeout(function () { step(k + 1); }, 350);
+    })(0);
+  }
+  function resetAudit() {
+    clearTimers();
+    setState({ auditStage: -1, running: false });
+    notify("Audit pipeline reset");
+  }
+
+  /* ---------- subject switching ---------- */
+  function switchSubject(s) {
+    if (!SUBJECTS[s] || s === state.subject) { return; }
+    if (state.running) { notify("Audit in progress — press Reset first", "warn"); return; }
+    clearTimers();
+    setState({
+      subject: s, auditStage: -1, running: false,
+      anchored: false, chainLogs: [], anchor: null, nonce: 0,
+      stress: "idle"
+    });
+    notify("Switched to " + SUBJECTS[s].label);
+  }
+
+  /* ---------- P1 anchoring ---------- */
+  function anchorSubject() {
+    var d = SUBJECTS[state.subject];
+    if (!d) { return; }
+    var ts = nowStamp();
+    var nonce = state.nonce + 1;
+    var digests = sourceCards(d).map(function (c) { return leafDigest(c, d); });
+    var tree = merkleBuild(digests, ts, nonce);
+    var block = 19000000 + Math.floor(Math.random() * 100000);
+    var entry = {
+      time: nowShort(), block: block,
+      hash: tree.root.slice(0, 18) + "…",
+      status: "success", rule: "v0.1", nonce: nonce
+    };
+    setState({
+      anchored: true, nonce: nonce,
+      anchor: { root: tree.root, block: block, time: ts, nonce: nonce, levels: tree.levels },
+      chainLogs: [entry].concat(state.chainLogs)
+    });
+    notify("Anchored · root " + tree.root);
+  }
+
+  /* ---------- P3 stress state machine ---------- */
+  // STRESS_FRAMES — single shared source of truth for P3 (view-report)
+  // and the Overview preview. Deeply frozen; never duplicate numbers.
+  var STRESS_FRAMES = Object.freeze({
+    liquidationHf: 1.0,                                   // red liquidation line
+    idle: Object.freeze({ hf: 1.85, credit: 20000 }),     // baseline frame
+    phases: Object.freeze([
+      Object.freeze({ key: "shock",   hf: 1.05, credit: 20000 }),
+      Object.freeze({ key: "derisk",  hf: 1.05, credit: 12000 }),
+      Object.freeze({ key: "notify",  hf: 1.05, credit: 12000 }),
+      Object.freeze({ key: "partial", hf: 1.05, credit: 12000 }),
+      Object.freeze({ key: "recover", hf: 1.35, credit: 18000 })
+    ]),
+    nodes: Object.freeze(["De-risk", "Notify", "Partial Liquidation", "HF Recovered"])
+  });
+  var STRESS_DUR = [600, 400, 350, 400, 0]; // pacing only (not shared data)
+  var STRESS_SEQ = STRESS_FRAMES.phases.map(function (p, i) {
+    return { key: p.key, dur: STRESS_DUR[i], hf: p.hf, credit: p.credit,
+             banner: i < STRESS_FRAMES.phases.length - 1, node: i };
+  });
+  function stressMeta(stress) {
+    var idle = { key: "idle", hf: STRESS_FRAMES.idle.hf, credit: STRESS_FRAMES.idle.credit, banner: false, node: 0 };
+    if (stress === "recover") { return STRESS_SEQ[STRESS_SEQ.length - 1]; }
+    if (stress === "idle") { return idle; }
+    for (var i = 0; i < STRESS_SEQ.length; i++) {
+      if (STRESS_SEQ[i].key === stress) { return STRESS_SEQ[i]; }
+    }
+    return idle;
+  }
+  function stressFlying() {
+    return state.stress !== "idle" && state.stress !== "recover";
+  }
+  function stressRun() {
+    var d = SUBJECTS[state.subject];
+    if (!d || vetoed(d)) { notify("Credit rejected — no facility to stress", "warn"); return; }
+    if (stressFlying()) { notify("Stress run in progress", "warn"); return; }
+    clearTimers();
+    setState({ stress: "idle" });
+    (function step(i) {
+      if (i >= STRESS_SEQ.length) { return; }
+      setState({ stress: STRESS_SEQ[i].key });
+      if (i < STRESS_SEQ.length - 1) {
+        timeout(function () { step(i + 1); }, STRESS_SEQ[i].dur);
+      }
+    })(0);
+  }
+  function stressReset() {
+    if (state.stress === "idle") { notify("Facility already at baseline"); return; }
+    clearTimers();
+    setState({ stress: "idle" });
+    notify("Facility reset to baseline");
+  }
+
+  /* ---------- public surface ---------- */
+  App.fn = {
+    validNT_M: validNT_M, efficiency: efficiency, cci: cci, pd: pd,
+    deviation: deviation, ntM: ntM, scuOf: scuOf, vetoed: vetoed, creditLine: creditLine,
+    sourceCards: sourceCards, mockHash: mockHash, merkleBuild: merkleBuild,
+    leafDigest: leafDigest, nowStamp: nowStamp, nowShort: nowShort,
+    timeout: timeout, raf: raf, clearTimers: clearTimers, addClearHook: addClearHook,
+    stressMeta: stressMeta, stressFlying: stressFlying, stressFrames: STRESS_FRAMES
+  };
+  App.act = {
+    runAudit: runAudit, resetAudit: resetAudit, switchSubject: switchSubject,
+    anchor: anchorSubject, stressRun: stressRun, stressReset: stressReset
+  };
+  App.setState = setState;
+  App.onChange = onChange;
+})();
