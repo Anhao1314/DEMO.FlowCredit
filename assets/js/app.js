@@ -5,14 +5,21 @@
    ============================================================ */
 (function () {
   var App = window.App = window.App || {};
-  var PAGE_NEW = 1;
-  var TABS = [
+    var TABS = [
     { hash: "#/overview", key: "overview", label: "Overview", icon: "layers" },
     { hash: "#/ingest", key: "ingest", label: "Ingest", sub: "P1", icon: "db" },
     { hash: "#/audit", key: "audit", label: "Audit", sub: "P2", icon: "pulse" },
     { hash: "#/report", key: "report", label: "Report", sub: "P3", icon: "shield" }
   ];
-  var rootEl = null;
+  var rootEl = null;  // Page-jump strip order (marketing front door first, then the app flow).
+  var PAGE_ORDER = [
+    { hash: "#/landing", key: "landing", label: "Landing" },
+    { hash: "#/overview", key: "overview", label: "Overview" },
+    { hash: "#/ingest", key: "ingest", label: "Ingest · P1" },
+    { hash: "#/audit", key: "audit", label: "Audit · P2" },
+    { hash: "#/report", key: "report", label: "Report · P3" }
+  ];
+
   var mainEl = null;
   var walletConnected = false;
   var booted = false;
@@ -184,6 +191,49 @@
     }
   }
 
+  /* ---------- cross-page jump strip (prev / pills / next + ← → keys) ---------- */
+  function pageIndex() {
+    var route = currentRoute();
+    for (var i = 0; i < PAGE_ORDER.length; i++) {
+      if (PAGE_ORDER[i].key === route) { return i; }
+    }
+    return 0;
+  }
+  function pageNavHtml() {
+    var idx = pageIndex();
+    function link(p, cls, arrow) {
+      if (!p) {
+        return '<span class="pj-go ' + cls + ' is-off" aria-hidden="true">' + arrow + '</span>';
+      }
+      return '<a class="pj-go ' + cls + '" href="' + p.hash + '">' + arrow + '</a>';
+    }
+    var prev = PAGE_ORDER[idx - 1] || null;
+    var next = PAGE_ORDER[idx + 1] || null;
+    var pills = PAGE_ORDER.map(function (p) {
+      var on = p.key === currentRoute() ? " on" : "";
+      return '<a class="pj-pill' + on + '" href="' + p.hash + '" data-jump="' + p.key + '">' + p.label + '</a>';
+    }).join("");
+    return '<nav class="pg-jump" aria-label="Page jump">' +
+      link(prev, "pj-prev", "←") +
+      '<span class="pj-pills">' + pills + '</span>' +
+      link(next, "pj-next", "→") +
+      '<span class="pj-hint">keys ← →</span></nav>';
+  }
+  function jumpTo(delta) {
+    var idx = pageIndex() + delta;
+    if (idx < 0 || idx >= PAGE_ORDER.length) { return; }
+    nav(PAGE_ORDER[idx].hash);
+  }
+  function onKeyJump(e) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") { return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) { return; }
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" ||
+      (t.isContentEditable && t.isContentEditable !== "false"))) { return; }
+    if (e.key === "ArrowLeft") { jumpTo(-1); } else { jumpTo(1); }
+    e.preventDefault();
+  }
+
   // Landing is the marketing front door: hide app chrome while on #/landing.
   function syncShell() {
     if (!rootEl) { return; }
@@ -198,6 +248,7 @@
     syncShell();
     var view = App.views[route] || App.views.overview;
     view.render(mainEl);
+    if (mainEl.insertAdjacentHTML) { mainEl.insertAdjacentHTML("beforeend", pageNavHtml()); }
     highlightTabs();
 
     if (mainEl.scrollTop) { window.scrollTo(0, 0); }
@@ -226,6 +277,7 @@
     if (bootMsg && bootMsg.parentNode) { bootMsg.parentNode.removeChild(bootMsg); }
     buildShell();
     window.addEventListener("hashchange", applyRoute);
+    window.addEventListener("keydown", onKeyJump);
     if (!location.hash || !/^#\/(landing|overview|ingest|audit|report)$/.test(location.hash)) {
       try { history.replaceState(null, "", "#/landing"); } catch (e) { location.hash = "#/landing"; }
     }
