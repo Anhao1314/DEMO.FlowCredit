@@ -330,50 +330,11 @@ button{font-family:inherit}
 
 
 
-.ov-hero-theme .fml{font-size:12px;padding:1px 8px;color:#9BE8DF}
-
-
-.ov-cta .btn{font-size:13.5px;padding:10px 17px}
- .why-grid > .card{margin-top:0}
 
 
 
 
-
-
-
-
-.vc-panel.ok{border-color:rgba(45,212,191,.42);background:linear-gradient(160deg,rgba(45,212,191,.05),rgba(255,255,255,.015))}
-.vc-panel.veto{border-color:rgba(248,113,113,.6);background:linear-gradient(160deg,rgba(248,113,113,.08),rgba(255,255,255,.015));
-  box-shadow:0 0 0 1px rgba(248,113,113,.14),0 16px 42px rgba(3,8,16,.32)}
-
-
-
-
-
-.vc-banner .note-italic{font-family:var(--sans);font-weight:400}
-
-
-
-
-
-
-.vc-card.veto-border{border-color:rgba(248,113,113,.4);background:linear-gradient(160deg,rgba(248,113,113,.05),rgba(255,255,255,.012))}
-
-
-
-
-
-
-
-
-.ad-item .sdot{width:7px;height:7px}
-
-
-
-
-
-.ov-banner.leave{animation:ovRiskOut .3s ease-in both;pointer-events:none}
+ 
 
 
 
@@ -390,8 +351,46 @@ button{font-family:inherit}
 
 
 
-@keyframes ovRiskIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-@keyframes ovRiskOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-8px)}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+to{opacity:1;transform:none}}
+to{opacity:0;transform:translateY(-8px)}}
 
 
 /* ---------- homepage (default route #/overview, product shell) ---------- */
@@ -404,22 +403,22 @@ button{font-family:inherit}
 
 
 
-.hp-hero-sub .fml{font-size:12.5px}
 
 
 
 
-.hp-cta .btn{font-size:14px;padding:11px 19px}
 
 
-.hp-hero-card .ring-wrap{gap:3px;padding:2px 0 0}
-.hp-hero-card .ring-wrap svg{width:126px;height:126px}
 
-.hp-hero-card .grade-chip{font-size:15px}
 
-.hp-tiles .metric{margin:0;padding:8px 10px}
-.hp-tiles .m-value{font-size:16.5px}
-.hp-tiles .m-note{line-height:1.4}
+
+
+
+
+
+
+
+
 
 
 
@@ -432,7 +431,7 @@ button{font-family:inherit}
 
 
 
-.hp-bd-mid .num{font-size:9.5px;font-weight:600;color:var(--text3);border-left:1px solid rgba(120,200,205,.28);padding-left:10px}
+
 
 
 
@@ -441,7 +440,6 @@ button{font-family:inherit}
 
 
 /* ---------- run progress / relay / deep-link hints ---------- */
-.hp-run-card .card-h{gap:8px;margin-bottom:10px}
 
 
 
@@ -449,26 +447,26 @@ button{font-family:inherit}
 
 
 
-.hp-rd.done{background:var(--green);box-shadow:0 0 8px rgba(52,211,153,.75)}
-.hp-rd.next{background:var(--teal);box-shadow:0 0 8px rgba(45,212,191,.8);animation:hpStepPulse 1.1s ease-in-out infinite}
-.hp-rd.todo{background:rgba(255,255,255,.14)}
-.hp-rd.blocked{background:var(--red);box-shadow:0 0 8px rgba(248,113,113,.75)}
-.hp-run-step.next{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.07)}
-.hp-run-step.done{border-color:rgba(52,211,153,.32)}
-.hp-run-step.todo{opacity:.8}
-.hp-run-step.blocked{border-color:rgba(248,113,113,.42);background:rgba(248,113,113,.05);cursor:not-allowed;opacity:.9}
-@keyframes hpStepPulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.5)}50%{box-shadow:0 0 0 6px rgba(45,212,191,0)}}
 
-.vc-relay .btn{font-size:11.5px}
-.card.pipe-item.hp-pipe-go{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;color:var(--text);
-  cursor:pointer;font:inherit;transition:border-color .2s,background .2s,transform .15s}
-.card.pipe-item.hp-pipe-go:hover{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.06);transform:translateY(-1px)}
+
+
+
+
+
+
+
+
+50%{box-shadow:0 0 0 6px rgba(45,212,191,0)}}
+
+
+
+
 
 .hp-hint{outline:2px solid rgba(45,212,191,0);outline-offset:2px;animation:hpHint 1.6s ease-out}
 #view-main .card.block,#view-main .proof-row{scroll-margin-top:92px}
 @keyframes hpHint{0%{outline-color:rgba(45,212,191,.95)}100%{outline-color:rgba(45,212,191,0)}}
 
-@media (prefers-reduced-motion:reduce){.hp-run-step .hp-rd.next{animation:none;box-shadow:0 0 0 1px rgba(45,212,191,.6)}}
+
 
 /* ============================================================
    Landing (external-facing #/landing) — appended only; every
@@ -616,8 +614,8 @@ button{font-family:inherit}
 
 
 
-.gd-line-ok.on{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.06)}
-.gd-line-rej.on{border-color:rgba(248,113,113,.55);background:rgba(248,113,113,.05)}
+
+
 
 
 
