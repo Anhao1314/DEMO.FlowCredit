@@ -11,7 +11,8 @@
     { hash: "#/audit", key: "audit", label: "Audit", sub: "P2", icon: "pulse" },
     { hash: "#/report", key: "report", label: "Report", sub: "P3", icon: "shield" }
   ];
-  var rootEl = null;  // Page-jump strip order (marketing front door first, then the app flow).
+  var rootEl = null;
+  // Page-jump strip order (marketing front door first, then the app flow).
   var PAGE_ORDER = [
     { hash: "#/landing", key: "landing", label: "Landing" },
     { hash: "#/overview", key: "overview", label: "Overview" },
