@@ -277,7 +277,8 @@
         var label = SUBJECTS[sub].label;
         return '<button type="button" class="seg-btn' + (st.subject === sub ? " on" : "") + '" data-subject="' + sub + '">' +
           '<span class="sdot dot-' + (SUBJECTS[sub].segDot || "g") + '" style="display:inline-block;margin-right:6px;vertical-align:-1px"></span>' +
-          ui.esc(label) + "</button>";
+          ui.esc(label) + '<span class="seg-addr num">' +
+          ui.esc(App.fn.shortAddr(SUBJECTS[sub].address)) + "</span></button>";
       }).join("");
 
       host.innerHTML =
