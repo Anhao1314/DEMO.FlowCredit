@@ -5,7 +5,7 @@
 (function () {
   var App = window.App = window.App || {};
   var ui = null; // resolved lazily (App.ui exists before first render)
-  var local = { busy: false };
+  var local = { busy: false, leafIdx: 0, proofBusy: false };
   var CARD_ICON = { billing: "db", gpu: "cpu", treasury: "cash", chain: "link" };
   var LEAF_NAMES = ["Billing", "GPU", "Treasury", "On-chain"];
   var LEAF_IDS = ["billing", "gpu", "treasury", "chain"];
@@ -247,6 +247,19 @@
     var btn = host.querySelector("#anchor-btn");
     if (!btn) { return; }
     btn.addEventListener("click", function () { runAnchor(host); });
+    var chips = host.querySelectorAll(".pf-chip");
+    for (var c = 0; c < chips.length; c++) {
+      (function (el) {
+        el.addEventListener("click", function () {
+          selectLeaf(host, parseInt(el.getAttribute("data-leaf"), 10));
+        });
+      })(chips[c]);
+    }
+    var vbtn = host.querySelector("#proof-verify");
+    if (vbtn) { vbtn.addEventListener("click", function () { proofVerify(host); }); }
+    var rbtn = host.querySelector("#proof-reset");
+    if (rbtn) { rbtn.addEventListener("click", function () { proofReset(host); }); }
+    if (anchored && host.querySelector("#proof-out")) { proofIdle(host); }
   }
 
   function runAnchor(host) {
@@ -254,9 +267,14 @@
     var st = App.state;
     var btn = host.querySelector("#anchor-btn");
     var label = host.querySelector("#anchor-btn-label");
+    var status = host.querySelector("#tx-status");
     local.busy = true;
+    local.proofBusy = false;
+    st.txStage = "idle";
     if (btn) { btn.classList.add("is-busy"); }
+    if (btn) { btn.disabled = true; }
     if (label) { label.textContent = "Anchoring…"; }
+    if (status) { status.textContent = ""; status.className = "tx-status"; }
     var cards = host.querySelectorAll(".src-card");
     for (var i = 0; i < cards.length; i++) {
       (function (card, idx) {
@@ -271,11 +289,98 @@
         }, 250 * (idx + 1));
       })(cards[i], i);
     }
+    // Post-signing realism: signing → submitted → mined (block preview) →
+    // act.anchor (mines the fixed block +2 and flips txStage to confirmed).
+    App.fn.timeout(function () {
+      if (local.busy) { setTxStatus(status, st, "signing"); }
+    }, 1000);
+    App.fn.timeout(function () {
+      if (local.busy) { setTxStatus(status, st, "submitted"); }
+    }, 1350);
+    App.fn.timeout(function () {
+      if (local.busy) { setTxStatus(status, st, "mined"); }
+    }, 1650);
     App.fn.timeout(function () {
       if (!local.busy) { return; }
       local.busy = false;
-      App.act.anchor(); // setState → emit → full re-render with new root + log
-    }, 1100);
+      App.act.anchor(); // setState → emit → full re-render (confirmed + panel)
+    }, 1950);
+  }
+
+  function setTxStatus(status, st, stage) {
+    if (!status) { return; }
+    st.txStage = stage;
+    status.textContent = txStatusText(stage, st);
+    status.className = "tx-status " + txStatusCls(stage);
+  }
+
+  function proofIdle(host) {
+    var st = App.state;
+    var out = host.querySelector("#proof-out");
+    if (!out || !st.anchor) { return; }
+    var leaf = st.anchor.levels[0][local.leafIdx];
+    out.innerHTML = '<div class="pf-idle">' + App.ui.icon("info", 12) + " leaf " +
+      App.ui.esc(LEAF_NAMES[local.leafIdx] || "Leaf") + " · " + sh2(leaf) +
+      " — press Verify Proof to walk the path to the root</div>";
+  }
+
+  function selectLeaf(host, idx) {
+    local.leafIdx = idx;
+    local.proofBusy = false;
+    var chips = host.querySelectorAll(".pf-chip");
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].classList.toggle("on", i === idx);
+    }
+    proofIdle(host);
+  }
+
+  function proofReset(host) {
+    selectLeaf(host, local.leafIdx);
+  }
+
+  function proofVerify(host) {
+    var st = App.state;
+    var out = host.querySelector("#proof-out");
+    if (!st.anchor || !out || local.proofBusy) { return; }
+    local.proofBusy = true;
+    var u = App.ui;
+    var mp = App.fn.merkleProof(st.anchor.levels, local.leafIdx);
+    var valid = App.fn.verifyProof(mp.leaf, mp.path, st.anchor.root);
+    var steps = [];
+    steps.push('<div class="pf-row"><span class="pf-tag">leaf</span>' +
+      '<span class="pf-op">selected ' + u.esc(LEAF_NAMES[local.leafIdx]) + " source digest</span>" +
+      '<span class="pf-h num">' + sh2(mp.leaf) + "</span></div>");
+    for (var i = 0; i < mp.path.length; i++) {
+      var step = mp.path[i];
+      var opTxt = step.sibling === null
+        ? "single node · carried up"
+        : "combine with " + (step.dir === "L" ? "left" : "right") + " sibling";
+      steps.push('<div class="pf-row"><span class="pf-tag num">L' + (i + 1) + "</span>" +
+        '<span class="pf-op">' + opTxt + "</span>" +
+        '<span class="pf-h num">' + (step.sibling === null ? "—" : sh2(step.sibling)) + "</span>" +
+        '<span class="pf-arr">→</span>' +
+        '<span class="pf-h num pf-par">' + sh2(step.parent) + "</span></div>");
+    }
+    steps.push('<div class="pf-final ' + (valid ? "pf-ok" : "pf-bad") + '">' +
+      (valid ? "✓ proof valid · root matches this session anchor"
+             : u.icon("x", 13) + " proof mismatch") + "</div>");
+    if (!motionOn()) {
+      out.innerHTML = steps.join("");
+      local.proofBusy = false;
+      return;
+    }
+    out.innerHTML = "";
+    for (var k = 0; k < steps.length; k++) {
+      (function (html, ms) {
+        App.fn.timeout(function () {
+          if (!local.proofBusy || !out || !out.isConnected) { return; }
+          out.insertAdjacentHTML("beforeend", html);
+        }, ms);
+      })(steps[k], 80 + k * PROOF_STEP_MS);
+    }
+    App.fn.timeout(function () {
+      local.proofBusy = false;
+    }, 80 + steps.length * PROOF_STEP_MS + 40);
   }
 
   App.views = App.views || {};
