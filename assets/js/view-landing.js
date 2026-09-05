@@ -1,12 +1,14 @@
 /* ============================================================
    view-landing.js — FlowCredit external-facing landing page
-   (default route #/landing). DeepSeek-style minimal front door:
-   centered statement hero with twin entry panels + live-signal
-   chart card + one merged compliance/testnet footer. Extra
-   marketing blocks (pipes / case cards / proof chain) live on
-   product pages instead of the landing. The hero SVG is a
-   stylized narrative with spec-locked coordinates (NOT a data
-   chart and NOT derived from any subject's R/C series).
+   (default route #/landing). DeepSeek-style front door rebuilt
+   around the judge questions: S0 hero (copy + preserved narrative
+   SVG) then S1 how it works / S2 credible-vs-raw inversion /
+   S3 three live subjects / S4 trust / S5 try-it CTA. All figures
+   are computed from SUBJECTS + App.fn at render time — no result
+   literals. Workspace/Account entries are gone from this page
+   (their routes stay untouched). The hero SVG is a stylized
+   narrative with spec-locked coordinates (NOT a data chart and
+   NOT derived from any subject's R/C series).
 
    App chrome (tabs / Mock-Live / global footer) is hidden via
    .shell.is-landing, toggled in app.js; wallet state stays the
