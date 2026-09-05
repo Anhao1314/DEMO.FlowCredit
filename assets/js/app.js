@@ -60,7 +60,7 @@
   function auditToastFor(idx) {
     var s = App.state.auditStage;
     if (s === -1) { return "Pipeline idle — press Run AI Assessment"; }
-    if (s < idx) { return "Stage L" + idx + " unlocks as the audit runs — press Run AI Assessment"; }
+    if (s < idx) { return "Stage L" + idx + " unlocks as the assessment runs — press Run AI Assessment"; }
     return "Assessment reached L" + Math.min(s, 4) + " — numbers are live below";
   }
   function navTo(hash, it) {
