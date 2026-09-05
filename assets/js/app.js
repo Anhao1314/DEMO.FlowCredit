@@ -124,12 +124,14 @@
       '<button type="button" class="btn btn-sm wallet-btn" id="wallet-btn">' + u.icon("wallet", 13) +
       '<span id="wallet-label">Connect Wallet</span></button>' +
       "</div></div></header>" +
-      '<div class="demo-flow" aria-label="Demo flow">' +
-        '<span class="df-step" data-flow="p1">P1 INGEST</span><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
-        '<span class="df-step" data-flow="p2">P2 RISK</span><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
-        '<span class="df-step" data-flow="p3">P3 MONITOR</span></div>' +
+      '<div class="demo-flow" aria-label="Assessment workflow">' +
+        '<a class="df-step" data-stage="attest" href="#/ingest">ATTEST<i class="df-lamp" data-lamp="attest" aria-hidden="true"></i></a><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
+        '<a class="df-step" data-stage="score" href="#/audit">DUAL-SCORE<i class="df-lamp" data-lamp="rules" aria-hidden="true"></i><i class="df-lamp" data-lamp="ai" aria-hidden="true"></i></a><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
+        '<a class="df-step" data-stage="decide" href="#/workspace">DECIDE<i class="df-lamp" data-lamp="decide" aria-hidden="true"></i></a><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
+        '<a class="df-step" data-stage="anchor" href="#/report">ANCHOR<i class="df-lamp" data-lamp="anchor" aria-hidden="true"></i></a><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
+        '<a class="df-step" data-stage="monitor" href="#/account">MONITOR<i class="df-lamp" data-lamp="monitor" aria-hidden="true"></i></a></div>' +
       '<main class="content" id="view-main" tabindex="-1"></main>' +
-      '<footer class="foot"><div class="line1">Demo flow: Landing → P1 attest &amp; anchor → P2 risk score → P3 verify &amp; active response</div>' +
+      '<footer class="foot"><div class="line1">Workflow: Attest → Dual-Score → Decide → Anchor → Monitor · Landing is the front door</div>' +
       '<div class="line2">Testnet demo · simulated data · not financial advice · risk analytics, not a statutory audit · demo calibration</div></footer>' +
       "</div>";
     mainEl = rootEl.querySelector("#view-main");
@@ -204,18 +206,59 @@
 
   function highlightFlow() {
     var route = currentRoute();
-    var map = { workspace: "p1", ingest: "p1", audit: "p2", report: "p3" };
+    var map = { ingest: "attest", audit: "score", workspace: "decide", report: "anchor", account: "monitor" };
     var active = map[route] || "";
     document.body.setAttribute("data-route", route || "");
     var steps = rootEl.querySelectorAll(".df-step");
     for (var i = 0; i < steps.length; i++) {
-      var on = steps[i].getAttribute("data-flow") === active;
+      var on = steps[i].getAttribute("data-stage") === active;
       steps[i].classList.toggle("on", on);
       if (on) { steps[i].setAttribute("aria-current", "step"); } else { steps[i].removeAttribute("aria-current"); }
     }
     var strip = rootEl.querySelector(".demo-flow");
     if (strip) { strip.classList.toggle("is-off", route === "landing"); }
+    paintFlow();
   }
+  function paintFlow() {
+    if (!rootEl) { return; }
+    var st = App.state || {};
+    var snap = App.flow.snapshot(st.subject || "healthy");
+    var map2 = { attest: snap.attest, rules: snap.score.rules, ai: snap.score.ai, decide: snap.decide, anchor: snap.anchor, monitor: snap.monitor };
+    var lamps = rootEl.querySelectorAll(".demo-flow .df-lamp");
+    for (var i = 0; i < lamps.length; i++) {
+      var key = lamps[i].getAttribute("data-lamp");
+      var m = map2[key];
+      if (!m) { continue; }
+      lamps[i].className = "df-lamp lamp-" + m.s;
+      lamps[i].setAttribute("title", m.txt || "");
+    }
+  }
+  App.flow = {
+    snapshot: function (subject) {
+      function stg(s2, txt) { return { s: s2, txt: txt }; }
+      var st = App.state || {};
+      var runs = (window.AI_LEDGER && AI_LEDGER.runs) || {};
+      var anchored = !!st.anchored;
+      var stageNum = (typeof st.auditStage === "number") ? st.auditStage : -1;
+      var rulesDone = stageNum >= 4;
+      var rulesRun = stageNum >= 0;
+      var aiRun = !!(runs[subject] && runs[subject].verdict);
+      var root = !!(st.anchor && st.anchor.root);
+      var walletOn = !!(App.wallet && App.wallet.connected);
+      return {
+        attest: stg(anchored ? "g" : "0", anchored ? "anchored · 事实快照已锚定" : "pending · 运行 P1 锚定"),
+        score: {
+          rules: stg(rulesDone ? "g" : rulesRun ? "y" : "0", rulesDone ? "L0–L5 complete" : rulesRun ? "audit in progress" : "not started"),
+          ai: stg(aiRun ? "g" : "0", aiRun ? "LLM verdict present" : "no LLM run yet")
+        },
+        decide: stg(rulesDone && aiRun ? "g" : (rulesRun || aiRun) ? "y" : "0",
+          rulesDone && aiRun ? "decision issued · 双引擎齐备" : (rulesRun || aiRun) ? "waiting on one engine" : "not started"),
+        anchor: stg(root ? "g" : "0", root ? "Merkle root anchored" : "not anchored"),
+        monitor: stg(walletOn ? "g" : "0", walletOn ? "wallet connected" : "wallet not connected")
+      };
+    },
+    refresh: function () { paintFlow(); }
+  };
 
   function highlightTabs() {
     var route = currentRoute();
