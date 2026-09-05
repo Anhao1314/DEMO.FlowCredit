@@ -236,12 +236,12 @@
             });
           }
         };
-        try { document.dispatchEvent(new Event("fc:live")); } catch (e) { /* consumer polls FC_AI */ }
+        try { window.dispatchEvent(new Event("fc:live")); } catch (e) { /* consumer polls FC_AI */ }
         if (lastHost && lastCtx) refreshPanel();
       }
     }, function () {
       window.FC_LIVE = false;
-      try { document.dispatchEvent(new Event("fc:live-off")); } catch (e) { /* consumer reads FC_AI absence */ }
+      try { window.dispatchEvent(new Event("fc:live-off")); } catch (e) { /* consumer reads FC_AI absence */ }
     });
   }
   boot();
