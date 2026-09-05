@@ -96,7 +96,7 @@
       ["check scope", "local session match"],
       ["rule", "v0.1"],
       ["timestamp", anchor.time],
-      ["root match", "true · equals this session P1 root"]
+      ["root match", "true · 4-leaf Merkle proof verified locally"]
     ].map(function (r) {
       return '<div class="verify-row"><span>' + u.esc(r[0]) + '</span><b class="num">' + u.esc(r[1]) + "</b></div>";
     }).join("");
@@ -380,6 +380,7 @@
       ["主体类型 · Type", esc(s.d.l0.compute.Model + " · " + s.d.l0.compute.Task)],
       ["报告日期 · Date", esc(s.dateCN)],
       ["Prepared for", "Institutional Credit Desk"],
+      ["主体地址 · Subject", esc(App.fn.shortAddr(s.d.address))],
       ["规则版本 · Rule", "flowcredit.audit_result / v0.1"],
       ["数据截止 · Data as of", esc(s.dataAsOf || "—")],
       ["链上存证 · On-chain", s.anchored ? "已锚定 (Anchored)" : "未锚定 (Not anchored)"],
@@ -874,7 +875,7 @@
       ["rule", "v0.1 · flowcredit.audit_result"],
       ["timestamp", a.time],
       ["nonce", "#" + pad6(a.nonce)],
-      ["root match", "true · equals this session P1 root"]
+      ["root match", "true · 4-leaf Merkle proof verified locally"]
     ];
     var body = "";
     for (var i = 0; i < rows.length; i++) {
