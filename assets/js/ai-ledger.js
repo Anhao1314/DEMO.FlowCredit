@@ -2,7 +2,7 @@
    External LLM verdicts (deepseek-chat). Display-only data; App.fn untouched. */
 window.AI_LEDGER = {
  "meta": {
-  "builtAtUtc": "2026-09-05 UTC",
+  "builtAtUtc": "2026-09-05 13:24:57 UTC",
   "model": "deepseek-chat",
   "dshVersion": "0.1.2-rc.1"
  },
