@@ -1,5 +1,5 @@
 /* ============================================================
-   view-audit.js — P2 AI Audit Engine (core demo page).
+   view-audit.js — P2 AI Risk Engine (core demo page).
    Six-step pipeline L0..L5, stage-gated blocks, live computed
    metrics, VETO handling, CCI ring + dual-value divergence.
    ============================================================ */
@@ -198,7 +198,7 @@
       return '<div class="anchor-state">' +
         '<span class="tag tag-success">' + u.icon("check", 10) + " result anchored ✓</span>" +
         '<span class="root-hash num" style="font-size:13px">root ' + u.esc(st.anchor.root) + "</span></div>" +
-        howBlock(["The P1 Merkle root fingerprints this audit subject on the testnet. Only the root is stored — raw details stay off-chain."]);
+        howBlock(["The P1 Merkle root fingerprints this assessment subject on the testnet. Only the root is stored — raw details stay off-chain."]);
     }
     return '<div class="anchor-state">' +
       '<span class="tag tag-warning">pending anchor (go to P1)</span>' +
@@ -241,7 +241,7 @@
           "</div></div>" +
           '<span class="spacer"></span>' +
           '<button type="button" id="audit-report-btn" class="btn btn-primary">' +
-          ui.icon("layers", 14) + " Open Audit Report</button>" +
+          ui.icon("layers", 14) + " Open Risk Report</button>" +
           "</div>";
       }
 

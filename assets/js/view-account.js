@@ -23,7 +23,7 @@
     return [
       ["Institution", "Institutional Credit Desk"],
       ["Network", "testnet · demo"],
-      ["Rule", "flowcredit.audit_result / v0.1"],
+      ["Rule", "flowcredit.risk_result / v0.1"],
       ["Ledger", "AI-native merchants"]
     ];
   }
@@ -33,7 +33,7 @@
     if (st.auditStage === 4 && !st.running) {
       var d = SUBJECTS[st.subject] || SUBJECTS.healthy;
       rows.push({
-        kind: "Audit complete",
+        kind: "Assessment complete",
         detail: esc(d.label) + " · CCI " + App.fn.cci(d) + " (" + App.fn.gradeOf(d) + ")",
         ic: "pulse"
       });
@@ -103,7 +103,7 @@
         '<div class="metric-tiles">' +
         '<div class="metric"><div class="m-label">Suggested line</div>' +
         '<div class="m-value num">' + (veto ? "$0" : fmtInt(App.fn.creditLine(d))) + "</div>" +
-        '<div class="m-note">' + (veto ? "rejected by red flags" : "post-audit limit") + "</div></div>" +
+        '<div class="m-note">' + (veto ? "rejected by red flags" : "post-assessment limit") + "</div></div>" +
         '<div class="metric"><div class="m-label">Grade</div>' +
         '<div class="m-value num">' + esc(App.fn.gradeOf(d)) + "</div>" +
         '<div class="m-note">five-band trust grade</div></div>' +

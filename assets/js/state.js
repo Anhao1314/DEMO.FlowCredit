@@ -290,7 +290,7 @@
 
   /* ---------- P2 audit pipeline ---------- */
   function runAudit() {
-    if (state.running) { notify("Audit already running — press Reset or wait", "warn"); return; }
+    if (state.running) { notify("Assessment already running — press Reset or wait", "warn"); return; }
     clearTimers();
     setState({ auditStage: -1, running: true });
     var d = SUBJECTS[state.subject];
@@ -306,13 +306,13 @@
   function resetAudit() {
     clearTimers();
     setState({ auditStage: -1, running: false });
-    notify("Audit pipeline reset");
+    notify("Assessment pipeline reset");
   }
 
   /* ---------- subject switching ---------- */
   function switchSubject(s) {
     if (!SUBJECTS[s] || s === state.subject) { return; }
-    if (state.running) { notify("Audit in progress — press Reset first", "warn"); return; }
+    if (state.running) { notify("Assessment in progress — press Reset first", "warn"); return; }
     clearTimers();
     setState({
       subject: s, auditStage: -1, running: false,

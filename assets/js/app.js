@@ -59,9 +59,9 @@
   }
   function auditToastFor(idx) {
     var s = App.state.auditStage;
-    if (s === -1) { return "Pipeline idle — press Run AI Audit"; }
-    if (s < idx) { return "Stage L" + idx + " unlocks as the audit runs — press Run AI Audit"; }
-    return "Audit reached L" + Math.min(s, 4) + " — numbers are live below";
+    if (s === -1) { return "Pipeline idle — press Run AI Assessment"; }
+    if (s < idx) { return "Stage L" + idx + " unlocks as the audit runs — press Run AI Assessment"; }
+    return "Assessment reached L" + Math.min(s, 4) + " — numbers are live below";
   }
   function navTo(hash, it) {
     intent = it || null;
@@ -126,7 +126,7 @@
       "</div></div></header>" +
       '<main class="content" id="view-main" tabindex="-1"></main>' +
       '<footer class="foot"><div class="line1">Demo flow: Landing → P1 attest &amp; anchor → P2 risk score → P3 verify &amp; active response</div>' +
-      '<div class="line2">Testnet demo · simulated data · not financial advice · demo calibration</div></footer>' +
+      '<div class="line2">Testnet demo · simulated data · not financial advice · risk analytics, not a statutory audit · demo calibration</div></footer>' +
       "</div>";
     mainEl = rootEl.querySelector("#view-main");
 

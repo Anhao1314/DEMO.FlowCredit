@@ -305,7 +305,7 @@
   /* ---------- S4 trust (2x2) ---------- */
   function trustHtml() {
     var items = [
-      ["pulse", "Formulas auditable", "Every score traces to five anchors; PD is a demo calibration"],
+      ["pulse", "Formulas transparent", "Every score traces to five anchors; PD is a demo calibration"],
       ["shield", "Anyone can verify", "Merkle root on-chain, raw source data stays off-chain"],
       ["anchor", "No custody · no lending · no token", "RegTech tooling for licensed platforms"],
       ["info", "Honest by design", "Testnet mock, samples synthesized from public disclosures, not financial advice"]
@@ -346,7 +346,7 @@
   /* ---------- 4.3 minimal footer (merged compliance + testnet) ---------- */
   function footHtml() {
     return '<footer class="ld-foot">' +
-      '<div class="ld-foot-line">RegTech tooling — no custody, no lending · testnet demo · simulated data · not financial advice</div>' +
+      '<div class="ld-foot-line">RegTech tooling — no custody, no lending · testnet demo · simulated data · not financial advice · risk analytics, not a statutory audit</div>' +
       "</footer>";
   }
 

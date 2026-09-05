@@ -29,14 +29,14 @@
         cta: "Anchor now", hash: "#/ingest" };
     }
     if (!auditDone) {
-      return { title: "Run the AI audit", sub: "P2 · five anchors → CCI",
-        cta: "Run audit", hash: "#/audit" };
+      return { title: "Run the AI assessment", sub: "P2 · five anchors → CCI",
+        cta: "Run assessment", hash: "#/audit" };
     }
     if (veto) {
       return { title: "Veto verdict — credit at $0", sub: "review the proof or switch ledger",
         cta: "View verdict", hash: "#/report" };
     }
-    return { title: "Open the audit report", sub: "P3 · verify on-chain & respond",
+    return { title: "Open the risk report", sub: "P3 · verify on-chain & respond",
       cta: "Open report", hash: "#/report" };
   }
 
@@ -82,7 +82,7 @@
     if (st.auditStage === 4 && !st.running) {
       var d = SUBJECTS[st.subject];
       rows.push({
-        kind: "Audit complete",
+        kind: "Assessment complete",
         detail: "CCI " + App.fn.cci(d) + " (" + App.fn.gradeOf(d) + ") · PD " +
           App.fn.pd(App.fn.cci(d)).toFixed(1) + "%",
         ic: "pulse"
