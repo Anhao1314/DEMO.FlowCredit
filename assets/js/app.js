@@ -114,7 +114,7 @@
       '<div class="shell">' +
       '<header class="topbar"><div class="topbar-inner">' +
       '<a class="brand" href="#/landing" aria-label="FlowCredit — back to home">' + u.icon("mark", 26) +
-      '<span>FlowCredit</span><span class="badge-testnet">Testnet</span></a>' +
+      '<span class="badge-testnet">Testnet</span></a>' +
       '<nav class="nav" aria-label="pages">' + tabs + "</nav>" +
       '<div class="top-actions">' +
       '<div class="seg" role="group" aria-label="network mode">' +

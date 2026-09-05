@@ -28,6 +28,13 @@
   };
   function icon(name, size) {
     var s = size || 16;
+    if (name === "mark") {
+      // Brand lockup asset (assets/img/logo.png) — replaces the legacy glyph.
+      // Natural ratio 1206:583, height-driven so every call site keeps its size.
+      var w = Math.max(1, Math.round(s * (1206 / 583)));
+      return '<img class="lc-logo" src="assets/img/logo.png" width="' + w + '" height="' + s +
+        '" alt="FlowCredit"/>';
+    }
     var body = ICONS[name] || ICONS.info;
     return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" fill="none" stroke="currentColor" ' +
       'stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + body + "</svg>";
