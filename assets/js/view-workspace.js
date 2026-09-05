@@ -48,8 +48,8 @@
       ? '<span class="chip chip-green">' + icon("check", 10) + " anchored</span>"
       : '<span class="chip">pending · anchor</span>');
     chips.push((st.auditStage === 4 && !st.running)
-      ? '<span class="chip chip-teal">audit done</span>'
-      : '<span class="chip">audit pending</span>');
+      ? '<span class="chip chip-teal">assessment done</span>'
+      : '<span class="chip">assessment pending</span>');
     chips.push(veto
       ? '<span class="chip chip-red">VETO · ' + esc(App.fn.gradeOf(d)) + "</span>"
       : '<span class="chip chip-green">grade ' + esc(App.fn.gradeOf(d)) + "</span>");

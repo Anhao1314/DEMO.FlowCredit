@@ -290,7 +290,7 @@
         '<div class="card" style="margin-bottom:14px"><div class="audit-bar">' +
         '<div class="subject-seg"><span class="subj-label">SUBJECT</span><div class="seg">' + seg + "</div></div>" +
         '<div class="spacer"></div>' +
-        '<button type="button" id="run-audit" class="btn btn-primary">' + ui.icon("pulse", 14) + " Run AI Audit</button>" +
+        '<button type="button" id="run-audit" class="btn btn-primary">' + ui.icon("pulse", 14) + " Run AI Assessment</button>" +
         '<button type="button" id="reset-audit" class="btn btn-ghost">' + ui.icon("x", 13) + " Reset</button>" +
         "</div>" +
         '<div class="steps">' + stepHtml(st) + "</div></div>" +
