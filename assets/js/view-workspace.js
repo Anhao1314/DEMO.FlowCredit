@@ -139,6 +139,7 @@
         '<span class="ws-sec-s">anchors &amp; verdicts · latest first</span></div>' +
         actHtml + "</section>" +
         "</div>";
+      if (App.aiPanel) { App.aiPanel(host, "workspace"); }
       bind(host);
     } catch (e) {
       host.innerHTML = '<div class="view-wrap"><div class="card"><div class="card-title">Workspace — render fallback</div>' +

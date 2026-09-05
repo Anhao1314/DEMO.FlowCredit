@@ -29,7 +29,6 @@
     n = Number(n);
     return (n % 1 === 0 ? String(n) : n.toFixed(1)) + "%";
   }
-  function pct(n) { return String(n % 1 === 0 && n < 100 ? n : n + "%"); }
 
   function badgeCls(v) { return v === "approve" ? "ai-ok" : v === "reject" ? "ai-rej" : "ai-warn"; }
   function stateCls(st) { return st === "g" ? "ai-ok" : st === "r" ? "ai-rej" : "ai-warn"; }

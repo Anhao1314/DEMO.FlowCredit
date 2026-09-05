@@ -239,6 +239,8 @@
         reportHtml + stressHtml +
         "</div>";
 
+      if (App.aiPanel) { App.aiPanel(host, "report"); }
+
       var verifyBtn = host.querySelector("#verify-btn");
       if (verifyBtn) {
         verifyBtn.addEventListener("click", function () {
