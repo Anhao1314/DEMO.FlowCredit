@@ -403,6 +403,7 @@
     try {
       host.innerHTML = '<div class="ld-page" id="ld-root">' + pageHtml() + "</div>";
       bindCases(host);
+      measureBars(host);
       if (enterLanding) { playIntro(host); revealFx(host); }
     } catch (e) {
       resetIntro();
