@@ -16,6 +16,8 @@
     auditStage: -1,   // -1 idle, 0..4 = L0..L4 reached
     running: false,
     anchored: false,  // per-subject anchor flag
+    txStage: "idle",  // idle|signing|submitted|mined|confirmed (P1 attest realism)
+    blockHeight: 19000421, // simulated chain tip; anchor increments it by 2
     chainLogs: [],    // newest first
     anchor: null,     // { root, block, time, nonce, leafHashes, levelHashes }
     nonce: 0,         // per-subject anchor counter (resets with subject)
@@ -141,6 +143,14 @@
     }
     return out;
   }
+  // combine(a,b) — the single shared "two children -> parent" step used by
+  // merkleBuild AND verifyProof (same mockHash, same ordering). Interior
+  // nodes depend only on their two children, so any third party can recompute
+  // the root from one leaf + its sibling path (leaf digests already carry
+  // data + timestamp + nonce, which is what makes every anchor root unique).
+  function combine(a, b) {
+    return mockHash(a + "|" + b);
+  }
   // merkleBuild(digests, ts, nonce) — data + timestamp + nonce feed every node,
   // so each anchor produces a different root.
   function merkleBuild(digests, ts, nonce) {
@@ -149,13 +159,57 @@
     while (level.length > 1) {
       var next = [];
       for (var i = 0; i < level.length; i += 2) {
-        var pair = level[i] + "|" + (level[i + 1] || level[i]);
-        next.push(mockHash(pair + "|" + ts + "|" + nonce + "|mid" + levels.length));
+        next.push(combine(level[i], i + 1 < level.length ? level[i + 1] : level[i]));
       }
       levels.push(next);
       level = next;
     }
     return { root: "0x" + levels[levels.length - 1][0], levels: levels };
+  }
+  // merkleProof(levels, leafIndex) — sibling path from a leaf up to the root.
+  // Returns the leaf digest, the root digest and the path array; every path
+  // item is { sibling, dir, parent } where dir is the sibling side ("L"/"R")
+  // and parent is the node hash produced by the shared combine step.
+  function merkleProof(levels, leafIndex) {
+    var path = [];
+    var idx = Math.max(0, Math.min(leafIndex, levels[0].length - 1));
+    for (var i = 0; i < levels.length - 1; i++) {
+      var level = levels[i];
+      var cur = level[idx];
+      var siblingIdx = (idx % 2 === 0) ? idx + 1 : idx - 1;
+      var sibling = level[siblingIdx];
+      if (sibling === undefined) {
+        path.push({ sibling: null, dir: "-", parent: cur });
+      } else {
+        var dir = siblingIdx > idx ? "R" : "L";
+        path.push({
+          sibling: sibling, dir: dir,
+          parent: dir === "L" ? combine(sibling, cur) : combine(cur, sibling)
+        });
+      }
+      idx = Math.floor(idx / 2);
+    }
+    return { leaf: levels[0][idx === 0 ? Math.max(0, Math.min(leafIndex, levels[0].length - 1)) : 0],
+             path: path, root: levels[levels.length - 1][0] };
+  }
+  // verifyProof(leaf, proof, root) — recomputes the root along the path with
+  // the shared combine/mockHash and returns strict equality (root may carry a
+  // "0x" prefix, e.g. when fed directly with state.anchor.root).
+  function verifyProof(leaf, proof, root) {
+    var want = String(root == null ? "" : root);
+    if (want.slice(0, 2) === "0x") { want = want.slice(2); }
+    var cur = leaf;
+    for (var i = 0; i < proof.length; i++) {
+      var step = proof[i];
+      if (step.sibling === null || step.sibling === undefined) { continue; }
+      cur = step.dir === "L" ? combine(step.sibling, cur) : combine(cur, step.sibling);
+    }
+    return cur === want;
+  }
+  // shortAddr("0x4A7b…") — compact display form for a full address.
+  function shortAddr(addr) {
+    var s = String(addr == null ? "" : addr);
+    return s.length > 10 ? s.slice(0, 6) + "…" + s.slice(-4) : s;
   }
 
   /* ---------- time helpers ---------- */
@@ -261,13 +315,18 @@
     clearTimers();
     setState({
       subject: s, auditStage: -1, running: false,
-      anchored: false, chainLogs: [], anchor: null, nonce: 0,
+      anchored: false, txStage: "idle", chainLogs: [], anchor: null, nonce: 0,
       stress: "idle"
     });
     notify("Switched to " + SUBJECTS[s].label);
   }
 
   /* ---------- P1 anchoring ---------- */
+  // Production seam — today this whole P1 anchor is a localAdapter
+  // (mockHash + in-memory Merkle tree). The replacement point is this single
+  // function: swap its body for EAS attest() or an IAttestationRegistry
+  // wrapper (Sepolia/mainnet) and the UI + state machine stay unchanged.
+  // Raw source data stays off-chain; only the Merkle root is attested.
   function anchorSubject() {
     var d = SUBJECTS[state.subject];
     if (!d) { return; }
@@ -275,14 +334,15 @@
     var nonce = state.nonce + 1;
     var digests = sourceCards(d).map(function (c) { return leafDigest(c, d); });
     var tree = merkleBuild(digests, ts, nonce);
-    var block = 19000000 + Math.floor(Math.random() * 100000);
+    var block = state.blockHeight + 2; // fixed deterministic chain advance
     var entry = {
       time: nowShort(), block: block,
       hash: tree.root.slice(0, 18) + "…",
-      status: "success", rule: "v0.1", nonce: nonce
+      status: "success", rule: "v0.1", nonce: nonce,
+      gas: "0.00001 test ETH", confirmations: 3, stage: "confirmed"
     };
     setState({
-      anchored: true, nonce: nonce,
+      anchored: true, nonce: nonce, txStage: "confirmed", blockHeight: block,
       anchor: { root: tree.root, block: block, time: ts, nonce: nonce, levels: tree.levels },
       chainLogs: [entry].concat(state.chainLogs)
     });
@@ -354,6 +414,7 @@
     DEMO_LGD: DEMO_LGD, ntM: ntM, scuOf: scuOf, vetoed: vetoed, creditLine: creditLine,
     gradeOf: gradeOf, gradeBands: GRADE_BANDS,
     sourceCards: sourceCards, mockHash: mockHash, merkleBuild: merkleBuild,
+    merkleProof: merkleProof, verifyProof: verifyProof, shortAddr: shortAddr,
     leafDigest: leafDigest, nowStamp: nowStamp, nowShort: nowShort,
     timeout: timeout, raf: raf, clearTimers: clearTimers, addClearHook: addClearHook,
     stressMeta: stressMeta, stressFlying: stressFlying, stressFrames: STRESS_FRAMES
