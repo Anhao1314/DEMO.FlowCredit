@@ -380,9 +380,11 @@
     prevRoute = App.state.route;
     try {
       host.innerHTML = '<div class="ld-page" id="ld-root">' + pageHtml() + "</div>";
-      if (enterLanding) { playIntro(host); }
+      bindCases(host);
+      if (enterLanding) { playIntro(host); revealFx(host); }
     } catch (e) {
       resetIntro();
+      resetFx();
       try { host.innerHTML = fallbackHtml(); } catch (e2) { /* host stays readable */ }
       if (App.ui && App.ui.toast) { App.ui.toast("Landing render failed — static fallback", "err"); }
     }

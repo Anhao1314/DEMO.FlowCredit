@@ -113,7 +113,7 @@
     rootEl.innerHTML =
       '<div class="shell">' +
       '<header class="topbar"><div class="topbar-inner">' +
-      '<a class="brand" href="#/ingest" aria-label="FlowCredit">' + u.icon("mark", 26) +
+      '<a class="brand" href="#/landing" aria-label="FlowCredit — back to home">' + u.icon("mark", 26) +
       '<span>FlowCredit</span><span class="badge-testnet">Testnet</span></a>' +
       '<nav class="nav" aria-label="pages">' + tabs + "</nav>" +
       '<div class="top-actions">' +
