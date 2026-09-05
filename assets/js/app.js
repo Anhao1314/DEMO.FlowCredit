@@ -124,6 +124,10 @@
       '<button type="button" class="btn btn-sm wallet-btn" id="wallet-btn">' + u.icon("wallet", 13) +
       '<span id="wallet-label">Connect Wallet</span></button>' +
       "</div></div></header>" +
+      '<div class="demo-flow" aria-label="Demo flow">' +
+        '<span class="df-step" data-flow="p1">P1 INGEST</span><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
+        '<span class="df-step" data-flow="p2">P2 RISK</span><i class="df-arrow" aria-hidden="true">&rarr;</i>' +
+        '<span class="df-step" data-flow="p3">P3 MONITOR</span></div>' +
       '<main class="content" id="view-main" tabindex="-1"></main>' +
       '<footer class="foot"><div class="line1">Demo flow: Landing → P1 attest &amp; anchor → P2 risk score → P3 verify &amp; active response</div>' +
       '<div class="line2">Testnet demo · simulated data · not financial advice · risk analytics, not a statutory audit · demo calibration</div></footer>' +
