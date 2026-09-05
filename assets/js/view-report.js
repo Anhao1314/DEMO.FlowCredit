@@ -169,7 +169,7 @@
         '<div class="m-note">logistic demo calibration</div></div>' +
         '<div class="report-big"><div class="m-label">Suggested credit line</div>' +
         '<div class="m-value num" style="color:' + (veto ? "#F87171" : "var(--text)") + '">' + ui.fmtMoney(credit) + "</div>" +
-        '<div class="m-note">' + (veto ? "vetoed by red flags" : "post-audit limit") + "</div></div>" +
+        '<div class="m-note">' + (veto ? "vetoed by red flags" : "post-assessment limit") + "</div></div>" +
         '<div class="report-big"><div class="m-label">Material flags</div>' +
         '<div style="margin-top:6px">' + flagsHtml + "</div></div>" +
         "</div>" +
@@ -226,7 +226,7 @@
         '<div class="report-actions">' +
         '<span class="spacer"></span>' +
         '<button type="button" class="btn btn-primary btn-sm" id="report-open-btn">' +
-        ui.icon("shield", 13) + " Open Audit Report</button>" +
+        ui.icon("shield", 13) + " Open Risk Report</button>" +
         "</div>";
 
       host.innerHTML =
@@ -277,7 +277,7 @@
 })();
 
 /* ============================================================
-   view-report.js (report overlay) — generated bilingual audit
+   view-report.js (report overlay) — generated bilingual risk-assessment
    report shown as a light paper sheet in a large overlay.
    Faithful to the reference layout: gray-blue labels, orange
    warnings, green passes; values are derived at open time from
@@ -293,7 +293,7 @@
   var SNAP = null;
   var NAV = [
     ["sum", "执行摘要"], ["p1", "P1 · 数据可信"], ["p2", "P2 · AI 评分"],
-    ["p3", "P3 · 监控响应"], ["concl", "审计结论"], ["appx", "附录"]
+    ["p3", "P3 · 监控响应"], ["concl", "评估结论"], ["appx", "附录"]
   ];
   var GEN_STEPS = [
     "Compiling four signed sources",
@@ -378,12 +378,12 @@
   function mastheadHtml(s) {
     var meta = [
       ["报告编号 · Report ID", esc(s.reportId)],
-      ["审计对象 · Subject", esc(s.d.label)],
+      ["评估对象 · Subject", esc(s.d.label)],
       ["主体类型 · Type", esc(s.d.l0.compute.Model + " · " + s.d.l0.compute.Task)],
       ["报告日期 · Date", esc(s.dateCN)],
       ["Prepared for", "Institutional Credit Desk"],
       ["主体地址 · Subject", esc(App.fn.shortAddr(s.d.address))],
-      ["规则版本 · Rule", "flowcredit.audit_result / v0.1"],
+      ["规则版本 · Rule", "flowcredit.risk_result / v0.1"],
       ["数据截止 · Data as of", esc(s.dataAsOf || "—")],
       ["链上存证 · On-chain", s.anchored ? "已锚定 (Anchored)" : "未锚定 (Not anchored)"],
       ["Merkle Root", s.anchored && s.anchor ? esc(s.anchor.root.slice(0, 18) + "…") : "—"]
@@ -396,7 +396,7 @@
       '<span class="rpt-brand">' + icon("mark", 20) +
       '<span class="rpt-brand-sub">On-chain AI Credit Risk Intelligence</span></span>' +
       '<span class="rpt-brand-side">链上 AI 信用风控 · RegTech</span></div>' +
-      '<div class="rpt-title">链上 AI 信用风控审计报告</div>' +
+      '<div class="rpt-title">链上 AI 信用风控评估报告</div>' +
       '<div class="rpt-kicker">On-chain Attestation · AI Risk Scoring · Dynamic Response</div>' +
       '<div class="rpt-chips">' +
       '<span class="rpt-chip rpt-chip-ok"><i class="rpt-dot"></i>VERIFIED</span>' +
@@ -410,24 +410,24 @@
   function execHtml(s) {
     var d0 = s.d;
     var lead = "本报告基于 FlowCredit 链上 AI 信用风控引擎，对 " + d0.label +
-      " 在审计周期内的经营数据进行全链路可信核验与风险评估。数据经四源签名采集后生成 Merkle 指纹上链存证，" +
+      " 在评估周期内的经营数据进行全链路可信核验与风险评估。数据经四源签名采集后生成 Merkle 指纹上链存证，" +
       "AI 引擎通过 L0→L5 流水线完成标准化、去水分、五锚核验、综合评分与违约概率测算，并输出动态风控响应建议。";
     var vk = s.verdictKind || (s.veto ? "reject" : "approve");
     var devPct = s.dev ? s.dev.pct : App.fn.deviation(d0).pct;
     var concl;
     if (vk === "reject") {
-      concl = "审计结论：" + d0.label + " 触发 " + d0.redflags.length +
+      concl = "评估结论：" + d0.label + " 触发 " + d0.redflags.length +
         " 项红旗并一票否决（VETO）：综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率 " +
         s.pd.toFixed(1) + "%，双价值背离 +" + devPct + "% 越 2σ 告警；建议授信额度 0（拒绝），" +
         "转入持续链上监控与观察名单。";
     } else if (vk === "watch") {
-      concl = "审计结论：" + d0.label + " 数据整体可核验，但覆盖不完整（Treasury 缺失周期、GPU 利用率自报待核验），" +
+      concl = "评估结论：" + d0.label + " 数据整体可核验，但覆盖不完整（Treasury 缺失周期、GPU 利用率自报待核验），" +
         "客户集中度 " + d0.l0.business.Top5 + " 偏高、回款 " + d0.l0.business.Repayment + " 走软。" +
         "综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率约 " + s.pd.toFixed(1) +
         "%。建议给予小额谨慎授信 " + fmtInt(s.credit) + " test USDC，纳入观察名单并 HF 盯市、周度复评；" +
         "补齐数据与独立核验前，不开放完整压力情景与提额。";
     } else {
-      concl = "审计结论：" + d0.label + " 经营数据链上存证完整，AI 风险评估综合可信评分 CCI " + s.cci +
+      concl = "评估结论：" + d0.label + " 经营数据链上存证完整，AI 风险评估综合可信评分 CCI " + s.cci +
         "（" + s.grade + "），违约概率 " + s.pd.toFixed(1) + "%，未触发重大红旗。" +
         "建议授予授信额度 " + fmtInt(s.credit) + " test USDC，并纳入动态风控监控体系。";
     }
@@ -440,7 +440,7 @@
         "Logistic 标定 PD = 1/(1+e^(0.01156*CCI-5.433))", s.veto ? "rpt-v-red" : "") +
       kpi("建议授信额度",
         s.veto ? "0 test USDC" : fmtInt(s.credit) + " test USDC",
-        s.veto ? "REJECTED · VETO" : (isWatch ? "谨慎额度 · 观察名单" : "审计后额度 · Post-audit Limit"),
+        s.veto ? "REJECTED · VETO" : (isWatch ? "谨慎额度 · 观察名单" : "评估后额度 · Post-assessment Limit"),
         s.veto ? "rpt-v-red" : (isWatch ? "" : "rpt-v-green")) +
       kpi("重大红旗 · Material Flags",
         s.veto ? esc(d0.redflags.length) + " Material Flags" : "No hard flag",
@@ -481,7 +481,7 @@
         '<div class="rpt-proof-grid">' +
         '<span class="rpt-proof-l">Merkle Root</span><span class="rpt-proof-v rpt-mono">' + esc(s.anchor.root) + "</span>" +
         '<span class="rpt-proof-l">锚定时间 · Anchored</span><span class="rpt-proof-v">' + esc(s.anchor.time) + "</span>" +
-        '<span class="rpt-proof-l">规则版本 · Rule</span><span class="rpt-proof-v">flowcredit.audit_result / v0.1</span>' +
+        '<span class="rpt-proof-l">规则版本 · Rule</span><span class="rpt-proof-v">flowcredit.risk_result / v0.1</span>' +
         '<span class="rpt-proof-l">Nonce</span><span class="rpt-proof-v rpt-mono">#' + pad6(s.anchor.nonce) + "</span>" +
         '<span class="rpt-proof-l">哈希匹配 · Hash</span><span class="rpt-proof-v rpt-txt-ok">local match · ✓ true · root matches P1 anchor</span>' +
         "</div>" +
@@ -598,7 +598,7 @@
       pair("建议授信额度",
         '<span class="rpt-txt-ok">' + fmtInt(App.fn.creditLine(h)) + " test USDC</span>",
         '<span class="rpt-txt-red">0（REJECTED · VETO）</span>'),
-      pair("审计结论",
+      pair("评估结论",
         '<span class="rpt-txt-ok">APPROVE · 通过</span>',
         '<span class="rpt-txt-red">VETO · 红旗一票否决</span>')
     ];
@@ -681,9 +681,9 @@
         "HF " + ph[ph.length - 1].hf.toFixed(2) + " / 额度 " + fmtInt(ph[ph.length - 1].credit)]
     ];
     return '<h2 class="rpt-h2">三、风险监控与动态响应 · P3 Risk Monitoring &amp; Response</h2>' +
-      '<p class="rpt-p">审计结论输出后，主体纳入 FlowCredit 动态风控监控体系。系统持续盯市健康因子（HF），' +
+      '<p class="rpt-p">评估结论输出后，主体纳入 FlowCredit 动态风控监控体系。系统持续盯市健康因子（HF），' +
       "在市场剧烈波动时自动触发压力测试，并根据预设规则执行降额、预警、部分清算等风控动作，市场回稳后自动恢复额度。" +
-      "整个响应过程上链留痕，确保风控决策可追溯、可审计。</p>" +
+      "整个响应过程上链留痕，确保风控决策可追溯、可复核。</p>" +
       '<h3 class="rpt-h3">3.1 健康因子监控 · Health Factor</h3>' +
       '<div class="rpt-hf-row">' + hfBox + crBox + "</div>" +
       '<h3 class="rpt-h3">3.2 压力测试与动态响应 · Stress &amp; Dynamic Response</h3>' +
@@ -715,7 +715,7 @@
       lines.push(
         s.auditDone
           ? "（2）L0→L5 流水线评估完成，无硬性红旗；锚点 2 pass / 3 warn（数据覆盖与集中度待观察）；"
-          : "（2）L0→L5 流水线尚未在本会话完整跑完，可在 P2 重新运行审计后刷新本报告；",
+          : "（2）L0→L5 流水线尚未在本会话完整跑完，可在 P2 重新运行评估后刷新本报告；",
         "（3）综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率约 " + s.pd.toFixed(1) +
           "%，双价值背离 +" + devPct4 + "% 无告警；",
         "（4）建议小额谨慎授信 " + fmtInt(s.credit) + " test USDC，纳入观察名单（HF 盯市 + 周度复评），" +
@@ -724,7 +724,7 @@
       lines.push(
         s.auditDone
           ? "（2）L0→L5 流水线评估通过，五锚核验全部达标，未触发重大红旗；"
-          : "（2）L0→L5 流水线尚未在本会话完整跑完，可在 P2 重新运行审计后刷新本报告；",
+          : "（2）L0→L5 流水线尚未在本会话完整跑完，可在 P2 重新运行评估后刷新本报告；",
         "（3）综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率 PD " + s.pd.toFixed(1) +
           "%，双价值背离 +" + devPct4 + "% 处于正常范围；",
         "（4）主体纳入动态风控监控体系，可在价值冲击时执行压力测试并自动响应，保护头寸安全。");
@@ -733,7 +733,7 @@
       "本报告基于测试网演示数据（simulated data），CCI/PD 模型为示例标定，不构成真实信用评估或投资建议。",
       "链上存证仅保证链上数据不可篡改，原始数据来源真实性需结合企业授权与多源交叉验证进一步确认。",
       "AI 算力/Token 消耗作为经营辅助指标的合理性尚需金融专业验证，目前尚无机构以此作为放贷/投资依据。",
-      "香港地区链上财务数据存储与审计服务的合规要求需进一步确认，建议申请数码港区块链试点资助。"
+      "香港地区链上数据的存储与处理需符合相关监管与数据合规要求；本报告为 AI 风控评估结果，不构成审计意见，亦不构成法定审计。"
     ];
     var riskHtml = "";
     for (var i = 0; i < risks.length; i++) {
@@ -745,7 +745,7 @@
         "不授予授信额度（0 test USDC），主体列入观察名单并持续链上监控。",
         "要求主体提供真实业务材料与实名信息，完成复核前不重新发起授信评估。",
         "对链上交互持续聚类监测，防止刷量/洗交易模式迁移或复活。",
-        "若后续数据转真，可按标准流程重新发起 P1→P3 全链路审计。"
+        "若后续数据转真，可按标准流程重新发起 P1→P3 全链路评估。"
       ];
     } else if (vk4 === "watch") {
       measures = [
@@ -758,7 +758,7 @@
       measures = [
         "授予授信额度 " + fmtInt(s.credit) + " test USDC，纳入动态风控监控体系，设置 HF 预警线 1.20、清算线 " +
           App.fn.stressFrames.liquidationHf.toFixed(2) + "。",
-        "建立月度审计复评机制，持续刷新 CCI/PD 与双价值背离指标，及时捕捉经营状况变化。",
+        "建立月度风控复评机制，持续刷新 CCI/PD 与双价值背离指标，及时捕捉经营状况变化。",
         "对接银行流水与支付平台，实现多源数据交叉验证，提升原始数据真实性保障。",
         "关注香港 Web3 政策进展，适时申请数码港区块链与数字资产试点资助（最高 50 万港元）。"
       ];
@@ -770,9 +770,9 @@
       meaHtml += '<div class="rpt-mea' + meaCls + '">' +
         meaIc + "<b>" + (j + 1) + ".</b> " + esc(measures[j]) + "</div>";
     }
-    return '<h2 class="rpt-h2">四、审计结论与建议 · Conclusion &amp; Recommendation</h2>' +
+    return '<h2 class="rpt-h2">四、评估结论与建议 · Conclusion &amp; Recommendation</h2>' +
       '<h3 class="rpt-h3">4.1 综合结论 · Overall Verdict</h3>' +
-      '<p class="rpt-p">经 FlowCredit 链上 AI 信用风控引擎全流程审计，' + esc(d0.label) + " 在审计周期内：" +
+      '<p class="rpt-p">经 FlowCredit 链上 AI 信用风控引擎全流程风险评估，' + esc(d0.label) + " 在审计周期内：" +
       esc(lines.join(" ")) + "</p>" +
       '<h3 class="rpt-h3">4.2 风险提示 · Risk Warnings</h3>' + riskHtml +
       '<h3 class="rpt-h3">4.3 建议措施 · Recommended Actions</h3>' + meaHtml;
@@ -813,7 +813,7 @@
       ];
     });
     var regTexts = [
-      "四源签名采集、L0→L5 决策留痕与结论指纹存证，对应监管要求的可审计性与可解释性；",
+      "四源签名采集、L0→L5 决策留痕与结论指纹存证，对应监管要求的可复核性与可解释性；",
       "Merkle 根存证可作为监管报送与事后稽核的链上完整性证据；",
       "FlowCredit 为 RegTech 工具，不吸储、不放贷、不托管资金、不作最终授信决定；",
       "原始明细链下存储、基于企业授权使用，呼应数据隐私与最小上链原则。"
@@ -842,12 +842,12 @@
       "L1 口径：Raw Token 取自 L0 原始采集值，rawNT_M 为已乘 w_model/w_task 后的折算 NT，L2 毛 NT 采用 rawNT_M。" +
       "波动率为链上可信序列 C 的 8 期环比收益率样本标准差现算（非年化、演示校准）；" +
       "背离度 D 采用 R/C 序列均值口径 D=(meanR−meanC)/meanC，与页面展示一致。</p>" +
-      '<h3 class="rpt-h3">D. 审计局限性与免责声明 · Limitations &amp; Disclaimer</h3>' +
-      '<p class="rpt-p">本审计报告存在以下局限性，使用者应予以充分关注：（1）数据范围局限：审计仅覆盖授权采集的四源数据' +
+      '<h3 class="rpt-h3">D. 评估局限性与免责声明 · Limitations &amp; Disclaimer</h3>' +
+      '<p class="rpt-p">本评估报告存在以下局限性，使用者应予以充分关注：（1）数据范围局限：审计仅覆盖授权采集的四源数据' +
       "（算力、API、资金、链上），未涵盖企业全部经营活动，表外业务、关联交易等可能未被纳入；（2）模型局限：CCI/PD 模型为 " +
       "Demo 校准版本，锚点权重与 Logistic 系数未经真实历史数据训练，AI 算力/Token 消耗作为信用指标的合理性尚需金融专业验证；" +
       "（3）存证局限：链上存证仅保证上链后数据不可篡改，原始数据来源真实性依赖企业授权与多源交叉验证，不排除数据源本身存在造假" +
-      "或错误的可能；（4）时点局限：审计结论基于审计周期内的数据快照，企业经营状况可能随时间发生重大变化，报告结论不代表对未来" +
+      "或错误的可能；（4）时点局限：评估结论基于评估周期内的数据快照，企业经营状况可能随时间发生重大变化，报告结论不代表对未来" +
       "信用状况的保证。</p>" +
       '<p class="rpt-p">免责声明：本报告由 FlowCredit 链上 AI 信用风控引擎自动生成，仅供演示与参考用途。' +
       "报告中的评估结果、评分、额度建议均基于测试网模拟数据与示例标定模型，不构成任何金融建议、投资建议、授信决策或法律意见。" +
@@ -938,7 +938,7 @@
   function loadHtml(idx) {
     return '<div class="report-load">' +
       '<div class="gen-spin"></div>' +
-      '<div class="gen-title">Generating audit report</div>' +
+      '<div class="gen-title">Generating risk assessment report</div>' +
       '<div class="gen-steps" aria-live="polite">' + genStepsHtml(idx) + "</div>" +
       '<div class="gen-note">rule v0.1 · demo calibration</div>' +
       "</div>";
@@ -1009,11 +1009,11 @@
     root.id = "report-overlay";
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
-    root.setAttribute("aria-label", "FlowCredit generated audit report");
+    root.setAttribute("aria-label", "FlowCredit generated risk assessment report");
     root.innerHTML =
       '<div class="report-frame">' +
       '<div class="report-chrome">' +
-      '<span class="rc-brand">' + icon("mark", 16) + " · On-chain Audit Report</span>" +
+      '<span class="rc-brand">' + icon("mark", 16) + " · On-chain Risk Assessment Report</span>" +
       '<span class="rc-tag">testnet demo</span>' +
       '<span class="spacer"></span>' +
       '<button type="button" class="btn btn-ghost btn-sm" data-rpt-close>' + icon("x", 13) + " Close</button>" +
