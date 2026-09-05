@@ -23,6 +23,7 @@
 (function () {
   var App = window.App = window.App || {};
   var introSvg = null;
+  var revealPage = null; // .ld-page node under the one-shot stagger reveal
   var prevRoute = null; // last state.route seen — intro plays only on true entry into #/landing
 
   /* ---------- intro reset: any clearTimers() snaps back to the full state ---------- */
@@ -39,6 +40,49 @@
     introSvg = null;
   }
   if (App.fn && App.fn.addClearHook) { App.fn.addClearHook(resetIntro); }
+  // Stagger reveal reset: any clearTimers() (route switch / reset) restores
+  // the fully readable static state, exactly like the hero intro.
+  if (App.fn && App.fn.addClearHook) { App.fn.addClearHook(resetFx); }
+
+  function resetFx() {
+    if (revealPage && revealPage.classList) {
+      revealPage.classList.remove("ld-reveal");
+      revealPage.classList.remove("ld-go");
+    }
+    revealPage = null;
+  }
+  // S1–S5 fade up in sequence (60ms apart) once, only on a true entry into
+  // #/landing; reduced-motion and same-route re-renders stay fully static.
+  function revealFx(host) {
+    if (typeof window === "undefined" || typeof host.querySelector !== "function") { return; }
+    try {
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) { return; }
+    } catch (e) { /* motion assumed on */ }
+    var page = host.querySelector(".ld-page");
+    if (!page || typeof page.classList !== "object") { return; }
+    revealPage = page;
+    page.classList.add("ld-reveal");
+    App.fn.raf(function () {
+      if (page.classList) { page.classList.add("ld-go"); }
+    });
+  }
+  // Sample cards pre-select a subject then enter P2; href="#/audit" is the
+  // no-JS fallback path (route still opens with the current subject).
+  function bindCases(host) {
+    if (typeof host.querySelectorAll !== "function") { return; }
+    var els = host.querySelectorAll(".ld-case[data-subject]");
+    for (var i = 0; i < els.length; i++) {
+      (function (el) {
+        el.addEventListener("click", function (ev) {
+          var key = el.getAttribute("data-subject");
+          if (!App.act || !App.act.switchSubject || !App.nav) { return; } // href fallback applies
+          if (ev && ev.preventDefault) { ev.preventDefault(); }
+          try { App.act.switchSubject(key); } catch (e) { /* state unchanged — still navigate */ }
+          App.nav("#/audit");
+        });
+      })(els[i]);
+    }
+  }
 
   function esc(s) {
     return String(s == null ? "" : s)
