@@ -1878,7 +1878,7 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 
 /* ---- typography refinement ---- */
 h1,h2,h3{text-wrap:balance}
-.ld-h1{font-size:clamp(28px,2.6vw + 14px,40px);font-weight:790;letter-spacing:-.018em}
+.ld-h1{letter-spacing:-.012em}
 .ld-eyebrow{letter-spacing:2px}
 .ld-eyebrow::before{content:"";width:22px;height:1px;margin-right:8px;display:inline-block;vertical-align:4px;
   background:linear-gradient(90deg,rgba(56,189,248,.85),rgba(56,189,248,0))}
