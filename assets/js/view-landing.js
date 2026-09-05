@@ -140,6 +140,143 @@
     return '<section class="ld-hero">' + heroCopyHtml() + heroVisualHtml() + "</section>";
   }
 
+  /* ---------- shared helpers (render-time math only) ---------- */
+  function fmtNum(n) { return String(Math.round(n * 10) / 10); }
+  function dotBg(ch) { return ch === "r" ? "#F87171" : ch === "y" ? "#F59E0B" : "#34D399"; }
+  function barW(v, max) {
+    var p = max > 0 ? (v / max) * 100 : 0;
+    p = Math.round(p * 10) / 10;
+    return Math.min(100, p) + "%";
+  }
+
+  /* ---------- S1 how it works ---------- */
+  function howPipe(num, ic, title, body) {
+    return '<div class="ld-pipe">' +
+      '<div class="ld-pipe-top">' + icon(ic, 15) + '<span class="ld-pipe-t">' + title + "</span>" +
+      '<span class="ld-pipe-badge">' + num + "</span></div>" +
+      '<div class="ld-pipe-s">' + body + "</div></div>";
+  }
+  function howHtml() {
+    return '<section class="ld-sec ld-rv">' +
+      '<div class="ld-kicker">HOW IT WORKS</div>' +
+      '<div class="ld-pipes">' +
+      howPipe("01", "db", "Attest",
+        "Cross-check 4 signed sources, strip idle/duplicate/pulse — raw volume ≠ credible volume") +
+      '<span class="ld-pipe-arrow">→</span>' +
+      howPipe("02", "pulse", "Score",
+        "Five anchors → CCI, PD, R-vs-C deviation, hard-rule veto") +
+      '<span class="ld-pipe-arrow">→</span>' +
+      howPipe("03", "shield", "Respond",
+        "Monitor Health Factor, auto de-risk through a flash crash") +
+      "</div></section>";
+  }
+
+  /* ---------- S2 credible volume inversion ---------- */
+  function whyHtml() {
+    var h = SUBJECTS.healthy, s = SUBJECTS.sybil;
+    var hRaw = App.fn.ntM(h), sRaw = App.fn.ntM(s);
+    var hVal = App.fn.validNT_M(h), sVal = App.fn.validNT_M(s);
+    var rawMax = Math.max(hRaw, sRaw), valMax = Math.max(hVal, sVal);
+    function barRow(name, val, pct, tone) {
+      return '<div class="ld-cmp-row">' +
+        '<span class="ld-cmp-k">' + name + "</span>" +
+        '<span class="ld-cmp-track"><span class="ld-bar ' + tone + '" data-w="' + pct + '"></span></span>" +
+        '<span class="ld-cmp-v num">' + fmtNum(val) + " M</span></div>";
+    }
+    return '<section class="ld-sec ld-rv" style="transition-delay:60ms">' +
+      '<h2 class="ld-sec-title">Raw volume can mislead. Credible volume tells the truth.</h2>' +
+      '<div class="ld-cmp">' +
+      '<div class="ld-cmp-head"><span>Raw NT</span>' +
+      '<span class="ld-cmp-note">declared volume · as reported</span></div>' +
+      barRow("Healthy", hRaw, barW(hRaw, rawMax), "ld-bar-good") +
+      barRow("Sybil", sRaw, barW(sRaw, rawMax), "ld-bar-bad") +
+      "</div>" +
+      '<div class="ld-cmp">' +
+      '<div class="ld-cmp-head"><span>Valid NT</span>' +
+      '<span class="ld-cmp-note">after wash filters</span></div>' +
+      barRow("Healthy", hVal, barW(hVal, valMax), "ld-bar-good") +
+      barRow("Sybil", sVal, barW(sVal, valMax), "ld-bar-bad") +
+      "</div>" +
+      '<p class="ld-cmp-foot">after stripping idle loops, duplicates and pulse spikes — the wash-trader collapses.</p>' +
+      "</section>";
+  }
+
+  /* ---------- S3 three live subjects ---------- */
+  function caseCard(k, d) {
+    var cci = App.fn.cci(d);
+    var grade = App.fn.gradeOf(d);
+    var cls = d.verdictKind === "approve" ? "ld-case-ok"
+      : d.verdictKind === "watch" ? "ld-case-watch" : "ld-case-rej";
+    var line;
+    if (d.verdictKind === "approve") {
+      line = '<span class="ld-case-line ok">credit line ' +
+        App.ui.fmtMoney(App.fn.creditLine(d)) + "</span>";
+    } else if (d.verdictKind === "watch") {
+      line = '<span class="ld-case-line warn">capped line ' +
+        App.ui.fmtMoney(App.fn.creditLine(d)) + " · watchlist</span>";
+    } else {
+      line = '<span class="ld-case-line rej">REJECTED · wash-trading</span>';
+    }
+    return '<a class="ld-case ' + cls + '" href="#/audit" data-subject="' + k + '">' +
+      '<div class="ld-case-head">' +
+      '<span class="ld-case-t"><span class="ld-dot" style="background:' + dotBg(d.segDot) + '"></span>' +
+      esc(d.label) + "</span>" +
+      '<span class="ld-case-badge num">' + esc(grade) + "</span></div>" +
+      '<div class="ld-case-addr num">' + esc(App.fn.shortAddr(d.address)) + "</div>" +
+      '<div class="ld-case-cci num">CCI ' + cci + "</div>" +
+      line +
+      "</a>";
+  }
+  function casesHtml() {
+    var cards = SUBJECT_ORDER.map(function (k) { return caseCard(k, SUBJECTS[k]); }).join("");
+    return '<section class="ld-sec ld-rv" style="transition-delay:180ms">' +
+      '<div class="ld-kicker">WHO IT IS FOR</div>' +
+      '<div class="ld-sec-line">Three live subjects — approve, watchlist, or veto in one assessment.</div>' +
+      '<div class="ld-cases">' + cards + "</div>" +
+      "</section>";
+  }
+
+  /* ---------- S4 trust (2x2) ---------- */
+  function trustHtml() {
+    var items = [
+      ["pulse", "Formulas auditable", "Every score traces to five anchors; PD is a demo calibration"],
+      ["shield", "Anyone can verify", "Merkle root on-chain, raw source data stays off-chain"],
+      ["anchor", "No custody · no lending · no token", "RegTech tooling for licensed platforms"],
+      ["info", "Honest by design", "Testnet mock, samples synthesized from public disclosures, not financial advice"]
+    ];
+    var grid = items.map(function (it) {
+      return '<div class="ld-tcard"><span class="ld-tcard-ic">' + icon(it[0], 14) + "</span>" +
+        '<div class="ld-tcard-b"><b>' + it[1] + "</b>" +
+        '<span class="ld-tcard-s">' + it[2] + "</span></div></div>";
+    }).join("");
+    return '<section class="ld-sec ld-rv" style="transition-delay:240ms">' +
+      '<div class="ld-kicker">WHY TRUST IT</div>' +
+      '<div class="ld-tgrid">' + grid + "</div></section>";
+  }
+
+  /* ---------- S5 try it now ---------- */
+  function tryHtml() {
+    var steps = [
+      "Pick a subject",
+      "Run AI assessment",
+      "Trigger a flash crash, watch it auto de-risk",
+      "Open the verifiable report"
+    ];
+    var row = steps.map(function (t, i) {
+      return '<div class="ld-nstep"><span class="ld-nnum num">' + (i + 1) + "</span>" +
+        '<span class="ld-nstep-t">' + t + "</span></div>";
+    }).join("");
+    return '<section class="ld-sec ld-rv" style="transition-delay:300ms">' +
+      '<div class="ld-kicker">TRY IT NOW</div>' +
+      '<div class="ld-nsteps">' + row + "</div>" +
+      '<div class="ld-cta-row">' +
+      '<a class="ld-btn ld-btn-primary" href="#/ingest">Run live demo · ~3 min</a>' +
+      '<a class="ld-btn ld-btn-ghost" href="#/report">Sample report</a>' +
+      "</div>" +
+      '<p class="ld-cta-note">No sign-up · runs locally in your browser</p>' +
+      "</section>";
+  }
+
   /* ---------- 4.3 minimal footer (merged compliance + testnet) ---------- */
   function footHtml() {
     return '<footer class="ld-foot">' +
@@ -148,16 +285,12 @@
   }
 
   function pageHtml() {
-    return heroHtml() + footHtml();
+    return heroHtml() + howHtml() + whyHtml() + casesHtml() + trustHtml() + tryHtml() + footHtml();
   }
   function fallbackHtml() {
-    return '<div class="ld-page"><section class="ld-hero"><div class="ld-hero-copy">' +
-      '<div class="ld-eyebrow">FLOWCREDIT · ON-CHAIN AI CREDIT RISK INTELLIGENCE</div>' +
-      '<h1 class="ld-h1">On-chain AI Credit Risk Intelligence</h1>' +
-      '<div class="ld-cta-row">' +
-      '<a class="ld-btn ld-btn-primary" href="#/ingest">Launch Live Demo →</a>' +
-      '<a class="ld-btn ld-btn-ghost" href="#/report">Sample Report</a></div>' +
-      "</div></section></div>";
+    return '<div class="ld-page">' +
+      '<section class="ld-hero"><div class="ld-hero-copy">' + heroCopyCore() + "</div></section>" +
+      footHtml() + "</div>";
   }
 
   /* ---------- §5 one-shot hero intro (static terminal state is the default) ---------- */
