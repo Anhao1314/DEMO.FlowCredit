@@ -172,7 +172,8 @@
   // and parent is the node hash produced by the shared combine step.
   function merkleProof(levels, leafIndex) {
     var path = [];
-    var idx = Math.max(0, Math.min(leafIndex, levels[0].length - 1));
+    var leafPos = Math.max(0, Math.min(leafIndex, levels[0].length - 1));
+    var idx = leafPos;
     for (var i = 0; i < levels.length - 1; i++) {
       var level = levels[i];
       var cur = level[idx];
@@ -189,7 +190,7 @@
       }
       idx = Math.floor(idx / 2);
     }
-    return { leaf: levels[0][idx === 0 ? Math.max(0, Math.min(leafIndex, levels[0].length - 1)) : 0],
+    return { leaf: levels[0][leafPos],
              path: path, root: levels[levels.length - 1][0] };
   }
   // verifyProof(leaf, proof, root) — recomputes the root along the path with

@@ -14,6 +14,7 @@
   var rootEl = null;
   var mainEl = null;
   var walletConnected = false;
+  var walletConnecting = false;
   var booted = false;
 
   function routeKey(hash) {
@@ -145,8 +146,31 @@
     if (walletBtn) {
       walletBtn.addEventListener("click", function () { toggleWallet(); });
     }
+    // If the simulated connect is interrupted (route switch / reset /
+    // stress start all run clearTimers), restore the idle wallet button.
+    App.fn.addClearHook(function () {
+      if (!walletConnecting) { return; }
+      walletConnecting = false;
+      var b2 = rootEl && rootEl.querySelector("#wallet-btn");
+      var l2 = rootEl && rootEl.querySelector("#wallet-label");
+      if (b2) { b2.disabled = false; b2.classList.remove("is-busy"); }
+      if (l2 && !walletConnected) { l2.textContent = "Connect Wallet"; }
+    });
     highlightTabs();
 
+  }
+
+  function walletConnectedUi(btn, label, u) {
+    walletConnected = true;
+    App.wallet.connected = true;
+    if (btn && label) {
+      btn.disabled = false;
+      btn.classList.remove("is-busy");
+      btn.classList.add("on");
+      label.innerHTML = '<span class="addr">' + App.wallet.address + " · " + App.wallet.balance + "</span>" +
+        '<span class="net-badge">Sepolia · simulated</span>';
+    }
+    if (u && u.toast) { u.toast("Wallet connected (mock) · " + App.wallet.address); }
   }
 
   function toggleWallet() {
@@ -154,13 +178,14 @@
     var btn = rootEl.querySelector("#wallet-btn");
     var label = rootEl.querySelector("#wallet-label");
     if (!walletConnected) {
-      walletConnected = true;
-      App.wallet.connected = true;
-      if (btn && label) {
-        btn.classList.add("on");
-        label.innerHTML = '<span class="addr">' + App.wallet.address + " · " + App.wallet.balance + "</span>";
-      }
-      if (u && u.toast) { u.toast("Wallet connected (mock) · " + App.wallet.address); }
+      if (walletConnecting) { return; } // re-entry guard
+      walletConnecting = true;
+      if (btn) { btn.disabled = true; btn.classList.add("is-busy"); }
+      if (label) { label.innerHTML = '<span class="addr">Connecting…</span>'; }
+      App.fn.timeout(function () {
+        walletConnecting = false;
+        walletConnectedUi(btn, label, u);
+      }, 500);
     } else {
       walletConnected = false;
       App.wallet.connected = false;
