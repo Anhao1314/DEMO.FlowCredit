@@ -7,6 +7,7 @@
 const SUBJECTS = {
   healthy: {
     label:"Healthy Merchant",
+    address:"0x4A7b19eD3c82F60a5b9E4d2C71f3A8eE21dB4f02",
     verdictKind:"approve", reportCode:"HM001", segDot:"g", stressEligible:true,
     dataAsOf:"2026-08-31 23:59 UTC", sourceIssues:{},
     // Illustrative composite of public disclosures (CoreWeave S-1 / Nebius /
@@ -33,6 +34,7 @@ const SUBJECTS = {
   },
   watch: {
     label:"Watchlist Merchant",
+    address:"0x9C1e57aB24d6F08c3E9b1a7D4f52C8e677Ba1d90",
     verdictKind:"watch", reportCode:"WL003", segDot:"y", stressEligible:false,
     dataAsOf:"2026-08-31 23:59 UTC",
     l0:{ compute:{Input:"38.0M",Output:"9.0M",Raw:"47.0M",Requests:"1.6M",Model:"Flagship Reasoning",Task:"Inference"},
@@ -58,6 +60,7 @@ const SUBJECTS = {
   },
   sybil: {
     label:"Sybil Address",
+    address:"0xD52f04cA91bE73d8F60a2c4B9e1D73f80A3c55b6",
     verdictKind:"reject", reportCode:"SYB001", segDot:"r", stressEligible:true,
     dataAsOf:"2026-08-31 23:59 UTC", alertIndex:5,
     rejectTitle:"REJECTED: Sybil / wash-trading detected",
