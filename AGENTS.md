@@ -3,19 +3,19 @@
 本文件约束在此仓库工作的协助者（AI 或人）。README.md 是项目说明；本文件是改动铁律。与任务书冲突时以任务书为准。
 
 ## 1. 项目本质
-- 零构建静态站：原生 HTML/CSS/JS，普通 script 按序加载（data→state→ui→view-landing→view-overview→view-ingest→view-audit→view-report→app），无 module/defer/fetch/CDN/npm。
+- 零构建静态站：原生 HTML/CSS/JS，普通 script 按序加载（data→state→ui→view-landing→view-ingest→view-audit→view-report→view-workspace→view-account→app），无 module/defer/fetch/CDN/npm。
 - 双击 index.html 以 file:// 离线可跑；UI 文案全英文；无 emoji（允许 → ← ✓ · σ ± 等符号）；图标只用 App.ui.icon 内联 SVG；数字 mono + tabular-nums。
 
 ## 2. 核心冻结区（默认一字不改；任务书明确点名才动）
 - 文件：assets/js/data.js、assets/js/ui.js、assets/js/app.js、assets/js/state.js、assets/js/view-landing.js。
-- 内容：SUBJECTS / ANCHOR_W / STRESS_FRAMES / 全部公式与 mock 数值 / 路由 hash（landing|overview|ingest|audit|report）/ 状态机语义 / 元素 id / 事件绑定 / 演示节奏（audit 350ms 步进、stress 约 2s 时序、ring 600ms、动画 200–350ms）。
+- 内容：SUBJECTS / ANCHOR_W / STRESS_FRAMES / 全部公式与 mock 数值 / 路由 hash（landing|workspace|ingest|audit|report|account）/ 状态机语义 / 元素 id / 事件绑定 / 演示节奏（audit 350ms 步进、stress 约 2s 时序、ring 600ms、动画 200–350ms）。
 - id 清单（保留）：run-audit / reset-audit / anchor-btn / anchor-btn-label / verify-btn / stress-btn / recover-btn / go-p1 / ring-slot / line-slot / chain-log。
-- L1 口径：Raw Token = d.l0.compute.Raw（healthy 60.0M / sybil 108.0M）；rawNT_M 是「已乘 w_model/w_task 后的 NT」（72.0M / 108.0M），只用于 L2「毛 NT」，绝不顶替 Raw Token。
+- L1 口径：Raw Token = d.l0.compute.Raw（healthy 80.0M / sybil 108.0M）；rawNT_M 是「已乘 w_model/w_task 后的 NT」（96.0M / 108.0M），只用于 L2「毛 NT」，绝不顶替 Raw Token。
 - Merkle：哈希输入 = 各叶摘要 + 时间戳 + 递增 nonce，每次 Anchor root 不同；anchor 保存最新 root；chainLogs 只增（switchSubject 时清空）。
 
 ## 3. 派生数值纪律
-- 页面一律调用 App.fn 现算（cci/pd/validNT_M/efficiency/scuOf/creditLine/vetoed/deviation/ntM/stressMeta），禁止写死 768/320/66.2/36.7/3.1/85.0 等结果字面量。
-- 回归基线：CCI 768/320 · PD 3.1/85.0 · ValidNT 66.2/36.7 · Efficiency 22500/514286 · SCU 2496/86.1 · Credit 20000/0 · Deviation +4%/+186% · stress 帧 1.85/1.05/1.35 与 20000/12000/18000。
+- 页面一律调用 App.fn 现算（cci/pd/validNT_M/efficiency/scuOf/creditLine/vetoed/deviation/ntM/stressMeta），禁止写死 795/320/90.2/36.7/2.3/85.0 等结果字面量。
+- 回归基线：CCI 795/320 · PD 2.3/85.0 · ValidNT 90.2/36.7 · Efficiency 22857/514286 · SCU 3570/86.1 · Credit 20000/0 · Deviation +3%/+186% · stress 帧 1.85/1.05/1.35 与 20000/12000/18000。
 
 ## 4. 句柄纪律（硬规则）
 - setTimeout/setInterval/requestAnimationFrame 一律经 App.fn.timeout/raf 登记 state.timer；页面局部动画用 App.fn.addClearHook 注册复位。
@@ -29,7 +29,7 @@
 - 动画 200–350ms（ring 600ms）；prefers-reduced-motion 下静态完整；≤420px 无横向滚动；flex/grid 用 auto-fit minmax。
 
 ## 6. 修改流程与提交
-- 完成后自检：node --check 全部 9 个 JS；CSS 花括号配平；静态扫描无 fetch/外链/module/emoji。
+- 完成后自检：node --check 全部 10 个 JS；CSS 花括号配平；静态扫描无 fetch/外链/module/emoji。
 - 回归断言脚本放系统临时目录（不入库）；涉及渲染需 stub window/document 后按序加载 JS。
 - 本机 autosync 守护会自动 commit + push（提交信息以 [autosync] 开头）；不要手动 commit；交付前确认 git status clean；GitHub 网络中断时守护会自动等恢复后补推。
 - 交付说明列出：改动文件清单、每文件改动点、冻结区零改动核对、验收结果。

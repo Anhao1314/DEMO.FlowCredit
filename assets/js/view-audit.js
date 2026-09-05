@@ -161,7 +161,7 @@
     return '<div class="l4-grid">' +
       '<div class="card" style="background:var(--card2);padding:14px"><div class="ring-wrap" id="ring-slot">' +
       '<span class="sec-l" style="margin:0 0 6px">CCI · composite</span></div>' +
-      '<div style="text-align:center;margin-top:8px"><span class="grade-chip" style="color:' + (veto ? "#F87171" : "#34D399") + '">grade ' + d.grade + "</span>" +
+      '<div style="text-align:center;margin-top:8px"><span class="grade-chip" style="color:' + (veto ? "#F87171" : "#34D399") + '">grade ' + App.fn.gradeOf(d) + "</span>" +
       '<div class="note-italic" style="margin-top:3px">computed Σ score × weight × 10</div></div></div>' +
       '<div class="card" style="background:var(--card2);padding:14px">' +
       '<div class="metric-tiles">' +
@@ -226,19 +226,50 @@
         return ["done", "done"];
       }
 
-      var bodyHtml =
-        blockCard("L0", "Collect — raw ledgers", "three reconciled sources, shown immediately", l0Body(d),
-          statusFor("L0")[0], statusFor("L0")[1], false) +
-        blockCard("L1", "Normalize", "token volumes → NT · SCU · money", l1Body(d, s >= 1),
-          statusFor("L1")[0], statusFor("L1")[1], s < 1) +
-        blockCard("L2", "Filter", "gross vs valid after wash filters", l2Body(d, s >= 2),
-          statusFor("L2")[0], statusFor("L2")[1], s < 2) +
-        blockCard("L3", "Anchor Check", "five peer-banded anchors · hard rules", l3Body(d, s >= 3),
-          statusFor("L3")[0], statusFor("L3")[1], s < 3) +
-        blockCard("L4", "Score", "CCI · PD · credit · value divergence", l4Body(d, s >= 4, veto),
-          statusFor("L4")[0], statusFor("L4")[1], s < 4) +
-        blockCard("L5", "Anchor", "on-chain fingerprint from P1", l5Body(st),
-          statusFor("L5")[0], statusFor("L5")[1], false);
+      var ctaHtml = "";
+      if (s === 4 && !st.running) {
+        var cciVal = App.fn.cci(d);
+        var pdVal = App.fn.pd(cciVal);
+        ctaHtml =
+          '<div class="card audit-cta">' +
+          '<div class="cta-icon">' + ui.icon("shield", 18) + "</div>" +
+          '<div class="cta-main"><div class="cta-title">' +
+          (veto ? "VETO verdict reached" : "Analysis complete") + "</div>" +
+          '<div class="cta-sub">CCI ' + cciVal + " · PD " + pdVal.toFixed(1) +
+          "%" + (veto ? " · red flags hold the line at zero" : " · report generated from this run") +
+          "</div></div>" +
+          '<span class="spacer"></span>' +
+          '<button type="button" id="audit-report-btn" class="btn btn-primary">' +
+          ui.icon("layers", 14) + " Open Audit Report</button>" +
+          "</div>";
+      }
+
+      // Wizard rendering: only unlocked layers occupy the page. L0 is
+      // always visible; L1-L4 appear once auditStage reaches them; L5
+      // appears after scoring (stage >= 4). The top step strip keeps
+      // showing the full L0->L5 pipeline.
+      var parts = [];
+      parts.push(blockCard("L0", "Collect — raw ledgers", "three reconciled sources, shown immediately",
+        l0Body(d), statusFor("L0")[0], statusFor("L0")[1], false));
+      if (s >= 1) {
+        parts.push(blockCard("L1", "Normalize", "token volumes → NT · SCU · money",
+          l1Body(d, s >= 1), statusFor("L1")[0], statusFor("L1")[1], false));
+      }
+      if (s >= 2) {
+        parts.push(blockCard("L2", "Filter", "gross vs valid after wash filters",
+          l2Body(d, s >= 2), statusFor("L2")[0], statusFor("L2")[1], false));
+      }
+      if (s >= 3) {
+        parts.push(blockCard("L3", "Anchor Check", "five peer-banded anchors · hard rules",
+          l3Body(d, s >= 3), statusFor("L3")[0], statusFor("L3")[1], false));
+      }
+      if (s >= 4) {
+        parts.push(blockCard("L4", "Score", "CCI · PD · credit · value divergence",
+          l4Body(d, s >= 4, veto), statusFor("L4")[0], statusFor("L4")[1], false));
+        parts.push(blockCard("L5", "Anchor", "on-chain fingerprint from P1", l5Body(st),
+          statusFor("L5")[0], statusFor("L5")[1], false));
+      }
+      var bodyHtml = parts.join("");
 
       var subjects = ["healthy", "sybil"];
       var seg = subjects.map(function (sub) {
@@ -253,8 +284,7 @@
         '<div class="page-head"><div>' +
         '<div class="crumbs"><a href="#/landing">Landing</a><span>/</span><span class="cur">Risk · P2</span></div>' +
         '<div class="page-title">' + ui.icon("pulse", 22) + " P2 · AI Risk Assessment</div>" +
-        '<div class="page-sub">Pipeline: collect ledgers → normalize → filter wash traffic → anchor check → score. ' +
-        "Every number below is computed live from the mock dataset.</div></div></div>" +
+        '<div class="page-sub">Pipeline: collect → normalize → filter → check → score.</div></div></div>' +
         '<div class="card" style="margin-bottom:14px"><div class="audit-bar">' +
         '<div class="subject-seg"><span class="subj-label">SUBJECT</span><div class="seg">' + seg + "</div></div>" +
         '<div class="spacer"></div>' +
@@ -263,6 +293,7 @@
         "</div>" +
         '<div class="steps">' + stepHtml(st) + "</div></div>" +
         bodyHtml +
+        ctaHtml +
         "</div>";
 
       var ringSlot = host.querySelector("#ring-slot");
@@ -290,6 +321,12 @@
     if (reset) { reset.addEventListener("click", function () { App.act.resetAudit(); }); }
     var goP1 = host.querySelector("#go-p1");
     if (goP1 && App.nav) { goP1.addEventListener("click", function () { App.nav("#/ingest"); }); }
+    var reportBtn = host.querySelector("#audit-report-btn");
+    if (reportBtn) {
+      reportBtn.addEventListener("click", function () {
+        if (App.report && App.report.open) { App.report.open(); }
+      });
+    }
   }
 
   App.views = App.views || {};

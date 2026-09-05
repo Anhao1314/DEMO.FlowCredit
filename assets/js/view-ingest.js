@@ -21,11 +21,16 @@
     var sig = signed
       ? '<div class="sig"><b>' + u.icon("check", 10) + "</b> fingerprint " + u.esc(fp || "signature recorded · testnet mock") + "</div>"
       : '<div class="sig"><b></b>signature recorded · testnet mock</div>';
+    var tag = signed
+      ? u.icon("check", 10) + " signed · timestamped"
+      : "raw record";
     return '<div class="card src-card' + (signed ? " signed" : "") + '" data-idx="' + idx + '">' +
+      '<div class="src-id">' +
       '<div class="src-top">' +
       '<span class="src-ico">' + u.icon(CARD_ICON[card.id] || "db", 15) + "</span>" +
       '<span class="src-name">' + u.esc(card.name) + "</span>" +
-      '<span class="src-tag">' + (signed ? u.icon("check", 10) + " " : "") + "source-signed · timestamped</span>" +
+      "</div>" +
+      '<div class="src-tag">' + tag + "</div>" +
       "</div>" +
       '<div class="kv-grid" style="grid-template-columns:repeat(auto-fit,minmax(96px,1fr))">' + fields + "</div>" +
       sig +
@@ -101,14 +106,13 @@
         '<div class="page-head">' +
         '<div><div class="crumbs"><a href="#/landing">Landing</a><span>/</span><span class="cur">Ingest · P1</span></div>' +
         '<div class="page-title">' + ui.icon("db", 22) + " P1 · Truth Ingest</div>" +
-        '<div class="page-sub">Prove the numbers are not self-reported and cannot be tampered with. ' +
-        "Four signed sources feed a mock Merkle root; only the fingerprint goes on-chain.</div></div>" +
+        '<div class="page-sub">Four signed sources → one Merkle root. Only the fingerprint goes on-chain.</div></div>' +
         '<span class="chip">subject · ' + ui.esc(d.label) + "</span>" +
         "</div>" +
         '<div class="ingest-cols">' +
         '<div class="col-main">' +
         '<div class="card"><div class="card-h"><div class="card-title">' + ui.icon("layers", 15) + " Data sources</div>" +
-        '<span class="card-sub">field summary · raw records</span></div>' +
+        "</div>" +
         '<div class="src-grid">' + cardHtmls + "</div></div>" +
         '<div class="card"><div class="card-h">' +
         '<div class="card-title"><span class="no">P1</span>Anchor pipeline</div>' +
@@ -127,13 +131,6 @@
         "so every anchor produces a different root. Interior nodes hash their two children; the root is the " +
         "testnet fingerprint. No raw detail, no key material — mock only.</div></details>" +
         "</div></div>" +
-        "</div>" +
-        '<aside class="card side-note">' +
-        '<h3>' + ui.icon("shield", 13) + " " + "Raw detail stored off-chain · only fingerprint on-chain · testnet mock" + "</h3>" +
-        '<p>What gets anchored is a compact digest tree, not the underlying ledgers:</p>' +
-        "<ul><li>cloud/API billing records</li><li>GPU telemetry</li><li>treasury cashflow</li><li>on-chain address activity</li></ul>" +
-        '<p style="margin-top:9px">The demo replays the same flow each anchor — data + timestamp + nonce determine the root.</p>' +
-        "</aside>" +
         "</div>" +
         "</div>";
 

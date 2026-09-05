@@ -673,3 +673,865 @@ button.hb-step:hover{border-color:rgba(45,212,191,.55);background:rgba(45,212,19
   .step-dot,.step.cur .step-dot,.risk-banner,.veto-title,.r-title{animation:none !important;
     box-shadow:none !important;transition:none !important}
 }
+
+/* ============================================================
+   P0 audit report sheet (light paper) + report entry chrome
+   Named override: light palette below is scoped to .report-sheet
+   / its .rpt-* children so the dark token system is untouched.
+   Bilingual report copy is the user-approved exception to the
+   English-only UI rule; symbols/icons follow the no-emoji rule.
+   ============================================================ */
+.report-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;
+  padding:10px 14px;border:1px solid var(--line-soft);background:var(--card2);border-radius:12px}
+.ra-note{display:inline-flex;align-items:center;gap:7px;color:var(--text2);font-size:12.5px}
+.ra-note b{color:var(--text);font-weight:600}
+.audit-cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px;
+  padding:13px 16px;border:1px solid rgba(45,212,191,.3);border-radius:14px;
+  background:linear-gradient(180deg,rgba(45,212,191,.09),rgba(45,212,191,.02))}
+.audit-cta .cta-icon{flex:0 0 auto;color:var(--teal);display:inline-flex}
+.audit-cta .cta-title{font-weight:700;color:var(--text);font-size:14.5px}
+.audit-cta .cta-sub{font-size:12px;color:var(--text2);margin-top:2px}
+
+.report-mask{position:fixed;inset:0;background:rgba(3,8,14,.72);backdrop-filter:blur(4px);
+  z-index:220;display:flex;align-items:center;justify-content:center;padding:18px}
+.report-frame{width:min(1040px,100%);max-height:calc(100vh - 36px);min-height:0;
+  display:flex;flex-direction:column;background:#0e1c26;border:1px solid var(--line);
+  border-radius:16px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+.report-chrome{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:9px 14px;
+  color:var(--text);border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(170deg,#132a33,#0b1a2a)}
+.rc-brand{display:inline-flex;align-items:center;gap:7px;font-size:13px}
+.rc-brand svg{color:var(--teal)}
+.rc-brand b{color:var(--teal);font-weight:700;margin-right:2px}
+.rc-tag{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);
+  border:1px solid var(--line-soft);border-radius:99px;padding:2px 9px}
+.report-scroll{overflow:auto;padding:30px 18px 44px;background:#dde2e8}
+.report-sheet{--rs-label:#8F959E;--rs-warn:#DE7802;--rs-ok:#2EA121;--rs-red:#C0332A;
+  --rs-line:#E3E7EC;--rs-head:#22303E;--rs-soft:#F7F9FB;
+  width:min(880px,100%);margin:0 auto;background:#fff;color:#3A4553;border-radius:8px;
+  box-shadow:0 12px 36px rgba(4,10,18,.45);padding:46px 52px 34px;
+  font-family:Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:13px;line-height:1.85}
+.report-sheet .rpt-brandrow{display:flex;justify-content:space-between;align-items:baseline;
+  gap:12px;flex-wrap:wrap}
+.report-sheet .rpt-brand{display:inline-flex;align-items:center;gap:8px;font-size:14.5px;
+  color:var(--rs-head);font-weight:400}
+.report-sheet .rpt-brand svg{color:#0F766E;flex:0 0 auto}
+.report-sheet .rpt-brand b{color:#0F4A45;font-weight:700}
+.report-sheet .rpt-brand-sub{color:var(--rs-label);font-size:11.5px;letter-spacing:.03em;margin-left:2px}
+.report-sheet .rpt-brand-side{color:var(--rs-label);font-size:10.5px;letter-spacing:.14em}
+.report-sheet .rpt-title{text-align:center;font-size:25px;font-weight:700;color:#111827;
+  letter-spacing:.03em;line-height:1.4;margin:18px 0 3px}
+.report-sheet .rpt-kicker{text-align:center;color:var(--rs-label);font-size:10.5px;
+  letter-spacing:.24em;text-transform:uppercase;margin:0 0 12px}
+.report-sheet .rpt-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 10px}
+.report-sheet .rpt-chip{display:inline-flex;align-items:center;gap:7px;font-size:9.5px;
+  font-weight:700;letter-spacing:.1em;border:1px solid #D9DEE4;border-radius:99px;
+  padding:3px 10px;color:#3E4A56;background:#fff}
+.report-sheet .rpt-chip .rpt-dot{width:6px;height:6px;border-radius:50%;background:#8F959E}
+.report-sheet .rpt-chip-ok{color:#1F7A12;border-color:#CBE4C6}
+.report-sheet .rpt-chip-ok .rpt-dot{background:var(--rs-ok)}
+.report-sheet .rpt-chip-warn{color:#A4510A;border-color:#F2D5B0}
+.report-sheet .rpt-chip-warn .rpt-dot{background:var(--rs-warn)}
+.report-sheet .rpt-autogen{text-align:center;color:#8A939E;font-size:10.5px;margin:2px 0 6px}
+.report-sheet .rpt-rule{border-bottom:2px solid var(--rs-head);margin:2px 0 6px}
+.report-sheet .rpt-meta-l{color:var(--rs-label);font-weight:600;font-size:11.5px;letter-spacing:.02em}
+
+.report-sheet .rpt-h2{font-size:16.5px;color:var(--rs-head);font-weight:700;
+  margin:28px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--rs-line)}
+.report-sheet .rpt-h3{font-size:13.5px;color:#3C4A58;font-weight:700;margin:18px 0 4px}
+.report-sheet .rpt-p{margin:8px 0;color:#3A4553}
+.report-sheet .rpt-concl{background:var(--rs-soft);border-left:3px solid var(--rs-head);
+  border-radius:0 8px 8px 0;padding:10px 14px;color:#263340;font-weight:500}
+.report-sheet .rpt-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;margin:14px 0 4px}
+.report-sheet .rpt-kpi{border:1px solid var(--rs-line);border-radius:10px;padding:11px 13px;
+  background:#FCFDFE}
+.report-sheet .rpt-kpi-l{font-size:9.5px;font-weight:700;letter-spacing:.09em;
+  color:var(--rs-label);text-transform:uppercase}
+.report-sheet .rpt-kpi-v{font-family:var(--mono);font-weight:700;font-size:22px;line-height:1.2;
+  color:#111827;margin-top:4px;font-variant-numeric:tabular-nums}
+.report-sheet .rpt-kpi-v small{font-size:11px;color:#8A939E;font-weight:600}
+.report-sheet .rpt-kpi-v.rpt-v-green{color:var(--rs-ok)}
+.report-sheet .rpt-kpi-v.rpt-v-red{color:var(--rs-red)}
+.report-sheet .rpt-kpi-n{font-size:10px;color:#7A848E;margin-top:4px;line-height:1.55}
+
+.report-sheet .rpt-tblwrap{overflow-x:auto;margin:10px 0 6px;border:1px solid var(--rs-line);
+  border-radius:8px}
+.report-sheet .rpt-tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}
+.report-sheet .rpt-tbl th{background:#F5F7F9;color:var(--rs-label);font-weight:700;
+  text-align:left;padding:7px 10px;border-bottom:1px solid var(--rs-line);
+  font-size:10.5px;letter-spacing:.05em;white-space:nowrap}
+.report-sheet .rpt-tbl td{padding:7px 10px;border-bottom:1px solid #EEF1F4;color:#3A4553;
+  vertical-align:top}
+.report-sheet .rpt-tbl tbody tr:last-child td{border-bottom:none}
+.report-sheet .rpt-cell-note{color:#8A939E;font-size:10px;margin-left:5px;white-space:nowrap}
+.report-sheet .rpt-st{display:inline-flex;align-items:center;gap:5px;font-weight:700;
+  font-size:10.5px;border-radius:99px;padding:2px 9px;white-space:nowrap}
+.report-sheet .rpt-st svg{width:11px;height:11px}
+.report-sheet .rpt-st-ok{background:#EAF6E7;color:#1F7A12}
+.report-sheet .rpt-st-warn{background:#FCF1E2;color:#A4510A}
+.report-sheet .rpt-st-fail{background:#FBE9E7;color:#C0332A}
+.report-sheet .rpt-txt-ok{color:#1F7A12;font-weight:600}
+.report-sheet .rpt-txt-red{color:var(--rs-red);font-weight:700}
+.report-sheet .rpt-txt-warn{color:#A4510A;font-weight:600}
+.report-sheet .rpt-txt-muted{color:#8A939E}
+.report-sheet .rpt-mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.report-sheet .rpt-vs-sy{color:#5A3A36}
+
+.report-sheet .rpt-flag-box{background:#FDF3F1;border:1px solid #F2D4CF;border-radius:8px;
+  padding:10px 12px;margin:8px 0 4px}
+.report-sheet .rpt-flag-title{font-weight:700;color:#B02E22;display:flex;gap:7px;
+  align-items:center;margin-bottom:4px;font-size:12.5px}
+.report-sheet .rpt-flag-title svg{color:var(--rs-red)}
+.report-sheet .rpt-flag{display:flex;gap:7px;align-items:flex-start;color:#8C3A30;
+  padding:2px 0;font-size:12px}
+.report-sheet .rpt-flag svg{flex:0 0 auto;margin-top:3px;color:var(--rs-red)}
+
+.report-sheet .rpt-div3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0 4px}
+.report-sheet .rpt-div-cell{border:1px solid var(--rs-line);border-radius:10px;padding:12px 10px;
+  background:#FCFDFE;text-align:center}
+.report-sheet .rpt-div-mid{background:#F5F9F5;border-color:#D5E5D2}
+.report-sheet .rpt-div-l{font-size:10px;letter-spacing:.06em;color:var(--rs-label);font-weight:700}
+.report-sheet .rpt-div-v{font-size:19px;font-weight:700;color:#111827;margin:4px 0 2px}
+.report-sheet .rpt-div-n{font-size:10px;color:#7A848E}
+
+.report-sheet .rpt-hf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 4px}
+.report-sheet .rpt-hf-box{border:1px solid var(--rs-line);border-radius:10px;padding:12px 14px;
+  background:#FCFDFE}
+.report-sheet .rpt-hf-l{font-size:9.5px;font-weight:700;letter-spacing:.08em;
+  color:var(--rs-label);text-transform:uppercase}
+.report-sheet .rpt-hf-v{font-family:var(--mono);font-weight:700;font-size:21px;line-height:1.25;
+  color:#111827;margin-top:4px;font-variant-numeric:tabular-nums}
+.report-sheet .rpt-hf-n{font-size:10px;color:#7A848E;margin-top:3px}
+
+.report-sheet .rpt-risk{display:flex;gap:8px;align-items:flex-start;padding:3px 0;
+  color:#8A5A10;font-size:12px;line-height:1.65}
+.report-sheet .rpt-risk svg{color:var(--rs-warn);flex:0 0 auto;margin-top:4px}
+.report-sheet .rpt-mea{display:flex;gap:8px;align-items:flex-start;padding:3px 0;
+  color:#33414F;font-size:12px;line-height:1.65}
+.report-sheet .rpt-mea svg{flex:0 0 auto;margin-top:4px}
+.report-sheet .rpt-mea-ok svg{color:var(--rs-ok)}
+.report-sheet .rpt-mea-v svg{color:var(--rs-red)}
+
+.report-sheet .rpt-proof-card{background:var(--rs-soft);border:1px solid var(--rs-line);
+  border-radius:10px;padding:12px 14px;margin:10px 0 4px}
+.report-sheet .rpt-proof-card.rpt-proof-muted{background:#FBFBFC}
+.report-sheet .rpt-proof-head{font-weight:700;color:var(--rs-head);display:flex;gap:7px;
+  align-items:center;font-size:12.5px}
+.report-sheet .rpt-proof-head svg{color:#0F766E}
+.report-sheet .rpt-proof-grid{display:grid;grid-template-columns:150px 1fr;gap:5px 14px;
+  margin:9px 0 6px;font-size:12px}
+.report-sheet .rpt-proof-l{color:var(--rs-label);font-weight:600}
+.report-sheet .rpt-proof-v{color:#3A4553;word-break:break-word}
+.report-sheet .rpt-vbtn{display:inline-flex;align-items:center;gap:6px;background:#fff;
+  border:1px solid #0F766E;color:#0F766E;border-radius:7px;font-size:12px;font-weight:600;
+  padding:5px 12px;cursor:pointer;margin-top:6px}
+.report-sheet .rpt-vbtn:hover{background:#E6F2F1}
+.report-sheet .rpt-vbtn svg{width:13px;height:13px}
+
+.report-sheet .rpt-engine{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;
+  margin-top:24px;border-top:2px solid var(--rs-head);padding-top:12px}
+.report-sheet .rpt-engine-cell{font-size:11.5px;color:#5A6570;line-height:1.7}
+.report-sheet .rpt-engine-cell b{display:block;margin-bottom:2px;color:#2B3442;
+  font-size:10.5px;letter-spacing:.05em}
+.report-sheet .rpt-engine-v{text-align:right}
+.report-sheet .rpt-engine-v .rpt-vbtn{margin-top:2px}
+.report-sheet .rpt-proof-slot{margin-top:6px}
+.report-sheet .rpt-proof-done{border-color:#BFE3C9;background:#F2FAF3;margin-top:10px}
+.report-sheet .rpt-proof-done .rpt-proof-head{color:#1F7A12}
+.report-sheet .rpt-proof-done .rpt-proof-head svg{color:var(--rs-ok)}
+.report-sheet .rpt-vrow{display:flex;justify-content:space-between;gap:12px;font-size:12px;
+  padding:3px 0;color:#3A4553;border-bottom:1px dashed #E3E9EE}
+.report-sheet .rpt-vrow b{color:#263340;font-weight:600}
+.report-sheet .rpt-rootline{font-size:10.5px;color:#4A5A68;word-break:break-all;margin-top:8px}
+.report-sheet .rpt-foot-note{text-align:center;color:#8A939E;font-size:10px;
+  margin:16px 0 2px;letter-spacing:.02em}
+
+@media (max-width:640px){
+  .report-mask{padding:0}
+  .report-frame{max-height:100vh;height:100vh;border-radius:0;border:none}
+  .report-scroll{padding:16px 10px 30px}
+  .report-sheet{padding:28px 18px 30px;font-size:12.5px}
+  .report-sheet .rpt-title{font-size:21px}
+  .report-sheet .rpt-brand-sub{display:none}
+  .report-sheet .rpt-div3,.report-sheet .rpt-hf-row,.report-sheet .rpt-engine{grid-template-columns:1fr}
+  .report-sheet .rpt-engine-v{text-align:left}
+  .report-sheet .rpt-proof-grid{grid-template-columns:118px 1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .report-mask{backdrop-filter:none}
+}
+
+/* ============================================================
+   P0 layout system v2 — design tokens + unified rhythm.
+   Append-only overrides: same-value normalizations first, then
+   gentle unifications (page furniture, card rhythm, stat cards).
+   Later rules win at equal specificity; nothing below changes
+   any JS-driven class semantics or layout structure.
+   ============================================================ */
+:root{
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:24px; --space-6:32px;
+  --fs-xs:10px; --fs-sm:12px; --fs-md:13px; --fs-lg:15px;
+  --fs-xl:18px; --fs-2xl:22px;
+  --radius-sm:10px; --radius-lg:18px;
+  --stack-gap:14px; --card-pad:16px;
+}
+
+/* ---- unified page furniture (all five views) ---- */
+.page-head{margin:0 0 var(--space-4);gap:8px 14px;align-items:flex-end}
+.crumbs{margin-bottom:6px}
+.page-title{gap:8px;line-height:1.3}
+.page-sub{margin-top:4px;max-width:760px}
+
+/* ---- unified card rhythm ---- */
+.card{padding:var(--card-pad)}
+.card+.card{margin-top:var(--stack-gap)}
+.card-h{margin-bottom:var(--space-3);gap:var(--space-2)}
+.block-head{gap:var(--space-2)}
+.card-sub{margin-left:var(--space-1)}
+
+/* ---- stat-card family: one padding language ---- */
+.metric,.report-big{padding:14px 16px}
+.metric-tiles{gap:12px}
+.kv-grid{gap:10px}
+.kv{padding:8px 11px}
+
+/* ---- section labels keep one rhythm ---- */
+.sec-l{margin:16px 0 8px;letter-spacing:.16em}
+.how{margin-top:var(--space-3);padding-top:var(--space-2)}
+
+/* ---- narrow screens: page furniture stays tight ---- */
+@media (max-width:560px){
+  .page-head{margin:0 0 14px}
+  .page-sub{margin-top:3px}
+}
+
+/* ============================================================
+   P0 landing live chart loop — hero R/C narrative dynamics.
+   The one-shot intro stays untouched; .ld-live (added only when
+   motion is OK) enables the looping tracker dot, the AI-response
+   pulse at x=255 and a subtle band glow. C (credible) baseline
+   stays static on purpose. All CSS effects share the 6s loop
+   axis started together with the SMIL dot; reduced-motion keeps
+   the full static chart (the SMIL dot is JS-gated via motionOK).
+   ============================================================ */
+.ld-hero-svg .ld-live-dot{opacity:0;pointer-events:none}
+.ld-hero-svg.ld-live .ld-live-dot{opacity:1;transition:opacity .3s ease}
+.ld-hero-svg .ld-ai-pulse{opacity:0;stroke:rgba(45,212,191,.85);stroke-width:1.2;
+  stroke-dasharray:3 4;pointer-events:none}
+.ld-hero-svg.ld-live .ld-ai-pulse{animation:ldAiFlash 6s linear infinite}
+.ld-hero-svg.ld-live .d-band{animation:ldBandGlow 6s linear infinite}
+@keyframes ldAiFlash{0%,53%{opacity:0}56%{opacity:.9}60%,100%{opacity:0}}
+@keyframes ldBandGlow{0%,28%,60%,100%{opacity:.72}44%{opacity:1}}
+
+/* ============================================================
+   P0 landing live signal — modules A-I on the hero chart.
+   A neon strokes · B energy flow · C scan sweep · D node pings ·
+   E AI pulse/beam/rings · F divergence particles · G aurora+grid ·
+   H title sheen · I LIVE tag. All gated by .ld-live (svg + card)
+   except H (gentle 7s sheen, reduced-motion-safe). Same 6s axis.
+   ============================================================ */
+/* A: static neon glow on narrative strokes */
+.ld-hero-svg.ld-live .d-aligned{filter:drop-shadow(0 0 5px rgba(56,189,248,.5))}
+.ld-hero-svg.ld-live .d-shock{filter:drop-shadow(0 0 6px rgba(248,113,113,.55))}
+.ld-hero-svg.ld-live .d-re{filter:drop-shadow(0 0 6px rgba(45,212,191,.6))}
+.ld-hero-svg.ld-live .ld-c{filter:drop-shadow(0 0 4px rgba(45,212,191,.5))}
+
+/* B: energy flow tube along the R trajectory */
+.ld-hero-svg .ld-live-flow{opacity:0;stroke:#A7F3D0;stroke-width:1.9;
+  stroke-linecap:round;stroke-dasharray:.06 .19;pointer-events:none}
+.ld-hero-svg.ld-live .ld-live-flow{opacity:.4}
+
+/* C: faint monitor scan sweep (CSS px = 1 user unit on SVG children) */
+.ld-hero-svg .ld-scan{opacity:0;stroke:rgba(45,212,191,.07);stroke-width:1.2;pointer-events:none}
+.ld-hero-svg.ld-live .ld-scan{animation:ldScan 6s linear infinite}
+@keyframes ldScan{0%{transform:translateX(0);opacity:0}
+  3%{opacity:.55}97%{opacity:.5}100%{transform:translateX(440px);opacity:0}}
+
+/* D: checkpoint nodes with staggered ripple pings */
+.ld-hero-svg .ld-node{opacity:0;pointer-events:none}
+.ld-hero-svg .ld-node .ld-ring{fill:none;stroke:rgba(157,180,184,.7);stroke-width:1.2;
+  transform-box:fill-box;transform-origin:center}
+.ld-hero-svg.ld-live .ld-node{opacity:1}
+.ld-hero-svg.ld-live .ld-ring{animation:ldPing 3s ease-out infinite}
+.ld-hero-svg.ld-live .n2 .ld-ring{animation-delay:.75s}
+.ld-hero-svg.ld-live .n3 .ld-ring{animation-delay:1.5s}
+.ld-hero-svg.ld-live .n4 .ld-ring{animation-delay:2.25s}
+.ld-hero-svg.ld-live .n3 .ld-core{filter:drop-shadow(0 0 4px rgba(45,212,191,.9))}
+@keyframes ldPing{0%{transform:scale(.4);opacity:.95}
+  70%,100%{transform:scale(2.7);opacity:0}}
+
+/* E: AI intervention — expanding rings + light beam + label spark */
+.ld-hero-svg .ld-ai-ring{opacity:0;fill:none;stroke:#2DD4BF;stroke-width:1.4;
+  transform-box:fill-box;transform-origin:center;pointer-events:none}
+.ld-hero-svg.ld-live .ld-ai-ring{animation:ldAiRing 6s linear infinite}
+.ld-hero-svg.ld-live .ld-ai-ring.r2{animation-delay:.12s}
+@keyframes ldAiRing{0%,53%{opacity:0;transform:scale(.2)}
+  55%{opacity:.9}59%,100%{opacity:0;transform:scale(2.1)}}
+.ld-hero-svg .ld-beam{opacity:0;pointer-events:none}
+.ld-hero-svg.ld-live .ld-beam{animation:ldBeam 6s linear infinite}
+@keyframes ldBeam{0%,52%{opacity:0}55%{opacity:.8}59%,100%{opacity:0}}
+.ld-hero-svg.ld-live .ld-t-ai{animation:ldAiText 6s linear infinite}
+@keyframes ldAiText{0%,53%{opacity:.85;text-shadow:none}
+  55.5%{opacity:1;text-shadow:0 0 10px rgba(45,212,191,.9)}
+  58%,100%{opacity:.9;text-shadow:0 0 3px rgba(45,212,191,.25)}}
+
+/* F: divergence-zone particles (data leakage) */
+.ld-hero-svg .ld-part{opacity:0;pointer-events:none}
+.ld-hero-svg.ld-live .ld-part{animation:ldPart 2.8s ease-in-out infinite}
+.ld-hero-svg.ld-live .ld-part.p2{animation-duration:3.4s;animation-delay:.5s}
+.ld-hero-svg.ld-live .ld-part.p3{animation-duration:3.1s;animation-delay:.9s}
+.ld-hero-svg.ld-live .ld-part.p4{animation-duration:2.6s;animation-delay:1.3s}
+@keyframes ldPart{0%{opacity:0;transform:translateY(9px)}
+  40%{opacity:.15}100%{opacity:0;transform:translateY(-13px)}}
+
+/* G: hero-card aurora drift + ledger grid (visible only while live) */
+.ld-hero-card{position:relative}
+.ld-hero-card::before{content:"";position:absolute;inset:0;border-radius:14px;
+  pointer-events:none;opacity:0;
+  background:
+    linear-gradient(rgba(120,200,205,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,200,205,.045) 1px,transparent 1px),
+    radial-gradient(420px 210px at 16% 20%,rgba(45,212,191,.12),transparent 62%),
+    radial-gradient(430px 230px at 88% 82%,rgba(56,189,248,.10),transparent 62%);
+  background-size:26px 26px,26px 26px,auto,auto}
+.ld-hero-card.ld-live::before{opacity:1;animation:ldAurora 12s ease-in-out infinite alternate}
+@keyframes ldAurora{from{transform:translateX(-1.1%)}to{transform:translateX(1.1%)}}
+
+/* H: gradient-title sheen (gentle, symmetric so it rests at start) */
+.ld-grad{background-size:220% 100%;animation:ldSheen 7s ease-in-out infinite}
+@keyframes ldSheen{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* I: LIVE · TRACKING R/C badge in the hero head */
+.ld-live-tag{display:inline-flex;align-items:center;gap:6px;visibility:hidden;
+  font:600 8px var(--mono);letter-spacing:1.6px;color:#7FF0E2;
+  border:1px solid rgba(45,212,191,.35);border-radius:99px;padding:3px 8px}
+.ld-hero-card.ld-live .ld-live-tag{visibility:visible}
+.ld-live-tag-dot{width:5px;height:5px;border-radius:50%;background:#2DD4BF;
+  box-shadow:0 0 8px rgba(45,212,191,.9);animation:softPulse 1.2s ease-in-out infinite}
+
+/* content above the aurora layer */
+.ld-hero-card>*{position:relative}
+
+/* ============================================================
+   P0 interaction polish v2 — keyboard focus, touch sizing and
+   breakpoint map. Append-only: generic focus rings first, then
+   small-screen touch/height patches, then a documented
+   breakpoint map with safe gap patches (no rule reordering).
+   ============================================================ */
+/* ---- keyboard focus (brand ring on dark & light surfaces) ---- */
+:where(a,button,summary,[tabindex],input,select,textarea):focus-visible{
+  outline:2px solid #2DD4BF;outline-offset:2px;border-radius:6px}
+.report-sheet :where(a,button,summary,[tabindex]):focus-visible{
+  outline-color:#0F766E}
+.seg-btn:focus-visible,.nav-tab:focus-visible,.ln-chip:focus-visible,.hb-step:focus-visible{
+  outline-offset:1px}
+.report-mask :focus-visible{outline-color:#2DD4BF}
+
+/* ---- small-screen touch sizing ---- */
+@media (max-width:560px){
+  .btn{min-height:40px}
+  .btn-sm{min-height:34px}
+  .seg-btn,.nav-tab,.ln-chip,.chip{min-height:32px}
+  .status-chip{min-height:28px}
+}
+
+/* ---- breakpoint map ----
+   880px : topbar nav collapses to a full-width second row
+   640px : report overlay becomes full-screen sheet
+   560px : steps/buttons/topbar compact, touch sizing above
+   420px : stat tiles / page furniture tighten
+   reduced-motion blocks (5x) intentionally stay with their
+   components; only the following gap patches are added here. */
+@media (max-width:560px){
+  .report-actions .ra-note{width:100%}
+  .audit-cta .cta-main{flex:1 1 100%}
+  .hb-bar .hb-next{margin-left:auto}
+}
+@media (max-width:420px){
+  .metric,.report-big{padding:12px 13px}
+  .report-actions{padding:9px 11px}
+}
+
+/* ============================================================
+   P0 layout polish v3 — overview run bar two-row structure,
+   audit block-head single-line alignment, P3 summary alignment.
+   Append-only; ids and event bindings untouched.
+   ============================================================ */
+/* ---- overview: progress steps row + next-action row ---- */
+.hb-bar{flex-direction:column;align-items:stretch;gap:0}
+.hb-top{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;min-width:0;width:100%}
+.hb-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;width:100%;
+  margin-top:10px;padding-top:10px;border-top:1px dashed rgba(120,200,205,.14)}
+.hb-foot-note{font-size:10.5px;color:var(--text3);line-height:1.5;min-width:0}
+
+/* ---- audit: one-line block headers (title · sub · status chip) ---- */
+.card.block .block-head{flex-wrap:nowrap}
+.card.block .block-head .card-title{min-width:0;white-space:nowrap}
+.card.block .block-head .card-sub{min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.card.block .block-head .status-chip{flex:none}
+
+/* ---- report (P3): KPI tiles align + actions row stable ---- */
+.report-cols{gap:12px;align-items:stretch}
+.report-big{display:flex;flex-direction:column;min-width:0}
+.report-big .m-note{margin-top:auto;padding-top:5px}
+.report-actions .btn{flex:none}
+
+@media (max-width:560px){
+  .card.block .block-head{flex-wrap:wrap}
+  .card.block .block-head .card-sub{white-space:normal;overflow:visible}
+  .hb-foot-note{width:100%}
+}
+
+/* ============================================================
+   P0 report sheet navigation v4b — LEFT section rail for the
+   report overlay. Dark rail + right-hand scrolling sheet keep
+   navigation clear of the report content (no sticky overlap).
+   Mobile: rail collapses into a horizontal top row.
+   No ids added; navigation uses data-rpt-jump / data-rpt-top.
+   ============================================================ */
+.report-body{display:flex;flex:1 1 auto;min-height:0}
+.report-rail{flex:0 0 174px;display:flex;flex-direction:column;gap:4px;min-height:0;
+  padding:14px 10px 18px;overflow-y:auto;
+  background:linear-gradient(180deg,#132a33,#0b1a2a);
+  border-right:1px solid var(--line-soft)}
+.report-rail .rail-title{font:600 9px var(--mono);letter-spacing:.18em;color:var(--text3);
+  text-transform:uppercase;padding:0 8px 7px}
+.report-rail .rpt-nav{display:flex;flex-direction:column;gap:4px}
+.report-rail .rpt-nav-btn{display:flex;width:100%;align-items:center;gap:8px;
+  border:1px solid transparent;background:transparent;color:var(--text2);
+  font:600 11px var(--mono);padding:6px 9px;border-radius:8px;text-align:left;
+  cursor:pointer;transition:border-color .18s,color .18s,background .18s}
+.report-rail .rpt-nav-btn::before{content:"";width:5px;height:5px;border-radius:50%;
+  background:rgba(120,200,205,.35);flex:none}
+.report-rail .rpt-nav-btn:hover{border-color:rgba(45,212,191,.45);color:#D6F9F4;
+  background:rgba(45,212,191,.08)}
+.report-rail .rpt-nav-btn:hover::before{background:#2DD4BF;
+  box-shadow:0 0 6px rgba(45,212,191,.85)}
+.report-scroll{flex:1 1 auto;min-width:0}
+.report-sheet{width:min(852px,100%);padding:42px 48px 32px}
+.report-sheet .rpt-sec{scroll-margin-top:14px}
+.report-sheet .rpt-backtop{display:flex;justify-content:center;margin:14px 0 2px}
+@media (max-width:640px){
+  .report-body{flex-direction:column}
+  .report-rail{flex:none;width:100%;min-height:0;flex-direction:row;overflow-x:auto;
+    border-right:0;border-bottom:1px solid var(--line-soft);padding:8px 10px}
+  .report-rail .rail-title{display:none}
+  .report-rail .rpt-nav{flex-direction:row;gap:6px}
+  .report-rail .rpt-nav-btn{width:auto;white-space:nowrap;padding:5px 10px}
+  .report-sheet{width:min(852px,100%);padding:30px 20px 26px}
+}
+
+/* ============================================================
+   P0 landing aurora — first screen immersive split (Option A).
+   Page-level aurora + faint star dots behind content; hero goes
+   full-height two-column "signal dashboard"; type and CTAs scale
+   up; below-fold spacing loosens. Data/live-signal untouched,
+   reduced-motion keeps everything static.
+   ============================================================ */
+.ld-page{max-width:1140px;position:relative;isolation:isolate;gap:30px;padding:6px 0 14px}
+.ld-page::before{content:"";position:absolute;inset:0;z-index:-1;
+  pointer-events:none;opacity:.95;
+  background:
+    radial-gradient(50% 42% at 15% 4%,rgba(45,212,191,.17),transparent 62%),
+    radial-gradient(44% 36% at 87% 10%,rgba(56,189,248,.14),transparent 64%),
+    radial-gradient(58% 46% at 50% 96%,rgba(45,212,191,.08),transparent 66%)}
+.ld-page::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    radial-gradient(rgba(255,255,255,.10) 1px,transparent 1.3px),
+    radial-gradient(rgba(45,212,191,.16) 1px,transparent 1.3px);
+  background-size:118px 118px,172px 172px}
+
+.ld-hero{min-height:min(calc(100vh - 150px),800px);
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);
+  align-items:center;gap:46px;padding:34px 0 26px}
+.ld-hero-copy{min-width:0}
+.ld-eyebrow{font-size:11px;letter-spacing:1.8px}
+.ld-h1{margin:18px 0 12px;font-size:clamp(30px,4.2vw,46px);line-height:1.1}
+.ld-slogan{font-size:14.5px;margin:0 0 10px}
+.ld-sub{font-size:13px;line-height:1.7;max-width:480px}
+.ld-cta-row{margin-top:26px;gap:12px}
+.ld-btn{padding:13px 22px;font-size:14px;border-radius:11px}
+.ld-btn-primary{box-shadow:0 0 26px rgba(45,212,191,.3)}
+.ld-btn-primary:hover{box-shadow:0 0 44px rgba(45,212,191,.48)}
+.ld-tracks{margin-top:24px;gap:8px}
+
+.ld-hero-card{min-width:0;border-radius:18px;padding:20px 20px 12px;
+  box-shadow:0 0 46px rgba(45,212,191,.09),0 22px 60px rgba(2,8,16,.35)}
+.ld-hero-svg{margin-top:10px}
+
+@media (max-width:1000px){
+  .ld-hero{grid-template-columns:1fr;gap:28px;min-height:0;padding:16px 0 22px}
+  .ld-hero-copy{max-width:640px}
+}
+@media (max-width:560px){
+  .ld-page{gap:24px;padding-top:2px}
+  .ld-h1{font-size:clamp(27px,7.4vw,34px);margin:14px 0 10px}
+  .ld-slogan{font-size:13px}
+  .ld-btn{padding:11px 16px;font-size:13px}
+  .ld-cta-row{margin-top:20px}
+  .ld-hero{padding:6px 0 14px;gap:22px}
+  .ld-page::before{opacity:.7}
+  .ld-page::after{opacity:.6}
+}
+@media (max-width:420px){
+  .ld-h1{font-size:27px}
+  .ld-sub{font-size:12px}
+  .ld-tracks{margin-top:18px}
+}
+
+/* ============================================================
+   P0 landing deepseek-style hero — centered statement layout
+   with larger type (reference: deepseek.com first screen).
+   Keeps the FlowCredit aurora + live signal chart, but the
+   hero becomes one centered column: headline -> subline ->
+   CTAs -> full-width chart card. No empty side/top gaps.
+   ============================================================ */
+.ld-hero{display:flex;flex-direction:column;align-items:center;gap:22px;
+  min-height:0;padding:14px 0 30px}
+.ld-hero-copy{flex:none;max-width:880px;text-align:center;width:100%}
+.ld-eyebrow{letter-spacing:2px}
+.ld-h1{font-size:clamp(38px,5.4vw,64px);line-height:1.07;
+  letter-spacing:-.015em;margin:20px 0 16px}
+.ld-slogan{font-size:16px;margin:0 0 12px}
+.ld-sub{font-size:14px;max-width:640px;margin-left:auto;margin-right:auto}
+.ld-cta-row{justify-content:center;gap:14px}
+.ld-btn{padding:14px 26px;font-size:15px;border-radius:12px}
+.ld-tracks{justify-content:center;margin-top:20px}
+.ld-hero-card{width:100%;max-width:960px}
+@media (max-width:560px){
+  .ld-hero{padding:6px 0 18px;gap:16px}
+  .ld-h1{font-size:clamp(30px,8vw,40px);margin:14px 0 10px}
+  .ld-slogan{font-size:14px}
+  .ld-sub{font-size:13px;max-width:100%}
+  .ld-cta-row{gap:10px;flex-direction:column;width:100%}
+  .ld-cta-row .ld-btn{width:100%;justify-content:center}
+}
+@media (max-width:420px){
+  .ld-h1{font-size:clamp(26px,9vw,33px)}
+  .ld-slogan{font-size:13px}
+}
+
+/* ============================================================
+   P0 landing entry panels — DeepSeek-style twin action cards
+   under the centered statement (Launch Live Demo / Open Audit
+   Report). Teal/blue brand accents, hover lift + arrow slide.
+   ============================================================ */
+.ld-entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  margin:28px auto 4px;width:100%;max-width:860px}
+.ld-entry{display:flex;align-items:center;gap:14px;text-align:left;
+  padding:17px 18px;border-radius:16px;text-decoration:none;color:var(--text);
+  border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  transition:border-color .2s,background .2s,transform .18s,box-shadow .2s;min-width:0}
+.ld-entry:hover{transform:translateY(-2px)}
+.ld-entry-ic{flex:none;width:46px;height:46px;border-radius:13px;display:inline-flex;
+  align-items:center;justify-content:center}
+.ld-entry-ic svg{width:22px;height:22px}
+.ld-entry-a .ld-entry-ic{background:rgba(45,212,191,.12);color:#2DD4BF;
+  box-shadow:inset 0 0 0 1px rgba(45,212,191,.35)}
+.ld-entry-a:hover{border-color:rgba(45,212,191,.55);
+  background:linear-gradient(180deg,rgba(45,212,191,.10),rgba(45,212,191,.02));
+  box-shadow:0 10px 30px rgba(45,212,191,.12)}
+.ld-entry-b .ld-entry-ic{background:rgba(56,189,248,.12);color:#38BDF8;
+  box-shadow:inset 0 0 0 1px rgba(56,189,248,.35)}
+.ld-entry-b:hover{border-color:rgba(56,189,248,.55);
+  background:linear-gradient(180deg,rgba(56,189,248,.10),rgba(56,189,248,.02));
+  box-shadow:0 10px 30px rgba(56,189,248,.12)}
+.ld-entry-body{min-width:0;display:flex;flex-direction:column;gap:3px}
+.ld-entry-body b{font-size:16px;font-weight:750;letter-spacing:.01em}
+.ld-entry-d{font-size:12px;color:var(--text3);line-height:1.5}
+.ld-entry:hover .ld-entry-d{color:var(--text2)}
+.ld-entry-ar{flex:none;font:600 15px var(--mono);color:var(--text3);
+  transition:transform .18s,color .18s}
+.ld-entry:hover .ld-entry-ar{transform:translateX(3px)}
+.ld-entry-a:hover .ld-entry-ar{color:#2DD4BF}
+.ld-entry-b:hover .ld-entry-ar{color:#38BDF8}
+@media (max-width:640px){
+  .ld-entry-grid{grid-template-columns:1fr;gap:10px;margin-top:20px}
+}
+@media (max-width:420px){
+  .ld-entry{padding:13px 14px;gap:11px}
+  .ld-entry-body b{font-size:14.5px}
+  .ld-entry-d{font-size:11.5px}
+}
+
+/* ============================================================
+   P0 landing minimal footer — merged compliance claim + testnet
+   disclaimer into one centered slim footer (DeepSeek style).
+   ============================================================ */
+.ld-foot{display:flex;flex-direction:column;align-items:center;gap:7px;
+  padding-top:16px;padding-bottom:6px;margin-top:6px}
+.ld-foot-claim{font-size:11px;line-height:1.7;color:#9DB4B8;max-width:780px;text-align:center}
+.ld-foot-claim b{color:#E7F1F1;font-weight:750;margin-right:6px}
+.ld-foot-line{font-size:9.5px;color:#5E7478;letter-spacing:.06em;text-align:center}
+
+/* ============================================================
+   P0 landing motto — Chinese statement typography (block-level
+   Chinese copy exemption, approved). Balanced two-line set with
+   the gradient on the second line; English caption below.
+   ============================================================ */
+.ld-h1{text-wrap:balance;letter-spacing:.005em}
+.ld-h1 .ld-grad{display:inline-block}
+.ld-slogan{font-weight:600}
+
+/* ============================================================
+   P0 product focus v2 — single-column ingest + right-aligned
+   report action (wizard audit renders fewer cards by design;
+   no extra CSS needed for the progressive unlock).
+   ============================================================ */
+.ingest-cols{grid-template-columns:minmax(0,1fr)}
+.report-actions{justify-content:flex-end}
+
+/* ============================================================
+   P0 chart intro motion v3 — 0 -> full for data visuals that
+   appear on page entry or after an action (anchor / audit run /
+   stress run). CSS-only (ui.js untouched); reduced-motion keeps
+   the global .001s finish so charts always end fully visible.
+   ============================================================ */
+@keyframes ldClipX{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes ldGrowX{from{transform:scaleX(0)}}
+@keyframes ldRiseIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+
+/* P1 · merkle tree appears after anchoring */
+.tree-box svg{animation:ldRiseIn .8s cubic-bezier(.22,.8,.36,1) both}
+
+/* P2 · R/C dual line chart (L4 unlock) wipes in left -> right */
+.chart-box svg{clip-path:inset(0 100% 0 0);
+  animation:ldClipX .9s cubic-bezier(.25,.7,.3,1) forwards}
+
+/* P2 · anchor meters & factor bars grow from zero when unlocked */
+.bar-row .bar-fill,.factor-row .bar-fill{transform-origin:left center;
+  animation:ldGrowX .8s cubic-bezier(.22,.8,.36,1) both}
+
+/* P3 · stress curve draws itself on entry and on each stress step */
+.curve-box svg polyline,.curve-box svg path{clip-path:inset(-20% 100% -20% 0);
+  animation:ldClipX .45s cubic-bezier(.25,.7,.3,1) forwards}
+
+/* ============================================================
+   P0 report generation flow v4 — staged loading before the
+   audit-report sheet is built (open -> compiling -> reveal).
+   Sheet entrance uses the shared rise-in keyframe; reduced
+   motion skips the staging loop entirely (JS-gated) and the
+   global CSS guard shortens the entrance.
+   ============================================================ */
+.report-stage{flex:1 1 auto;min-height:0;display:flex;
+  background:linear-gradient(180deg,#11232d,#0a1722)}
+.report-load{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:12px;padding:30px 20px;text-align:center}
+.gen-spin{width:40px;height:40px;border-radius:50%;flex:none;
+  border:2px solid rgba(45,212,191,.16);border-top-color:#2DD4BF;
+  animation:spin .9s linear infinite}
+.gen-title{font:700 15px var(--sans);color:var(--text);letter-spacing:.02em}
+.gen-steps{display:flex;flex-direction:column;gap:8px;margin-top:6px;min-width:260px}
+.gen-step{display:flex;align-items:center;gap:9px;font:600 12px var(--mono);
+  color:var(--text3);letter-spacing:.02em;text-align:left}
+.gen-step .gs-dot{width:8px;height:8px;border-radius:50%;flex:none;
+  background:rgba(255,255,255,.18)}
+.gen-step.on{color:#D6F9F4}
+.gen-step.on .gs-dot{background:#2DD4BF;animation:gsPulse 1s ease-in-out infinite}
+.gen-step.done{color:#6EE7B7}
+.gen-step.done svg{width:12px;height:12px;color:#34D399}
+.gen-note{font-size:9.5px;color:#5E7478;letter-spacing:.08em;margin-top:8px}
+@keyframes gsPulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.5)}
+  50%{box-shadow:0 0 0 6px rgba(45,212,191,0)}}
+.report-sheet{animation:ldRiseIn .5s cubic-bezier(.22,.8,.36,1) both}
+
+/* ============================================================
+   P0 ingest workspace v5 — DeepSeek-style single flow column:
+   the four sources become borderless list rows (quiet data),
+   the anchor card becomes the one elevated action panel, and
+   the primary CTA scales up. Feature markup untouched.
+   ============================================================ */
+.ingest-cols .col-main{display:flex;flex-direction:column;gap:22px}
+.ingest-cols .col-main .card+.card{margin-top:0}
+
+/* sources: quiet list rows */
+.ingest-cols .col-main > .card:first-child{
+  padding:6px 2px 0;box-shadow:none}
+.ingest-cols .col-main > .card:first-child .card-h{
+  margin-bottom:2px;padding:0 2px}
+.src-grid{display:flex;flex-direction:column;gap:0;margin-top:2px}
+.src-card{background:transparent;border:0;border-bottom:1px dashed rgba(120,200,205,.15);
+  border-radius:0;padding:13px 2px;margin:0;box-shadow:none}
+.src-grid .src-card:last-child{border-bottom:0}
+.src-card .src-top{margin-bottom:8px}
+.src-card .src-tag{font-size:8px;letter-spacing:.12em}
+.src-card .src-name{font-size:13px}
+.src-card .kv-grid{gap:1px 16px;margin-top:2px;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+.src-card .kv{background:transparent;border:0;border-radius:0;
+  display:flex;gap:8px;align-items:baseline;padding:1px 0}
+.src-card .kv .l{flex:none;min-width:66px;font-size:8.5px;letter-spacing:.1em;
+  text-transform:uppercase}
+.src-card .kv .v{font-size:12px}
+.src-card.signed{border-bottom-color:rgba(52,211,153,.25)}
+.src-card.signed .src-name{color:#D1FAE5}
+
+/* anchor: the one elevated action panel */
+.ingest-cols .col-main > .card:last-child{
+  background:linear-gradient(180deg,rgba(45,212,191,.06),rgba(255,255,255,.012));
+  border-color:rgba(45,212,191,.24)}
+.anchor-flow{gap:14px}
+.ingest-cols .col-main #anchor-btn{padding:11px 22px;font-size:13.5px;border-radius:11px}
+.anchor-flow .note-italic{font-size:10.5px;color:var(--text3)}
+.tree-box{margin:2px 0 0}
+@media (max-width:560px){
+  .ingest-cols .col-main{gap:16px}
+  .src-card{padding:11px 2px}
+  .src-card .kv-grid{grid-template-columns:1fr 1fr !important}
+}
+
+/* ============================================================
+   P0 ingest small cards v6 — four compact source tiles (2x2 /
+   auto-fit) with quiet label/value pairs; anchor stays the one
+   elevated action panel. Overrides the flat-list experiment v5.
+   ============================================================ */
+.ingest-cols .col-main > .card:first-child{padding:14px 14px 10px}
+.ingest-cols .col-main > .card:first-child .card-h{margin-bottom:10px;padding:0}
+.src-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));
+  gap:10px;margin-top:0}
+.src-card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:11px 12px;margin:0;box-shadow:0 10px 26px rgba(3,8,16,.2)}
+.src-card:hover{border-color:rgba(120,200,205,.35)}
+.src-grid .src-card:last-child{border-bottom:1px solid var(--line)}
+.src-card .src-top{flex-wrap:nowrap;margin-bottom:0;min-width:0}
+.src-card .src-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-card .src-tag{display:block;margin:5px 0 9px;margin-left:0;width:auto;
+  font-size:7.5px;letter-spacing:.13em;text-transform:uppercase}
+.src-card.signed{background:rgba(52,211,153,.05);
+  border-color:rgba(52,211,153,.42);box-shadow:0 10px 26px rgba(3,8,16,.2)}
+.src-card.signed .src-name{color:#D1FAE5}
+.src-card .kv-grid{gap:6px 10px;margin:0;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+.src-card .kv{background:rgba(255,255,255,.03);border:1px solid var(--line-soft);
+  border-radius:8px;padding:5px 7px;flex-direction:column;align-items:flex-start;
+  gap:1px;min-width:0}
+.src-card .kv .l{min-width:0;width:100%;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;font-size:8px;letter-spacing:.1em}
+.src-card .kv .v{width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:11.5px}
+@media (max-width:560px){
+  .src-grid{grid-template-columns:repeat(2,1fr);gap:9px}
+  .src-card{padding:10px}
+}
+@media (max-width:380px){
+  .src-grid{grid-template-columns:1fr}
+}
+
+/* ============================================================
+   P0 ingest compact stack v7 — four sources collapse into a
+   single-column stack of slim row-cards (identity left, four
+   field cells right), no side-by-side card sprawl.
+   ============================================================ */
+.src-grid{display:flex;flex-direction:column;gap:8px;margin-top:0}
+.src-card{display:grid;grid-template-columns:minmax(190px,240px) 1fr;
+  grid-template-areas:"id fields" "sig sig";
+  column-gap:16px;row-gap:3px;align-items:center;
+  padding:9px 12px;margin:0;border-radius:11px;
+  background:rgba(255,255,255,.03);border:1px solid var(--line-soft);
+  box-shadow:none}
+.src-card:hover{border-color:rgba(120,200,205,.35)}
+.src-card.signed{background:rgba(52,211,153,.05);
+  border-color:rgba(52,211,153,.4);box-shadow:none}
+.src-id{grid-area:id;display:flex;flex-direction:column;gap:3px;min-width:0}
+.src-card .src-top{flex-wrap:nowrap;margin:0;min-width:0}
+.src-card .src-tag{margin:0;display:block;font-size:7.5px;
+  letter-spacing:.13em;text-transform:uppercase}
+.src-card .kv-grid{grid-area:fields;margin:0;align-content:center;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:6px 10px}
+.src-card .kv{padding:4px 7px}
+.src-card .sig{grid-area:sig;margin-top:2px}
+.src-card.signed .src-tag{color:#6EE7B7}
+.src-card.signed .src-name{color:#D1FAE5}
+@media (max-width:760px){
+  .src-card{grid-template-columns:1fr;grid-template-areas:"id" "fields" "sig"}
+  .src-card .kv-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+}
+
+/* ============================================================
+   P0 return-home control v8 — the breadcrumb "Landing" link on
+   every product page becomes a clear pill with a back arrow.
+   ============================================================ */
+.crumbs{gap:8px}
+.crumbs a[href="#/landing"]{display:inline-flex;align-items:center;gap:6px;
+  font:700 12px var(--mono);letter-spacing:.05em;color:var(--text2);
+  border:1px solid var(--line-soft);background:var(--card2);
+  border-radius:99px;padding:5px 13px;text-decoration:none;
+  transition:border-color .2s,color .2s,background .2s,transform .15s}
+.crumbs a[href="#/landing"]::before{content:"←";font-size:13px;line-height:1;color:var(--teal)}
+.crumbs a[href="#/landing"]:hover{border-color:rgba(45,212,191,.55);
+  color:#D6F9F4;background:rgba(45,212,191,.09);transform:translateY(-1px)}
+.crumbs a[href="#/landing"]:hover::before{color:#5EEAD4}
+@media (max-width:560px){
+  .crumbs a[href="#/landing"]{padding:4px 10px;font-size:11px}
+}
+
+/* ============================================================
+   P0 workspace & account pages — product desk layout.
+   Reuses card/chip/metric system; only new structural pieces.
+   ============================================================ */
+.ws-task{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.ws-task-copy{min-width:0;flex:1 1 220px}
+.ws-task-t{font-weight:800;font-size:16px;letter-spacing:.01em}
+.ws-task-s{color:var(--text2);font-size:12px;margin-top:3px}
+.ws-chips{flex-basis:100%;display:flex;gap:6px;flex-wrap:wrap;
+  border-top:1px dashed rgba(120,200,205,.14);padding-top:10px}
+.ws-sec{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.ws-sec-head{display:flex;align-items:baseline;justify-content:space-between;
+  gap:8px 14px;flex-wrap:wrap;padding:0 2px}
+.ws-sec-t{font-weight:750;font-size:15px;display:inline-flex;align-items:center;gap:8px}
+.ws-sec-s{font-size:10.5px;color:var(--text3)}
+.ws-ledgers{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.ws-ledger{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  text-align:left;cursor:pointer;width:100%;min-width:0;
+  padding:14px 34px 14px 16px;border:1px solid var(--line);border-radius:14px;
+  background:var(--card);color:var(--text);font-family:var(--sans);
+  transition:border-color .2s,transform .18s,background .2s}
+.ws-ledger:hover{transform:translateY(-1px);border-color:rgba(120,200,205,.45)}
+.ws-ledger.on{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.05)}
+.ws-lg-top{display:flex;align-items:center;justify-content:space-between;
+  gap:10px;width:100%;min-width:0}
+.ws-lg-name{font-weight:750;font-size:14px;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-pill{flex:none;font:700 8.5px var(--mono);letter-spacing:.14em;
+  padding:3px 9px;border-radius:999px}
+.ws-pill-ok{color:#A7F3D0;border:1px solid rgba(52,211,153,.5);background:rgba(52,211,153,.08)}
+.ws-pill-rej{color:#FECACA;border:1px solid rgba(248,113,113,.5);background:rgba(248,113,113,.08)}
+.ws-lg-metrics{font-size:11.5px;color:var(--text2)}
+.ws-credit{font:600 11px var(--mono)}
+.ws-credit-ok{color:#6EE7B7}
+.ws-credit-rej{color:#FCA5A5}
+.ws-lg-open{position:absolute;right:15px;bottom:12px;
+  color:var(--text3);font:600 13px var(--mono)}
+.ws-acts{display:flex;flex-direction:column;gap:6px}
+.ws-act{display:flex;align-items:center;gap:10px;min-width:0;
+  padding:8px 12px;border:1px solid var(--line-soft);
+  background:var(--card2);border-radius:10px}
+.ws-act-ic{width:26px;height:26px;border-radius:8px;flex:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(45,212,191,.08);color:var(--teal)}
+.ws-act-ic svg{width:13px;height:13px}
+.ws-act-body{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ws-act-body b{font-size:12px;color:var(--text)}
+.ws-act-body .num{font-size:10.5px;color:var(--text3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ws-empty{color:var(--text3);font-size:12px;font-style:italic;padding:4px 2px}
+
+.ac-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.ac-card{display:flex;flex-direction:column;gap:6px}
+.ac-card .card-title{margin-bottom:4px}
+.ac-row{display:flex;justify-content:space-between;gap:14px;font-size:12px;
+  border-bottom:1px dashed rgba(120,200,205,.12);padding:6px 0}
+.ac-row:last-child{border-bottom:0}
+.ac-row span{color:var(--text3)}
+.ac-row b{color:var(--text);font-weight:600;text-align:right;min-width:0;
+  overflow-wrap:anywhere}
+.ac-row b.ac-ok{color:#6EE7B7}
+.ac-credit{margin-top:2px}
+@media (max-width:560px){
+  .ws-task-t{font-size:14.5px}
+  .ws-ledgers{grid-template-columns:1fr}
+}

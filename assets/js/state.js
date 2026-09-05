@@ -2,10 +2,10 @@
    state.js — global store, pure metric functions, pipeline &
    stress state machines, timer discipline.
    Self-test (node, stubbed window):
-     cci(healthy)=768, cci(sybil)=320
-     pd(768)=3.1%, pd(320)=85.0%
-     validNT_M: 66.2 / 36.7
-     efficiency: 22500 / 514286
+     cci(healthy)=795, cci(sybil)=320
+     pd(795)=2.3%, pd(320)=85.0%
+     validNT_M: 90.2 / 36.7
+     efficiency: 22857 / 514286
    ============================================================ */
 (function () {
   var App = window.App = window.App || {};
@@ -25,21 +25,41 @@
   App.state = state;
 
   /* ---------- pure metric functions (computed, never hard-coded) ---------- */
-  function validNT_M(d) { return +(d.rawNT_M * d.validRate).toFixed(1); }               // healthy 66.2 / sybil 36.7
-  function efficiency(d) { return Math.round(d.rawNT_M * 1e6 / d.gpuHours); }           // healthy 22500 / sybil 514286
-  function cci(d) {                                                                     // healthy 768 / sybil 320
+  function validNT_M(d) { return +(d.rawNT_M * d.validRate).toFixed(1); }               // healthy 90.2 / sybil 36.7
+  function efficiency(d) { return Math.round(d.rawNT_M * 1e6 / d.gpuHours); }           // healthy 22857 / sybil 514286
+  function cci(d) {                                                                     // healthy 795 / sybil 320
     var s = 0;
     for (var i = 0; i < ANCHOR_W.length && i < d.anchors.length; i++) {
       s += d.anchors[i][3] * ANCHOR_W[i];
     }
     return Math.round(s * 10);
   }
-  function pd(value) { return 100 / (1 + Math.exp(0.01156 * value - 5.433)); }          // pd(768)=3.1% pd(320)=85.0%
-  function deviation(d) { return { pct: d.deviationPct, alert: d.devAlert }; }          // +4% normal / +186% >2σ
+  function pd(value) { return 100 / (1 + Math.exp(0.01156 * value - 5.433)); }          // pd(795)=2.3% pd(320)=85.0%
+  function deviation(d) { return { pct: d.deviationPct, alert: d.devAlert }; }          // +3% normal / +186% >2σ
   function ntM(d) { return d.rawNT_M; }                                                 // NT (M), w_model x w_task applied — see data.js
-  function scuOf(d) { return Math.round(d.gpuHours * d.util * d.coef.c_gpu * 10) / 10; } // healthy 2496 / sybil 86.1
+  function scuOf(d) { return Math.round(d.gpuHours * d.util * d.coef.c_gpu * 10) / 10; } // healthy 3570 / sybil 86.1
   function vetoed(d) { return !!(d.redflags && d.redflags.length); }
   function creditLine(d) { return vetoed(d) ? 0 : d.creditLine; }                       // veto forces 0
+
+  /* ---------- five-band trust grade (A / A- / B / C / D), derived from CCI ---------- */
+  var GRADE_DEFS = [
+    { key: "A",  min: 800, max: 1000, action: "高额度授信",          cadence: "常规监控，季度复评" },
+    { key: "A-", min: 750, max: 799,  action: "中高额度授信",        cadence: "月度复评" },
+    { key: "B",  min: 650, max: 749,  action: "中额度授信",          cadence: "月度复评，HF 盯市" },
+    { key: "C",  min: 500, max: 649,  action: "低额度/担保授信",     cadence: "周度复评，降额预警" },
+    { key: "D",  min: 0,   max: 499,  action: "拒绝授信",            cadence: "一票否决，额度清零（含 VETO 强制）" }
+  ];
+  var GRADE_BANDS = GRADE_DEFS.map(function (b) { return Object.freeze(b); });
+  Object.freeze(GRADE_BANDS);
+  // gradeOf: VETO forces D regardless of CCI; otherwise first band with CCI >= min.
+  function gradeOf(d) {
+    if (vetoed(d)) { return "D"; }                                  // healthy A- / sybil D (veto)
+    var v = cci(d);
+    for (var i = 0; i < GRADE_BANDS.length; i++) {
+      if (v >= GRADE_BANDS[i].min) { return GRADE_BANDS[i].key; }
+    }
+    return "D";
+  }
 
   /* ---------- source cards (P1) derived from the subject's raw records ---------- */
   function sourceCards(d) {
@@ -279,6 +299,7 @@
   App.fn = {
     validNT_M: validNT_M, efficiency: efficiency, cci: cci, pd: pd,
     deviation: deviation, ntM: ntM, scuOf: scuOf, vetoed: vetoed, creditLine: creditLine,
+    gradeOf: gradeOf, gradeBands: GRADE_BANDS,
     sourceCards: sourceCards, mockHash: mockHash, merkleBuild: merkleBuild,
     leafDigest: leafDigest, nowStamp: nowStamp, nowShort: nowShort,
     timeout: timeout, raf: raf, clearTimers: clearTimers, addClearHook: addClearHook,

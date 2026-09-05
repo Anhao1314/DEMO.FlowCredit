@@ -5,8 +5,8 @@
    ============================================================ */
 (function () {
   var App = window.App = window.App || {};
+  App.wallet = { connected: false, address: "0x7F3A…9C21", balance: "10,000 test USDC" };
   var TABS = [
-    { hash: "#/overview", key: "overview", label: "Overview", icon: "layers" },
     { hash: "#/ingest", key: "ingest", label: "Ingest", sub: "P1", icon: "db" },
     { hash: "#/audit", key: "audit", label: "Risk", sub: "P2", icon: "pulse" },
     { hash: "#/report", key: "report", label: "Monitor", sub: "P3", icon: "shield" }
@@ -17,7 +17,7 @@
   var booted = false;
 
   function routeKey(hash) {
-    var m = String(hash || "").match(/^#\/(landing|overview|ingest|audit|report)$/);
+    var m = String(hash || "").match(/^#\/(landing|workspace|ingest|audit|report|account)$/);
     return m ? m[1] : "landing";
   }
   function currentRoute() {
@@ -35,8 +35,7 @@
     report: {
       proof: { sel: "#verify-btn" },
       stress: { sel: "#stress-btn", toast: "Run stress — the facility responds to the shock" }
-    },
-    overview: { "subject-healthy": { action: "subject-healthy" } }
+    }
   };
   var intent = null;
 
@@ -74,11 +73,6 @@
     var route = currentRoute();
     var target = intentTarget(route, it.block);
     if (!target) { return; }
-    if (route === "overview" && target.action === "subject-healthy") {
-      if (App.state.subject !== "healthy") { App.act.switchSubject("healthy"); }
-      else if (App.ui) { App.ui.toast("Healthy run armed — continue from Home"); }
-      return;
-    }
     var el = null;
     if (typeof target.idx === "number") {
       var nodes = mainEl.querySelectorAll(".card.block");
@@ -118,14 +112,14 @@
     rootEl.innerHTML =
       '<div class="shell">' +
       '<header class="topbar"><div class="topbar-inner">' +
-      '<a class="brand" href="#/overview" aria-label="FlowCredit">' + u.icon("mark", 26) +
+      '<a class="brand" href="#/ingest" aria-label="FlowCredit">' + u.icon("mark", 26) +
       '<span>FlowCredit</span><span class="badge-testnet">Testnet</span></a>' +
       '<nav class="nav" aria-label="pages">' + tabs + "</nav>" +
       '<div class="top-actions">' +
       '<div class="seg" role="group" aria-label="network mode">' +
       '<button type="button" class="seg-btn on" id="mode-mock">Mock</button>' +
       '<button type="button" class="seg-btn is-off" id="mode-live">Live</button></div>' +
-      '<a class="launch-cta" href="#/overview">Launch App →</a>' +
+      '<a class="launch-cta" href="#/ingest">Launch App →</a>' +
       '<button type="button" class="btn btn-sm wallet-btn" id="wallet-btn">' + u.icon("wallet", 13) +
       '<span id="wallet-label">Connect Wallet</span></button>' +
       "</div></div></header>" +
@@ -159,17 +153,22 @@
     var u = App.ui;
     var btn = rootEl.querySelector("#wallet-btn");
     var label = rootEl.querySelector("#wallet-label");
-    if (!btn || !label) { return; }
     if (!walletConnected) {
       walletConnected = true;
-      btn.classList.add("on");
-      label.innerHTML = '<span class="addr">0x7F3A…9C21 · 10,000 test USDC</span>';
-      u.toast("Wallet connected (mock) · 0x7F3A…9C21");
+      App.wallet.connected = true;
+      if (btn && label) {
+        btn.classList.add("on");
+        label.innerHTML = '<span class="addr">' + App.wallet.address + " · " + App.wallet.balance + "</span>";
+      }
+      if (u && u.toast) { u.toast("Wallet connected (mock) · " + App.wallet.address); }
     } else {
       walletConnected = false;
-      btn.classList.remove("on");
-      label.textContent = "Connect Wallet";
-      u.toast("Wallet disconnected");
+      App.wallet.connected = false;
+      if (btn && label) {
+        btn.classList.remove("on");
+        label.textContent = "Connect Wallet";
+      }
+      if (u && u.toast) { u.toast("Wallet disconnected"); }
     }
   }
 
@@ -195,7 +194,7 @@
     if (!mainEl || !booted) { return; }
     var route = currentRoute();
     syncShell();
-    var view = App.views[route] || App.views.overview;
+    var view = App.views[route] || App.views.ingest;
     view.render(mainEl);
     highlightTabs();
 
@@ -225,13 +224,14 @@
     if (bootMsg && bootMsg.parentNode) { bootMsg.parentNode.removeChild(bootMsg); }
     buildShell();
     window.addEventListener("hashchange", applyRoute);
-    if (!location.hash || !/^#\/(landing|overview|ingest|audit|report)$/.test(location.hash)) {
+    if (!location.hash || !/^#\/(landing|workspace|ingest|audit|report|account)$/.test(location.hash)) {
       try { history.replaceState(null, "", "#/landing"); } catch (e) { location.hash = "#/landing"; }
     }
     App.nav = nav;
     App.navTo = navTo;
     App.applyRoute = applyRoute;
     App.renderCurrent = renderCurrent;
+    if (App.act) { App.act.toggleWallet = toggleWallet; }
     App.onChange(function () { if (booted) { renderCurrent(); } });
     applyRoute();
   }
@@ -251,4 +251,3 @@
     boot();
   }
 })();
-
