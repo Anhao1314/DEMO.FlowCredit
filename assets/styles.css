@@ -1974,3 +1974,28 @@ html{scrollbar-color:rgba(120,200,205,.28) transparent}
   .ai-meta{flex-basis:100%}
   .ai-panel-report .ai-summary{gap:7px 10px}
 }
+
+/* ============================================================
+   Design skeleton unification (post-audit polish pack)
+   Appended only: demo flow spine + unified page head rhythm.
+   ============================================================ */
+.demo-flow{display:flex;align-items:center;justify-content:center;gap:4px;
+  padding:7px 14px;border-bottom:1px solid var(--line-soft);background:rgba(7,13,23,.34)}
+.df-step{font:600 9.5px var(--mono);letter-spacing:.14em;color:var(--text3);
+  padding:3px 10px;border:1px solid transparent;border-radius:999px;white-space:nowrap}
+.df-arrow{color:var(--text3);font:700 9px var(--mono);opacity:.55;padding:0 2px}
+.df-step.on{color:#B7F5EC;background:rgba(45,212,191,.09);border-color:rgba(45,212,191,.38)}
+.demo-flow.is-off{display:none}
+
+.content{max-width:1320px;padding:20px 22px 96px}
+.page-head{margin:2px 0 18px;padding-bottom:14px;border-bottom:1px solid var(--line-soft)}
+.page-title{font-size:21px;font-weight:750;letter-spacing:.01em}
+.page-sub{font-size:12.5px}
+
+@media (max-width:560px){
+  .demo-flow{gap:2px;padding:6px 8px}
+  .df-step{padding:3px 8px;letter-spacing:.1em;font-size:9px}
+  .df-arrow{opacity:.45}
+  .content{padding:16px 14px 90px}
+  .page-title{font-size:18px}
+}
