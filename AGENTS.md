@@ -3,7 +3,8 @@
 本文件约束在此仓库工作的协助者（AI 或人）。README.md 是项目说明；本文件是改动铁律。与任务书冲突时以任务书为准。
 
 ## 1. 项目本质
-- 零构建静态站：原生 HTML/CSS/JS，普通 script 按序加载（data→state→ui→view-landing→view-ingest→view-audit→view-report→view-workspace→view-account→app），无 module/defer/fetch/CDN/npm。
+- 零构建静态站：原生 HTML/CSS/JS，普通 script 按序加载（data→state→ui→view-landing→view-ingest→view-audit→view-report→view-workspace→view-account→ai-ledger→view-ai→view-ai-live→app），无 module/defer/CDN/npm。
+- fetch 唯一豁免：view-ai-live.js 允许同源 /fc/ai/* 三处调用（config/run/ask），必须带 try/catch、短超时、探测失败静默退出；其余所有文件仍禁 fetch。EOF
 - 双击 index.html 以 file:// 离线可跑；UI 文案全英文；无 emoji（允许 → ← ✓ · σ ± 等符号）；图标只用 App.ui.icon 内联 SVG；数字 mono + tabular-nums。
 
 ## 1.1 对外措辞纪律（合规红线）
@@ -11,6 +12,11 @@
 - 业务定位：AI 信用风控（风险评估）系统，不是审计机构；用户可见文案禁用 audit / 审计 / auditor / 审阅意见 等表述，统一用 risk assessment / 风控评估 / 评估结论 / 复核。
 - 免责口径：「非审计意见、不构成法定审计」类注记必须保留（报告 D 节与全局页脚）。
 - 工程标识例外：路由 #/audit、文件名 view-audit.js、id run-audit / reset-audit / audit-report-btn、状态字段 auditStage / auditDone 属内部标识，只允许出现在代码与文档技术段，禁止进入用户可见文案。
+
+## 1.2 实时 AI 会话态原则
+
+- 页面实时 AI（view-ai-live.js + 仓库外的 agent/ai-live-server.js 侧车）只更新会话内存，绝不写 ai-ledger.js；ai-ledger.js 与 git 提交链仅由离线批跑（agent/run-audit.sh）生成。
+- 侧车代码、密钥、运行日志均位于仓库外（agent/ 目录），不进入本仓库。
 
 ## 2. 核心冻结区（默认一字不改；任务书明确点名才动）
 - 文件：assets/js/data.js、assets/js/ui.js、assets/js/app.js、assets/js/state.js、assets/js/view-landing.js。
@@ -35,7 +41,7 @@
 - 动画 200–350ms（ring 600ms）；prefers-reduced-motion 下静态完整；≤420px 无横向滚动；flex/grid 用 auto-fit minmax。
 
 ## 6. 修改流程与提交
-- 完成后自检：node --check 全部 10 个 JS；CSS 花括号配平；静态扫描无 fetch/外链/module/emoji。
+- 完成后自检：node --check 全部 13 个 JS；CSS 花括号配平；静态扫描仅 view-ai-live.js 可含 fetch 与 /fc/ai/（且必须有门控判定），其余文件无 fetch/外链/module/emoji。
 - 回归断言脚本放系统临时目录（不入库）；涉及渲染需 stub window/document 后按序加载 JS。
 - 本机 autosync 守护会自动 commit + push（提交信息以 [autosync] 开头）；不要手动 commit；交付前确认 git status clean；GitHub 网络中断时守护会自动等恢复后补推。
 - 交付说明列出：改动文件清单、每文件改动点、冻结区零改动核对、验收结果。

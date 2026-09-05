@@ -100,9 +100,10 @@ node --check assets/js/data.js
       cd ~/fc/agent && ./verify.sh
 
   最后一行显示 **MVP HEALTH: PASS** 即可上台；新批次 AI VERDICT 卡会随账本提交进入仓库。
-- 启动演示站：
+- 启动演示站（Live AI 侧车，同源托管页面 + AI 接口）：
 
-      cd ~/fc/demo-flowcredit && python3 -m http.server 8000
+      node ~/fc/agent/ai-live-server.js
 
-  浏览器打开 http://127.0.0.1:8000（断网预案：直接双击 index.html，全部功能离线可用）。
+  浏览器打开 http://127.0.0.1:8000：页面自动点亮工作台 AI 卡逐行 Re-run 与报告页 Ask the AI（实时调用 deepseek-chat，仅会话内生效，不写账本）。
+  断网/无侧车预案：双击 index.html 或 python3 -m http.server 8000，全部功能离线可用、自动静默降级。
 - 健康检查独立脚本：agent/regress.js（16 项基线断言）、agent/sync-check.js（facts <=> data.js 单一事实源校验）。
