@@ -8,7 +8,7 @@
    ============================================================ */
 (function () {
   "use strict";
-  "use strict";
+  var App = window.App = window.App || {};
   var rafId = 0, ttTimer = null, pillTimer = null, canvasCtl = null, textDone = false;
 
   function esc(s) {
@@ -355,5 +355,6 @@
   }
   if (App.fn && App.fn.addClearHook) { App.fn.addClearHook(cleanup); }
 
+  App.views = App.views || {};
   App.views.landing = { render: render };
 })();
