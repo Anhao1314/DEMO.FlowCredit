@@ -49,23 +49,23 @@
     if (App.ui && App.ui.icon) { return App.ui.icon(name, size); }
     return "";
   }
-  /* ---------- 4.1 hero copy ---------- */
+  /* ---------- S0 hero copy (shared with the static fallback) ---------- */
+  function heroCopyCore() {
+    return '<div class="ld-eyebrow">FLOWCREDIT · ON-CHAIN AI CREDIT RISK INTELLIGENCE</div>' +
+      '<h1 class="ld-h1">Volume can be faked.<br><span class="ld-grad">Trust must be proven.</span></h1>' +
+      '<p class="ld-sub">Verified activity into credit — with real-time response to volatility, for digital-asset lenders.</p>' +
+      '<div class="ld-trust">' +
+      '<span class="ld-tchip">Attest → Score → Respond</span>' +
+      '<span class="ld-tchip">Merkle-anchored on-chain</span>' +
+      '<span class="ld-tchip">No custody · no lending</span>' +
+      "</div>" +
+      '<div class="ld-cta-row">' +
+      '<a class="ld-btn ld-btn-primary" href="#/ingest">Run live demo · ~3 min</a>' +
+      '<a class="ld-btn ld-btn-ghost" href="#/report">Sample report</a>' +
+      "</div>";
+  }
   function heroCopyHtml() {
-    return '<div class="ld-hero-copy">' +
-      '<h1 class="ld-h1">Where compute ends,<br><span class="ld-grad">trust begins.</span></h1>' +
-      '<p class="ld-sub">Verify AI-native growth before you lend.</p>' +
-      '<div class="ld-entry-grid">' +
-      '<a class="ld-entry ld-entry-a" href="#/workspace">' +
-      '<span class="ld-entry-ic">' + icon("layers", 22) + "</span>" +
-      '<span class="ld-entry-body"><b>Go to Workspace</b>' +
-      '<span class="ld-entry-d">Attest → score → respond</span></span>' +
-      '<span class="ld-entry-ar" aria-hidden="true">→</span></a>' +
-      '<a class="ld-entry ld-entry-b" href="#/account">' +
-      '<span class="ld-entry-ic">' + icon("wallet", 22) + "</span>" +
-      '<span class="ld-entry-body"><b>My Account</b>' +
-      '<span class="ld-entry-d">Profile · credit · history</span></span>' +
-      '<span class="ld-entry-ar" aria-hidden="true">→</span></a>' +
-      "</div></div>";
+    return '<div class="ld-hero-copy">' + heroCopyCore() + "</div>";
   }
 
   /* ---------- 4.2 hero visual (fixed narrative coordinates) ---------- */
