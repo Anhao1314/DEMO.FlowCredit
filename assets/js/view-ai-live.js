@@ -59,10 +59,13 @@
       st.className = "ai-live-status";
       st.setAttribute("data-subject", k);
       st.textContent = "";
-      btn.addEventListener("click", function (e) {
-        var s2 = row.getAttribute("data-subject") || k;
-        liveRun(s2, btn, row, host);
-      });
+      (function (rowEl, k2) {
+        btn.addEventListener("click", function (e) {
+          var rowNow = rowEl || (e.currentTarget ? e.currentTarget.parentNode : null);
+          var s2 = (rowNow && rowNow.getAttribute("data-subject")) || k2;
+          liveRun(s2, e.currentTarget || btn, rowNow || row, host);
+        });
+      })(row, k);
       row.appendChild(btn);
       row.appendChild(st);
     }
