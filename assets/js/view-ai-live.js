@@ -60,7 +60,8 @@
       st.setAttribute("data-subject", k);
       st.textContent = "";
       btn.addEventListener("click", function (e) {
-        liveRun(k, btn, row, host);
+        var s2 = row.getAttribute("data-subject") || k;
+        liveRun(s2, btn, row, host);
       });
       row.appendChild(btn);
       row.appendChild(st);
@@ -68,7 +69,7 @@
   }
 
   function liveRun(subject, btn, row, host) {
-    var st = row.querySelector(".ai-live-status[data-subject=\"" + subject + "\"]");
+    var st = row.querySelector(".ai-live-status");
     function setBusy(txt, busy) {
       if (st) { st.textContent = txt; st.setAttribute("data-state", busy ? "busy" : "ok"); }
       if (btn) { btn.disabled = busy; btn.classList.toggle("is-busy", busy); }
