@@ -73,75 +73,69 @@ window.AI_LEDGER = {
   },
   "watch": {
    "subjectId": "watch-merchant",
-   "verdict": "reject",
-   "cci": 458,
-   "pdPct": 85.0,
-   "grade": "F",
-   "creditSuggestedUsd": 0,
-   "redflags": [
-    {
-     "name": "efficiency_above_peer_band",
-     "evidence": [
-      "F3",
-      "F12"
-     ],
-     "note": "33,750 NT/h exceeds band; unverified utilization"
-    }
-   ],
+   "verdict": "watch",
+   "cci": 546,
+   "pdPct": 15.0,
+   "grade": "D",
+   "creditSuggestedUsd": 6000,
+   "redflags": [],
    "anchors": [
     {
      "name": "efficiency",
-     "score": 28,
-     "state": "r",
+     "score": 56,
+     "state": "y",
      "evidence": [
-      "F3",
-      "F12"
+      "F1",
+      "F2",
+      "F3"
      ],
-     "note": "Above peer band, utilization unverified F2"
+     "note": "33,750 NT/h marginal above band; self-reported utilization uncross-checked"
     },
     {
      "name": "repayment",
-     "score": 62,
-     "state": "g",
+     "score": 50,
+     "state": "y",
      "evidence": [
       "F4"
      ],
-     "note": "78% collectible but softening trend"
+     "note": "78% repayment softening; tracked and compressed materially"
     },
     {
-     "name": "concentration",
-     "score": 48,
-     "state": "r",
+     "name": "customer_concentration",
+     "score": 55,
+     "state": "y",
      "evidence": [
-      "F5"
+      "F5",
+      "F6"
      ],
-     "note": "Top-5 64%, elevated e-commerce risk"
+     "note": "Top-5 64% elevated, counterparties otherwise ordinary"
     },
     {
      "name": "cost_stability",
-     "score": 46,
-     "state": "r",
+     "score": 62,
+     "state": "g",
      "evidence": [
       "F6",
       "F9",
       "F10"
      ],
-     "note": "Waste loops, treasury gaps two periods"
+     "note": "Spend stable; waste idle/duplicate, two gaps in coverage"
     },
     {
      "name": "time_sybil",
-     "score": 50,
+     "score": 52,
      "state": "y",
      "evidence": [
+      "F7",
       "F8",
-      "F7"
+      "F12"
      ],
-     "note": "No cluster; partial history 68% real"
+     "note": "Real-transaction 68%; partial on-chain, no Sybil cluster"
     }
    ],
-   "trace": "F3 efficiency far above peer band triggers the hard red flag (rubric: override), forcing reject and credit 0. F12 confirms utilization self-reported with no independent cross-check, so the F2 62% base is unverifiable. F4 78% with softening and F5 64% concentration normally indicate watchlist, not approve. F9 waste layers (idle/duplicate/pulse at 7-9%) plus F10 two missing treasury periods add cost instability. CCI 458 suppressed to worst-state by red-flag override; PD 85 reflects rejected merchant band 80-90. Credit 0.",
+   "trace": "No hard flag met: efficiency 33,750 NT/h (F3) only marginally exceeds the 8k-30k band, not an extreme multiple; top-5 64% (F5) is below the 80% threshold; repayment 78% (F4) is far above 20%; no Sybil (F8). Material warnings nonetheless push four anchors into the 50-59 y band: softening repayment (F4), elevated concentration and 78% repayment (F4-F5), 78% repayments, softening (F4), 68% real-transaction and partial history (F7-F8), self-reported uncross-checked utilization (F12). Credit compressed; partial treasury coverage (F10) adds watchlist pressure.",
    "factsSha256": "746262da39f4e952",
-   "promptSha256": "789231489293767c"
+   "promptSha256": "f6f39b23083e52e0"
   },
   "sybil": {
    "subjectId": "sybil-address",
