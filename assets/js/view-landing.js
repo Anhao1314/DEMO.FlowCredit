@@ -226,6 +226,132 @@
       }
     }, 700);
   }
+  /* ---------- ask the risk desk (live AI via FC_AI client) ---------- */
+  var askBusy = false;
+  var askListeners = [];
+  function routeSubject(q) {
+    q = String(q || "");
+    if (/sybil|reject|address/i.test(q)) return "sybil";
+    if (/watch|recover|decline/i.test(q)) return "watch";
+    return "healthy";
+  }
+  function askHtml() {
+    return '<div class="nld-ask" id="nld-ask" hidden>' +
+      '<div class="nld-ask-head">ASK THE RISK DESK · live deepseek-chat</div>' +
+      '<div class="nld-ask-chips">' +
+      '<button type="button" class="nld-ask-chip" data-subject="sybil">Why was the sybil address rejected?</button>' +
+      '<button type="button" class="nld-ask-chip" data-subject="healthy">How much credit should a healthy merchant get?</button>' +
+      '<button type="button" class="nld-ask-chip" data-subject="healthy">What does the Merkle fingerprint prove?</button>' +
+      "</div>" +
+      '<div class="nld-ask-row">' +
+      '<input type="text" id="nld-ask-input" maxlength="500" placeholder="ask: why was the sybil address rejected?" />' +
+      '<button type="button" id="nld-ask-send" aria-label="ask">' +
+      '<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h9M8 3.5 12 7l-4 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</button></div>" +
+      '<div class="nld-ask-log" id="nld-ask-log"></div></div>';
+  }
+  function bindAsk(host) {
+    var box = host.querySelector("#nld-ask");
+    if (!box) { return; }
+    var input = host.querySelector("#nld-ask-input");
+    var send = host.querySelector("#nld-ask-send");
+    var log = host.querySelector("#nld-ask-log");
+    var chips = box.querySelectorAll(".nld-ask-chip");
+
+    function setBusy(b) {
+      askBusy = b;
+      if (input) { input.disabled = b; }
+      if (send) { send.disabled = b; send.classList.toggle("is-busy", b); }
+      for (var i = 0; i < chips.length; i++) { chips[i].disabled = b; }
+    }
+    function trimLog() {
+      while (log.children.length > 12) { log.removeChild(log.firstChild); }
+    }
+    function hhmmss() {
+      var d = new Date();
+      function p2(n) { return (n < 10 ? "0" : "") + n; }
+      return p2(d.getHours()) + ":" + p2(d.getMinutes()) + ":" + p2(d.getSeconds());
+    }
+    function ask(q, subject) {
+      q = String(q == null ? "" : q).trim();
+      if (!q || askBusy) { return; }
+      if (!window.FC_AI || !FC_AI.ask) { return; }
+      subject = subject || routeSubject(q);
+      setBusy(true);
+      var qd = document.createElement("div");
+      qd.className = "nld-ask-q";
+      qd.textContent = q;
+      log.appendChild(qd);
+      trimLog();
+      var st = document.createElement("div");
+      st.className = "nld-ask-status";
+      st.textContent = "asking deepseek-chat…";
+      log.appendChild(st);
+      log.scrollTop = log.scrollHeight;
+      window.FC_AI.ask(subject, q).then(function (p) {
+        if (!p.ok || !p.data || !p.data.answer) { throw new Error(p.data && p.data.error || "bad response"); }
+        st.remove();
+        var card = document.createElement("div");
+        card.className = "nld-ask-a";
+        var meta = document.createElement("div");
+        meta.className = "nld-ask-meta";
+        meta.textContent = "answered · " + hhmmss() + " · deepseek-chat";
+        var body = document.createElement("p");
+        body.className = "nld-ask-body";
+        body.textContent = p.data.answer;
+        card.appendChild(meta);
+        card.appendChild(body);
+        var cites = p.data.citations || [];
+        if (cites.length) {
+          var c = document.createElement("div");
+          c.className = "nld-ask-cites";
+          var hs = [];
+          for (var i = 0; i < cites.length; i++) {
+            hs.push('<span class="nld-ask-cite">' + esc(cites[i]) + "</span>");
+          }
+          c.innerHTML = hs.join(" ");
+          card.appendChild(c);
+        }
+        var link = document.createElement("a");
+        link.className = "nld-ask-dl";
+        link.href = "#/audit";
+        link.textContent = "Open this case on the P2 desk →";
+        link.addEventListener("click", function (ev) {
+          if (ev && ev.preventDefault) { ev.preventDefault(); }
+          try { if (App.act && App.act.switchSubject) { App.act.switchSubject(subject); } } catch (e) { /* href fallback */ }
+          if (App.nav) { App.nav("#/audit"); }
+        });
+        card.appendChild(link);
+        log.appendChild(card);
+        log.scrollTop = log.scrollHeight;
+        trimLog();
+        setBusy(false);
+      }).catch(function () {
+        st.textContent = "ask failed — try again";
+        App.fn.timeout(function () { if (st.parentNode) { st.remove(); } }, 3000);
+        setBusy(false);
+      });
+    }
+    var chipFn = [];
+    for (var c2 = 0; c2 < chips.length; c2++) {
+      (function (chip) {
+        var fn = function () { ask(chip.textContent, chip.getAttribute("data-subject")); };
+        chip.addEventListener("click", fn);
+        chipFn.push(fn);
+      })(chips[c2]);
+    }
+    send.addEventListener("click", function () { ask(input.value, ""); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { ask(input.value, ""); }
+    });
+    box.hidden = !window.FC_AI;
+    var onLive = function () { box.hidden = false; };
+    var offLive = function () { box.hidden = true; if (askBusy) { setBusy(false); } };
+    window.addEventListener("fc:live", onLive);
+    window.addEventListener("fc:live-off", offLive);
+    askListeners.push([onLive, offLive]);
+  }
+
   function bindCases(host) {
     var els = host.querySelectorAll(".nld-case[data-subject]");
     for (var i = 0; i < els.length; i++) {
@@ -328,6 +454,7 @@
       '<rect x="2.5" y="2.5" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/>' +
       '<rect x="5.2" y="5.2" width="7" height="7" rx="1" fill="#0B1220" stroke="currentColor" stroke-width="1.2"/></svg></button>' +
       "</div>" +
+      askHtml() +
       '<div class="nld-honesty"><span>testnet demo</span><span>synthetic data + public-disclosure composites</span>' +
       "<span>risk analytics, not a statutory audit</span><span>no custody, no lending</span></div>" +
       "</div></section></div>";
@@ -339,6 +466,7 @@
     bindCases(host);
     bindBurger(host);
     bindCopyPill(host);
+    bindAsk(host);
     var ctl = startBeacon(host);
     if (!reducedMotion() && ctl) { canvasCtl = ctl; }
     startTypewriter(host);
@@ -349,6 +477,12 @@
     if (raftId) { try { cancelAnimationFrame(raftId); } catch (e) { /* noop */ } raftId = 0; }
     if (ttTimer) { try { clearTimeout(ttTimer); } catch (e) { /* noop */ } ttTimer = null; }
     if (pillTimer) { try { clearTimeout(pillTimer); } catch (e) { /* noop */ } pillTimer = null; }
+    for (var li = 0; li < askListeners.length; li++) {
+      window.removeEventListener("fc:live", askListeners[li][0]);
+      window.removeEventListener("fc:live-off", askListeners[li][1]);
+    }
+    askListeners = [];
+    askBusy = false;
     if (canvasCtl && canvasCtl.off) { canvasCtl.off(); }
     canvasCtl = null;
     textDone = false;
