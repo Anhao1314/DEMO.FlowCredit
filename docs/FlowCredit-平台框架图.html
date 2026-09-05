@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FlowCredit · 平台框架图</title>
+<style>
+  :root{--bg:#0B1220;--card:rgba(255,255,255,.035);--line:rgba(120,200,205,.16);
+    --teal:#2DD4BF;--blue:#38BDF8;--amber:#F59E0B;--red:#F87171;--green:#34D399;
+    --text:#E7F1F1;--text2:#9DB4B8;--text3:#6b838a;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(160deg,#0B1220 0%,#0E2A33 100%) fixed;
+    color:var(--text);font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:26px 16px 60px}
+  .wrap{max-width:1180px;margin:0 auto}
+  h1{margin:4px 0 2px;font-size:26px}
+  .sub{color:var(--text2);margin:0 0 14px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 22px}
+  .tag{font:600 11px var(--mono);padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+  .tag.t{color:#99F6E4;border-color:rgba(45,212,191,.45);background:rgba(45,212,191,.07)}
+  .tag.b{color:#BAE6FD;border-color:rgba(56,189,248,.45);background:rgba(56,189,248,.07)}
+  .tag.a{color:#FDE68A;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.07)}
+  .tag.r{color:#FECACA;border-color:rgba(248,113,113,.45);background:rgba(248,113,113,.07)}
+  .tag.g{color:#A7F3D0;border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.07)}
+  .layer{position:relative;border:1px solid var(--line);border-radius:18px;
+    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.008));
+    padding:18px 18px 16px;margin:0 0 14px}
+  .layer h2{margin:0 0 4px;font-size:17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .layer h2 .idx{font:700 11px var(--mono);color:#06231f;background:var(--teal);
+    width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center}
+  .layer-desc{color:var(--text2);font-size:12.5px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
+  .mod{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .mod .mt{font-weight:750;font-size:13.5px;display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .mod .mt .d{width:8px;height:8px;border-radius:50%;flex:none}
+  .mod ul{margin:4px 0 0;padding-left:17px;color:var(--text2);font-size:12px}
+  .mod li{margin:2px 0}
+  .mono{font-family:var(--mono);color:#9BE8DF}
+  .num{font-variant-numeric:tabular-nums}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:700 12px var(--mono);color:var(--text3);padding:2px 0 0 34px}
+  .flow b{color:var(--teal)}
+  .warn{font-size:11px;color:var(--text3)}
+  .foot{margin-top:16px;color:var(--text3);font-size:12px;border-top:1px dashed var(--line);padding-top:12px}
+  .d-teal{background:var(--teal)} .d-blue{background:var(--blue)} .d-amber{background:var(--amber)}
+  .d-red{background:var(--red)} .d-green{background:var(--green)} .d-gray{background:#64748B}
+</style>
+</head>
+<body><div class="wrap">
+  <h1>FlowCredit · 平台框架图</h1>
+  <p class="sub">链上可验证 AI 信用风控审计 · 概念演示平台 — On-chain Attestation · AI Risk Scoring · Dynamic Response</p>
+  <div class="meta">
+    <span class="tag t">零构建静态站 · file:// 可跑</span>
+    <span class="tag b">hash 路由 ×6</span>
+    <span class="tag g">纯函数现算 App.fn</span>
+    <span class="tag a">五档等级 A/A-/B/C/D</span>
+    <span class="tag r">红旗一票否决 VETO</span>
+    <span class="tag">10 JS · 4413 行 · 2026-09-05</span>
+  </div>
+
+  <section class="layer">
+    <h2><span class="idx">0</span>应用外壳 · 路由与组件库</h2>
+    <p class="layer-desc">入口 index.html 按序加载 10 个脚本；无 module/defer/fetch/CDN/npm，双击即可运行。</p>
+    <div class="grid">
+      <div class="mod"><div class="mt"><i class="d-teal"></i>app.js — 产品外壳与路由</div>
+        <ul><li>路由白名单：landing｜workspace｜ingest｜audit｜report｜account（非法 hash 回落 landing）</li>
+        <li>顶栏：品牌、产品 Tab×3（Ingest P1 / Risk P2 / Monitor P3）、Mock-Live、共享钱包 Connect</li>
+        <li>Deep-link intent：跨页滚动定位、展开 How-it-works、脉冲提示</li>
+        <li>路由切换前 clearTimers，杜绝跨页残留回调；共享 <span class="mono">App.wallet</span> 状态</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-blue"></i>ui.js — 可视化组件库</div>
+        <ul><li>内联 SVG 图标集（20+）、toast、modal</li><li>CCI 环形仪表（0→值填充）、区间轨道、锚点条</li>
+        <li>R/C 双值折线图（含背离 2σ 标记）、链日志时间轴</li><li>格式化 esc/fmtInt/fmtMoney</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-amber"></i>styles.css — 设计系统</div>
+        <ul><li>深色 token：--teal/--blue/--amber/--red/--green/--text/--card…</li>
+        <li>间距/字号/圆角令牌；P0 组件分区与追加制</li><li>reduced-motion 全局压平；≤880/640/560/420 响应式</li></ul></div>
+    </div>
+  </section>
+
+  <section class="layer">
+    <h2><span class="idx">1</span>页面视图层 · 6 路由 + 报告浮层</h2>
+    <p class="layer-desc">Landing 只做门面；Workspace/Account 承接账户与任务；P1→P2→P3 是产品主线。</p>
+    <div class="grid">
+      <div class="mod"><div class="mt"><i class="d-gray"></i>#/landing · Landing 门面</div>
+        <ul><li>座右铭「Where compute ends, trust begins」+ 双入口（Go to Workspace / My Account）</li>
+        <li>动态信号图表卡：追踪点、能量流、扫描线、节点涟漪、AI 响应脉冲、背离粒子、极光</li>
+        <li>极简单行页脚（合规 + testnet 免责）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-blue"></i>#/workspace · 工作台</div>
+        <ul><li>当前任务卡：按状态推导 Anchor / Run audit / VETO / Open report</li>
+        <li>双主体 Ledgers：点击切换主体并进入 P2</li><li>活动流：审计完成行 + 最近 4 条锚定</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-green"></i>#/ingest · P1 Truth Ingest</div>
+        <ul><li>四源小卡（Cloud/API、GPU、Treasury、On-chain）：raw record → signed</li>
+        <li>Anchor 主操作：逐卡签名动画 → Merkle 树生长 → 新 root；链日志只增累积</li>
+        <li>字段展示 15 项；状态语义 raw/signed</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-amber"></i>#/audit · P2 AI Risk Assessment</div>
+        <ul><li>向导式解锁 L0→L5：跑一步亮一步，完成后六卡全览</li>
+        <li>五锚/因子条从 0 生长；R/C 折线擦除式画出；CCI 环形 0→填充</li>
+        <li>完成横幅 → Open Audit Report（带四步生成加载）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-red"></i>#/report · P3 Monitor</div>
+        <ul><li>报告卡：CCI / PD / 建议额度 / 红旗四宫格</li>
+        <li>Verify on-chain（root 匹配核验）；压力曲线逐帧自绘</li>
+        <li>响应帧：Shock → De-risk → Notify → Partial → Recover（HF 与额度联动）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-teal"></i>#/account · 账户页</div>
+        <ul><li>机构档案 + 共享钱包（地址/余额/连接状态）</li>
+        <li>当前授信卡（额度/等级/PD，VETO 红色横幅）</li><li>活动流（与工作台同一数据源）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-green"></i>[浮层] 审计报告（白纸文档）</div>
+        <ul><li>打开即"生成加载"：四步进度 → 报告纸张入场</li>
+        <li>左侧章节导航（6 节）+ Back to top；中英双语、与页面同源现算</li>
+        <li>Verify on-chain 内联展开（hash match / rule / nonce / 时间戳）</li></ul></div>
+    </div>
+  </section>
+
+  <section class="layer">
+    <h2><span class="idx">2</span>状态机与交互纪律</h2>
+    <p class="layer-desc">state.js 持有全局状态与纯函数；所有动画/定时器登记 state.timer，路由切换即清理。</p>
+    <div class="grid">
+      <div class="mod"><div class="mt"><i class="d-blue"></i>全局状态</div>
+        <ul><li>subject（healthy/sybil）、auditStage(-1..4)、running</li>
+        <li>anchored / anchor(root·block·time·nonce·levels) / chainLogs / nonce</li>
+        <li>stress：idle → shock → derisk → notify → partial → recover</li><li>timer 句柄表、clearHooks</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-amber"></i>状态机节奏</div>
+        <ul><li>runAudit：350ms/级；resetAudit 回 idle</li>
+        <li>anchorSubject：四源摘要 + 时间戳 + 递增 nonce → 每次新 root</li>
+        <li>stressRun：600/400/350/400ms 推进；switchSubject 全量重置</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-red"></i>纪律</div>
+        <ul><li>reduced-motion：静态完整；无 emoji（SVG 图标 + ✓/→/·/σ）</li>
+        <li>数字 mono + tabular-nums；UI 英文为主（报告双语为已授权例外）</li>
+        <li>AGENTS.md 冻结区契约：data/ui/app/state/view-landing 默认不动</li></ul></div>
+    </div>
+  </section>
+
+  <section class="layer">
+    <h2><span class="idx">3</span>规则引擎 App.fn · L0→L5 流水线（纯函数现算，禁止写死结果）</h2>
+    <div class="flow">L0 采集 → L1 折算 → L2 过滤 → L3 五锚核验 → L4 评分 → L5 链上存证</div>
+    <div class="grid">
+      <div class="mod"><div class="mt"><i class="d-teal"></i>L1 口径</div>
+        <ul><li>Raw Token 唯一口径：<span class="mono num">d.l0.compute.Raw</span>（healthy 80.0M / sybil 108.0M）</li>
+        <li>rawNT_M = 已乘 w_model×w_task（96.0M / 108.0M），仅用于 L2 毛 NT</li>
+        <li>SCU = GPU·h × util × c_gpu（3,570 / 86.1）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-green"></i>L2 去水分</div>
+        <ul><li>ValidRate：healthy 94% / sybil 34%</li>
+        <li>ValidNT：90.2M / 36.7M（"毛值更高、有效反低"的核心反转）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-amber"></i>L3 五锚（权重 .25/.25/.20/.15/.15）</div>
+        <ul><li>Efficiency 22,857·76｜Repayment 96%·88｜Customer 36%·86｜Cost·70｜Time/Sybil·72</li>
+        <li>同业带 [lo,hi] 打分红/黄/绿；硬规则命中 → 一票否决 VETO</li>
+        <li>sybil：效率/回款/客户/女巫 4 项红旗 → D、额度 0</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-red"></i>L4 评分与量化</div>
+        <ul><li>CCI = Σ(score×weight)×10 → <span class="num">795 / 320</span></li>
+        <li>PD = 1/(1+e^(0.01156·CCI−5.433)) → <span class="num">2.3% / 85.0%</span></li>
+        <li>等级五档：A≥800 / A- 750–799 / B 650–749 / C 500–649 / D&lt;500（VETO 强制 D）</li>
+        <li>双价值背离 D=(R−C)/C：+3% 正常 / +186% 越 2σ 告警</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-blue"></i>L5 / 决策输出</div>
+        <ul><li>Merkle mock：叶子(data|ts|nonce) → root；anchor 保存最新 root 与层级</li>
+        <li>额度：VETO→$0，否则 $20,000（演示校准）</li>
+        <li>贷后响应帧：额度 20,000→12,000→18,000；HF 1.85→1.05→1.35，清算线 1.00</li></ul></div>
+    </div>
+  </section>
+
+  <section class="layer">
+    <h2><span class="idx">4</span>数据与案例层 · data.js</h2>
+    <div class="grid">
+      <div class="mod"><div class="mt"><i class="d-green"></i>Healthy Merchant（主演示 · 公开披露复合示例）</div>
+        <ul><li>Raw 80M / 4,200 GPU·h(H100) / 利用率 85% / 支出 $58,000 / 客户 168</li>
+        <li>Top-5 36% · 回款 96% · 循环 2% · 波动 7% · R/C 序列（64-71 / 62-69）</li>
+        <li>结构参数参考 CoreWeave S-1 / Nebius 财报 / Northern Data 公告（数值为演示尺度换算）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-red"></i>Sybil Address（对照 · VETO）</div>
+        <ul><li>Raw 108M / 210 GPU·h / 41% / 91% 集中 / 12% 回款 / 67% 循环</li>
+        <li>红旗 4 项（+2,150% 越带 / Top5 91% / 回款 12% / 女巫簇）→ 拒绝授信</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-amber"></i>输入清单与基线</div>
+        <ul><li>《案例数据输入清单.md》逐字段映射原值/现值/依据</li>
+        <li>回归基线：CCI 795/320 · PD 2.3/85.0 · ValidNT 90.2/36.7 · Efficiency 22,857/514,286 · SCU 3,570/86.1 · 额度 20,000/0</li></ul></div>
+    </div>
+  </section>
+
+  <section class="layer">
+    <h2><span class="idx">5</span>工程契约 · 交付物 · 部署</h2>
+    <div class="grid">
+      <div class="mod"><div class="mt"><i class="d-gray"></i>工程契约</div>
+        <ul><li>AGENTS.md：冻结区 / 派生数值纪律 / 计时句柄 / 样式纪律 / 自检清单</li>
+        <li>autosync 自动 commit+push；自检：node --check ×10、CSS 配平、无 fetch/module/emoji</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-blue"></i>对外交付物</div>
+        <ul><li>页面报告浮层（中英双语白纸版）</li><li>基础风控审计报告.docx（新案例+五档）</li>
+        <li>参考报告模板（已同步数值、保留占位符）</li></ul></div>
+      <div class="mod"><div class="mt"><i class="d-teal"></i>部署形态</div>
+        <ul><li>局域网 python：<span class="mono">http://10.0.1.137:8000/</span>（实时）</li>
+        <li>Docker nginx：<span class="mono">:8080</span>（旧镜像待重建）</li>
+        <li>异地公网：Cloudflare Quick Tunnel（trycloudflare.com，重启地址变化）</li></ul></div>
+    </div>
+  </section>
+
+  <p class="foot">FlowCredit · On-chain AI Credit Risk Intelligence — testnet demo · simulated data · demo calibration · not financial advice</p>
+</div></body>
+</html>
