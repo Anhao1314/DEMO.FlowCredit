@@ -79,7 +79,7 @@ assets/js/view-account.js  Account 账户页（#/account）
 node --check assets/js/data.js
 # …对 assets/js/ 下每个 js 执行
 
-# 数值回归基线（临时断言脚本，不入库）：
+# 数值回归基线（断言脚本位于 agent/regress.js，不进本仓库）：
 # CCI 795/320 · PD 2.3/85.0 · ValidNT 90.2/36.7 · Efficiency 22857/514286
 # SCU 3570/86.1 · Credit 20000/0 · Deviation +3%/+186% · stress 1.85/1.05/1.35 · 20000/12000/18000
 ```
@@ -91,3 +91,18 @@ node --check assets/js/data.js
 - UI 文案全英文、无 emoji；图标一律 App.ui.icon(...) 内联 SVG。
 - 改样式：在 styles.css 末尾追加新区块，复用既有 token，不删仍被 JS 使用的类。
 - 本仓库由本机 autosync 守护自动 commit/push（提交信息以 [autosync] 开头）；改完文件等待同步，最终工作区应为 clean。
+
+
+## 8. 现场演示（一分钟起跑）
+
+- 一键真跑闭环（真实 LLM 三主体 + 基线回归 + 健康摘要）：
+
+      cd ~/fc/agent && ./verify.sh
+
+  最后一行显示 **MVP HEALTH: PASS** 即可上台；新批次 AI VERDICT 卡会随账本提交进入仓库。
+- 启动演示站：
+
+      cd ~/fc/demo-flowcredit && python3 -m http.server 8000
+
+  浏览器打开 http://127.0.0.1:8000（断网预案：直接双击 index.html，全部功能离线可用）。
+- 健康检查独立脚本：agent/regress.js（16 项基线断言）、agent/sync-check.js（facts <=> data.js 单一事实源校验）。
