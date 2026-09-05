@@ -6,6 +6,12 @@
 - 零构建静态站：原生 HTML/CSS/JS，普通 script 按序加载（data→state→ui→view-landing→view-ingest→view-audit→view-report→view-workspace→view-account→app），无 module/defer/fetch/CDN/npm。
 - 双击 index.html 以 file:// 离线可跑；UI 文案全英文；无 emoji（允许 → ← ✓ · σ ± 等符号）；图标只用 App.ui.icon 内联 SVG；数字 mono + tabular-nums。
 
+## 1.1 对外措辞纪律（合规红线）
+
+- 业务定位：AI 信用风控（风险评估）系统，不是审计机构；用户可见文案禁用 audit / 审计 / auditor / 审阅意见 等表述，统一用 risk assessment / 风控评估 / 评估结论 / 复核。
+- 免责口径：「非审计意见、不构成法定审计」类注记必须保留（报告 D 节与全局页脚）。
+- 工程标识例外：路由 #/audit、文件名 view-audit.js、id run-audit / reset-audit / audit-report-btn、状态字段 auditStage / auditDone 属内部标识，只允许出现在代码与文档技术段，禁止进入用户可见文案。
+
 ## 2. 核心冻结区（默认一字不改；任务书明确点名才动）
 - 文件：assets/js/data.js、assets/js/ui.js、assets/js/app.js、assets/js/state.js、assets/js/view-landing.js。
 - 内容：SUBJECTS / ANCHOR_W / STRESS_FRAMES / 全部公式与 mock 数值 / 路由 hash（landing|workspace|ingest|audit|report|account）/ 状态机语义 / 元素 id / 事件绑定 / 演示节奏（audit 350ms 步进、stress 约 2s 时序、ring 600ms、动画 200–350ms）。

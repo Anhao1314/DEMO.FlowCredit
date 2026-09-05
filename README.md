@@ -1,6 +1,6 @@
 # FlowCredit · On-chain AI Credit Risk Intelligence
 
-FlowCredit 是一个面向 AI 原生企业（GPU / API / 链上地址）的「链上可验证 AI 财务审计 + 动态授信风控」概念演示站。
+FlowCredit 是一个面向 AI 原生企业（GPU / API / 链上地址）的「链上可验证 AI 信用风控智能（风险评估 + 动态授信）」概念演示站。
 
 > Testnet demo · simulated data · not financial advice · demo calibration
 
