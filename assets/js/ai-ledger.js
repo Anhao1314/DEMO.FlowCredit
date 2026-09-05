@@ -2,7 +2,7 @@
    External LLM verdicts (deepseek-chat). Display-only data; App.fn untouched. */
 window.AI_LEDGER = {
  "meta": {
-  "builtAtUtc": "2026-09-05 13:24:57 UTC",
+  "builtAtUtc": "2026-09-05 14:09:15 UTC",
   "model": "deepseek-chat",
   "dshVersion": "0.1.2-rc.1"
  },
@@ -74,68 +74,65 @@ window.AI_LEDGER = {
   "watch": {
    "subjectId": "watch-merchant",
    "verdict": "watch",
-   "cci": 546,
-   "pdPct": 15.0,
-   "grade": "D",
-   "creditSuggestedUsd": 6000,
+   "cci": 579,
+   "pdPct": 12.0,
+   "grade": "C",
+   "creditSuggestedUsd": 7000,
    "redflags": [],
    "anchors": [
     {
      "name": "efficiency",
-     "score": 56,
-     "state": "y",
+     "score": 64,
+     "state": "g",
      "evidence": [
-      "F1",
       "F2",
-      "F3"
+      "F3",
+      "F12"
      ],
-     "note": "33,750 NT/h marginal above band; self-reported utilization uncross-checked"
+     "note": "Compute above peer band; utilization self-reported"
     },
     {
      "name": "repayment",
-     "score": 50,
+     "score": 56,
      "state": "y",
      "evidence": [
       "F4"
      ],
-     "note": "78% repayment softening; tracked and compressed materially"
+     "note": "78% repayment, softening; below clean threshold"
     },
     {
      "name": "customer_concentration",
-     "score": 55,
+     "score": 54,
      "state": "y",
      "evidence": [
-      "F5",
-      "F6"
+      "F5"
      ],
-     "note": "Top-5 64% elevated, counterparties otherwise ordinary"
+     "note": "48 customers; top-5 64%, elevated concentration"
     },
     {
      "name": "cost_stability",
-     "score": 62,
+     "score": 60,
      "state": "g",
      "evidence": [
       "F6",
-      "F9",
       "F10"
      ],
-     "note": "Spend stable; waste idle/duplicate, two gaps in coverage"
+     "note": "Spend steady; treasury partial, two gaps"
     },
     {
      "name": "time_sybil",
-     "score": 52,
+     "score": 54,
      "state": "y",
      "evidence": [
       "F7",
-      "F8",
-      "F12"
+      "F8"
      ],
-     "note": "Real-transaction 68%; partial on-chain, no Sybil cluster"
+     "note": "68% real txns; no cluster, history partial"
     }
    ],
-   "trace": "No hard flag met: efficiency 33,750 NT/h (F3) only marginally exceeds the 8k-30k band, not an extreme multiple; top-5 64% (F5) is below the 80% threshold; repayment 78% (F4) is far above 20%; no Sybil (F8). Material warnings nonetheless push four anchors into the 50-59 y band: softening repayment (F4), elevated concentration and 78% repayment (F4-F5), 78% repayments, softening (F4), 68% real-transaction and partial history (F7-F8), self-reported uncross-checked utilization (F12). Credit compressed; partial treasury coverage (F10) adds watchlist pressure.",
+   "trace": "No hard flag met: efficiency 33,750 NT/h (F3) is only marginally above the 8-30k peer band, not an extreme multiple; top-5 share 64% (F5) is below the 80%+related-party reject bar; repayment 78% (F4) well above 20%; no Sybil cluster (F8). Warnings accumulate: softening repayment (F4), elevated concentration (F5), partial treasury/history coverage (F8,F10), real-transaction ratio 68% (F7), and self-reported, uncross-checked utilization (F12). Three anchors sit in the y band (repayment, concentration, time-sybil), so credit is compressed, not voided.",
    "factsSha256": "746262da39f4e952",
-   "promptSha256": "f6f39b23083e52e0"
+   "promptSha256": "932346456a0a9f01"
   },
   "sybil": {
    "subjectId": "sybil-address",
