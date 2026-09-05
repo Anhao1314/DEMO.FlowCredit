@@ -2123,6 +2123,7 @@ html{scrollbar-color:rgba(120,200,205,.28) transparent}
 
 @media (max-width:760px){
   .nld-hero-in{padding-top:110px}
+  .nld-h1{min-height:3.35em}
   .nld-honesty{flex-direction:row}
 }
 @media (prefers-reduced-motion:reduce){
