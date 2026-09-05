@@ -1535,3 +1535,17 @@ button.hb-step:hover{border-color:rgba(45,212,191,.55);background:rgba(45,212,19
   .ws-task-t{font-size:14.5px}
   .ws-ledgers{grid-template-columns:1fr}
 }
+
+/* ===== P0 completeness patch ===== */
+.src-tagline{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.src-card .src-tag{display:inline-flex;align-items:center;margin:0}
+.src-card .src-issue{display:inline-flex;align-items:center;gap:5px;
+  font:600 9px var(--mono);line-height:1.45;padding:2px 7px 2px 6px;
+  border-left:3px solid var(--amber);border-radius:4px;
+  color:#FDE68A;background:rgba(245,158,11,.1)}
+.src-card .src-issue.bad{color:#FECACA;background:rgba(248,113,113,.1);
+  border-left-color:var(--red)}
+.src-card.has-issue-warn{border-color:rgba(245,158,11,.28)}
+.src-card.has-issue-bad{border-color:rgba(248,113,113,.32)}
+.modal-note{color:var(--text3);font-size:10.5px;line-height:1.6;
+  margin:10px 0 0;font-style:italic}

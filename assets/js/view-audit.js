@@ -155,7 +155,7 @@
     var dev = App.fn.deviation(d);
     var ringColor = veto ? "#F87171" : "#2DD4BF";
     var reject = veto
-      ? '<div class="reject-panel"><div class="r-title">' + u.icon("alert", 17) + " REJECTED: Sybil / wash-trading detected</div>" +
+      ? '<div class="reject-panel"><div class="r-title">' + u.icon("alert", 17) + " " + u.esc(d.rejectTitle || "REJECTED") + "</div>" +
         '<p class="note-italic" style="color:#FDA4AF;margin-top:5px">Suggested Credit Line forced to $0 · no facility, no borrowing, no stress test.</p></div>'
       : "";
     return '<div class="l4-grid">' +
@@ -169,8 +169,9 @@
       '<div class="m-note">logistic demo calibration</div></div>' +
       '<div class="metric"><div class="m-label">Suggested credit line</div><div class="m-value num" ' + (veto ? 'style="color:var(--red)"' : "") + ">" + u.fmtMoney(credit) + "</div>" +
       '<div class="m-note">' + (veto ? "vetoed by red flags" : "from score + PD band") + "</div></div>" +
-      '<div class="metric"><div class="m-label">Rolling volatility</div><div class="m-value num">' + u.esc(d.volatility) + "</div>" +
-      '<div class="m-note">value-series 8-period</div></div>' +
+      '<div class="metric"><div class="m-label">Volatility (σ)</div><div class="m-value num">' +
+      App.fn.volatilityPct(d).toFixed(1) + "%</div>" +
+      '<div class="m-note">period σ · 8 pts · not annualized</div></div>' +
       "</div>" +
       '<div class="sec-l">four-factor profile</div><div>' + factorBars(d) + "</div></div>" +
       '<div class="card" style="background:var(--card2);padding:14px">' +
@@ -271,11 +272,11 @@
       }
       var bodyHtml = parts.join("");
 
-      var subjects = ["healthy", "sybil"];
+      var subjects = SUBJECT_ORDER;
       var seg = subjects.map(function (sub) {
         var label = SUBJECTS[sub].label;
         return '<button type="button" class="seg-btn' + (st.subject === sub ? " on" : "") + '" data-subject="' + sub + '">' +
-          '<span class="sdot dot-' + (sub === "healthy" ? "g" : "r") + '" style="display:inline-block;margin-right:6px;vertical-align:-1px"></span>' +
+          '<span class="sdot dot-' + (SUBJECTS[sub].segDot || "g") + '" style="display:inline-block;margin-right:6px;vertical-align:-1px"></span>' +
           ui.esc(label) + "</button>";
       }).join("");
 
@@ -299,7 +300,10 @@
       var ringSlot = host.querySelector("#ring-slot");
       var lineSlot = host.querySelector("#line-slot");
       if (s >= 4 && ringSlot) { App.ui.ring(ringSlot, App.fn.cci(d), veto ? "#F87171" : "#2DD4BF"); }
-      if (s >= 4 && lineSlot) { App.ui.lineChart(lineSlot, d.R, d.C, d.devAlert ? 5 : null); }
+      if (s >= 4 && lineSlot) {
+        var devNow = App.fn.deviation(d);
+        App.ui.lineChart(lineSlot, d.R, d.C, devNow.alert ? devNow.index : null);
+      }
       bind(host, st);
     } catch (e) {
       host.innerHTML = '<div class="card"><div class="card-title">AI Risk Assessment — render fallback</div>' +

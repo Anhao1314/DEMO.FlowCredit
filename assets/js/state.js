@@ -2,10 +2,10 @@
    state.js — global store, pure metric functions, pipeline &
    stress state machines, timer discipline.
    Self-test (node, stubbed window):
-     cci(healthy)=795, cci(sybil)=320
-     pd(795)=2.3%, pd(320)=85.0%
-     validNT_M: 90.2 / 36.7
-     efficiency: 22857 / 514286
+     cci(healthy)=795, cci(watch)=668, cci(sybil)=320
+     pd(795)=2.3%, pd(668)=9.2%, pd(320)=85.0%
+     validNT_M: 90.2 / 42.1 / 36.7
+     efficiency: 22857 / 33750 / 514286
    ============================================================ */
 (function () {
   var App = window.App = window.App || {};
@@ -24,6 +24,9 @@
   };
   App.state = state;
 
+  // demo assumption: unsecured wholesale reference loss given default, not fitted
+  var DEMO_LGD = 0.45;
+
   /* ---------- pure metric functions (computed, never hard-coded) ---------- */
   function validNT_M(d) { return +(d.rawNT_M * d.validRate).toFixed(1); }               // healthy 90.2 / sybil 36.7
   function efficiency(d) { return Math.round(d.rawNT_M * 1e6 / d.gpuHours); }           // healthy 22857 / sybil 514286
@@ -35,7 +38,41 @@
     return Math.round(s * 10);
   }
   function pd(value) { return 100 / (1 + Math.exp(0.01156 * value - 5.433)); }          // pd(795)=2.3% pd(320)=85.0%
-  function deviation(d) { return { pct: d.deviationPct, alert: d.devAlert }; }          // +3% normal / +186% >2σ
+  // period σ over the 8 trusted C points, not annualized, demo calibration
+  function volatilityPct(d) {
+    var m = d.C.length;
+    if (m < 3) { return 0; }
+    var rets = [];
+    for (var i = 1; i < m; i++) {
+      var prev = d.C[i - 1];
+      rets.push(prev ? (d.C[i] - prev) / prev : 0);
+    }
+    var n = rets.length;
+    var mean = 0;
+    for (var j = 0; j < n; j++) { mean += rets[j]; }
+    mean = mean / n;
+    var variance = 0;
+    for (var k = 0; k < n; k++) { variance += (rets[k] - mean) * (rets[k] - mean); }
+    variance = variance / (n - 1); // sample variance, n = m-1 returns
+    return +(Math.sqrt(variance) * 100).toFixed(1);
+  }
+  function meanOf(arr) {
+    if (!arr || !arr.length) { return 0; }
+    var s = 0;
+    for (var i = 0; i < arr.length; i++) { s += arr[i]; }
+    return s / arr.length;
+  }
+  // D = (meanR - meanC) / meanC, computed from the R/C series
+  function deviation(d) {
+    var meanC = meanOf(d.C);
+    var pct = meanC ? Math.round((meanOf(d.R) - meanC) / meanC * 100) : 0;
+    return { pct: pct, alert: !!d.devAlert, index: (typeof d.alertIndex === "number" ? d.alertIndex : null) };
+  }
+  function expectedLoss(d) {
+    var ead = creditLine(d); // veto -> 0
+    var prob = pd(cci(d)) / 100;
+    return Math.round(ead * prob * DEMO_LGD);
+  }
   function ntM(d) { return d.rawNT_M; }                                                 // NT (M), w_model x w_task applied — see data.js
   function scuOf(d) { return Math.round(d.gpuHours * d.util * d.coef.c_gpu * 10) / 10; } // healthy 3570 / sybil 86.1
   function vetoed(d) { return !!(d.redflags && d.redflags.length); }
@@ -63,7 +100,7 @@
 
   /* ---------- source cards (P1) derived from the subject's raw records ---------- */
   function sourceCards(d) {
-    return [
+    var cards = [
       { id: "billing", name: "Cloud / API Billing",
         fields: [["Input tokens", d.l0.compute.Input], ["Output tokens", d.l0.compute.Output],
                  ["Raw tokens", d.l0.compute.Raw], ["Requests", d.l0.compute.Requests]] },
@@ -76,9 +113,19 @@
         fields: [["Periods", String(d.R.length)], ["R declared range", minMax(d.R)],
                  ["C verified range", minMax(d.C)], ["Wash-loop rate", d.l0.business.Loop]] }
     ];
+    if (d.sourceIssues) {
+      for (var i = 0; i < cards.length; i++) {
+        if (d.sourceIssues[cards[i].id]) { cards[i].issue = d.sourceIssues[cards[i].id]; }
+      }
+    }
+    return cards;
   }
   function minMax(arr) { return Math.min.apply(null, arr) + "-" + Math.max.apply(null, arr); }
-  function leafDigest(card, d) { return card.name + "|" + card.fields.map(function (f) { return f.join("="); }).join("&"); }
+  function leafDigest(card, d) {
+    var digest = card.name + "|" + card.fields.map(function (f) { return f.join("="); }).join("&");
+    if (card.issue && card.issue.text) { digest += "|issue:" + card.issue.text; }
+    return digest;
+  }
 
   /* ---------- simplified deterministic mock hash / merkle (no crypto.subtle) ---------- */
   function mockHash(str) {
@@ -277,6 +324,11 @@
   function stressRun() {
     var d = SUBJECTS[state.subject];
     if (!d || vetoed(d)) { notify("Credit rejected — no facility to stress", "warn"); return; }
+    var dd = SUBJECTS[state.subject];
+    if (dd && dd.stressEligible === false) {
+      notify("Watchlist subject — capped monitoring; full stress runs on approved facilities", "warn");
+      return;
+    }
     if (stressFlying()) { notify("Stress run in progress", "warn"); return; }
     clearTimers();
     setState({ stress: "idle" });
@@ -298,7 +350,8 @@
   /* ---------- public surface ---------- */
   App.fn = {
     validNT_M: validNT_M, efficiency: efficiency, cci: cci, pd: pd,
-    deviation: deviation, ntM: ntM, scuOf: scuOf, vetoed: vetoed, creditLine: creditLine,
+    deviation: deviation, volatilityPct: volatilityPct, expectedLoss: expectedLoss,
+    DEMO_LGD: DEMO_LGD, ntM: ntM, scuOf: scuOf, vetoed: vetoed, creditLine: creditLine,
     gradeOf: gradeOf, gradeBands: GRADE_BANDS,
     sourceCards: sourceCards, mockHash: mockHash, merkleBuild: merkleBuild,
     leafDigest: leafDigest, nowStamp: nowStamp, nowShort: nowShort,

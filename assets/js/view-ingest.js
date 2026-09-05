@@ -24,13 +24,24 @@
     var tag = signed
       ? u.icon("check", 10) + " signed · timestamped"
       : "raw record";
-    return '<div class="card src-card' + (signed ? " signed" : "") + '" data-idx="' + idx + '">' +
+    var issue = card.issue || null;
+    var issueHtml = issue
+      ? '<span class="src-issue ' + u.esc(issue.level === "bad" ? "bad" : "warn") + '">' +
+        u.esc(issue.text || "") + "</span>"
+      : "";
+    var issueCls = issue
+      ? " has-issue-" + u.esc(issue.level === "bad" ? "bad" : "warn")
+      : "";
+    return '<div class="card src-card' + issueCls + (signed ? " signed" : "") + '" data-idx="' + idx + '">' +
       '<div class="src-id">' +
       '<div class="src-top">' +
       '<span class="src-ico">' + u.icon(CARD_ICON[card.id] || "db", 15) + "</span>" +
       '<span class="src-name">' + u.esc(card.name) + "</span>" +
       "</div>" +
-      '<div class="src-tag">' + tag + "</div>" +
+      '<div class="src-tagline">' +
+      '<span class="src-tag">' + tag + "</span>" +
+      issueHtml +
+      "</div>" +
       "</div>" +
       '<div class="kv-grid" style="grid-template-columns:repeat(auto-fit,minmax(96px,1fr))">' + fields + "</div>" +
       sig +

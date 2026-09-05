@@ -93,10 +93,10 @@
   function verifyModal(anchor) {
     var u = App.ui;
     var rows = [
-      ["status", "verified"],
+      ["check scope", "local session match"],
       ["rule", "v0.1"],
       ["timestamp", anchor.time],
-      ["hash match", "true · root matches P1 anchor"]
+      ["root match", "true · equals this session P1 root"]
     ].map(function (r) {
       return '<div class="verify-row"><span>' + u.esc(r[0]) + '</span><b class="num">' + u.esc(r[1]) + "</b></div>";
     }).join("");
@@ -104,6 +104,9 @@
       '<div class="modal-head">' + u.icon("check", 18) + " On-chain verification</div>" +
       '<div class="verify-rows">' + rows + "</div>" +
       '<div class="root-hash num" style="font-size:12px;overflow-wrap:anywhere">' + u.esc(anchor.root) + "</div>" +
+      '<p class="modal-note">Testnet mock: the match is computed locally in this session. Production path — ' +
+      "the root is written by an on-chain contract and any third party can independently verify it through a " +
+      "block explorer; FlowCredit holds no funds and is not the verifier.</p>" +
       '<div style="margin-top:16px;text-align:right"><button type="button" class="btn btn-primary btn-sm" id="verify-close">Close</button></div>'
     );
     var close = document.getElementById("verify-close");
@@ -143,11 +146,11 @@
           '<span class="chip chip-teal num">rule v0.1</span>' +
           '<span class="chip num">' + ui.esc(st.anchor.time) + "</span>" +
           '<div class="spacer"></div>' +
-          '<button type="button" class="btn btn-primary btn-sm" id="verify-btn">' + ui.icon("shield", 13) + " Verify On-Chain</button></div>"
+          '<button type="button" class="btn btn-primary btn-sm" id="verify-btn">' + ui.icon("shield", 13) + " Verify Proof</button></div>"
         : '<div class="proof-row"><span class="proof-label">On-chain proof · Merkle root</span>' +
           '<span class="tag tag-warning">not anchored — anchor data in P1 first</span>' +
           '<div class="spacer"></div>' +
-          '<button type="button" class="btn btn-primary btn-sm" id="verify-btn">' + ui.icon("shield", 13) + " Verify On-Chain</button></div>";
+          '<button type="button" class="btn btn-primary btn-sm" id="verify-btn">' + ui.icon("shield", 13) + " Verify Proof</button></div>";
 
       var reportHtml =
         '<div class="card">' +
@@ -321,6 +324,7 @@
     var veto = App.fn.vetoed(d);
     var cci = App.fn.cci(d);
     var pdVal = App.fn.pd(cci);
+    var devInfo = App.fn.deviation(d);
     var ts = App.fn.nowStamp();
     var iso = ts.slice(0, 10);
     var parts = iso.split("-");
@@ -328,11 +332,14 @@
       key: st.subject, d: d, veto: veto, cci: cci, pd: pdVal, grade: App.fn.gradeOf(d),
       credit: App.fn.creditLine(d), anchored: !!st.anchor, anchor: st.anchor,
       auditDone: st.auditStage === 4 && !st.running,
+      dev: devInfo, vol: App.fn.volatilityPct(d), el: App.fn.expectedLoss(d),
+      dataAsOf: d.dataAsOf || null, sourceIssues: d.sourceIssues || {},
+      verdictKind: d.verdictKind || (veto ? "reject" : "approve"),
       meta: App.fn.stressMeta(st.stress),
       short: App.fn.nowShort(), iso: iso,
       dateCN: parts[0] + " 年 " + parts[1] + " 月 " + parts[2] + " 日",
       reportId: "FC-AUD-" + iso.replace(/-/g, "") + "-" +
-        (st.subject === "healthy" ? "HM001" : "SYB001")
+        (d.reportCode || (st.subject === "healthy" ? "HM001" : "SYB001"))
     };
   }
 
@@ -374,6 +381,7 @@
       ["报告日期 · Date", esc(s.dateCN)],
       ["Prepared for", "Institutional Credit Desk"],
       ["规则版本 · Rule", "flowcredit.audit_result / v0.1"],
+      ["数据截止 · Data as of", esc(s.dataAsOf || "—")],
       ["链上存证 · On-chain", s.anchored ? "已锚定 (Anchored)" : "未锚定 (Not anchored)"],
       ["Merkle Root", s.anchored && s.anchor ? esc(s.anchor.root.slice(0, 18) + "…") : "—"]
     ];
@@ -401,28 +409,41 @@
     var lead = "本报告基于 FlowCredit 链上 AI 信用风控引擎，对 " + d0.label +
       " 在审计周期内的经营数据进行全链路可信核验与风险评估。数据经四源签名采集后生成 Merkle 指纹上链存证，" +
       "AI 引擎通过 L0→L5 流水线完成标准化、去水分、五锚核验、综合评分与违约概率测算，并输出动态风控响应建议。";
+    var vk = s.verdictKind || (s.veto ? "reject" : "approve");
+    var devPct = s.dev ? s.dev.pct : App.fn.deviation(d0).pct;
     var concl;
-    if (s.veto) {
+    if (vk === "reject") {
       concl = "审计结论：" + d0.label + " 触发 " + d0.redflags.length +
         " 项红旗并一票否决（VETO）：综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率 " +
-        s.pd.toFixed(1) + "%，双价值背离 +" + d0.deviationPct + "% 越 2σ 告警；建议授信额度 0（拒绝），" +
+        s.pd.toFixed(1) + "%，双价值背离 +" + devPct + "% 越 2σ 告警；建议授信额度 0（拒绝），" +
         "转入持续链上监控与观察名单。";
+    } else if (vk === "watch") {
+      concl = "审计结论：" + d0.label + " 数据整体可核验，但覆盖不完整（Treasury 缺失周期、GPU 利用率自报待核验），" +
+        "客户集中度 " + d0.l0.business.Top5 + " 偏高、回款 " + d0.l0.business.Repayment + " 走软。" +
+        "综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率约 " + s.pd.toFixed(1) +
+        "%。建议给予小额谨慎授信 " + fmtInt(s.credit) + " test USDC，纳入观察名单并 HF 盯市、周度复评；" +
+        "补齐数据与独立核验前，不开放完整压力情景与提额。";
     } else {
       concl = "审计结论：" + d0.label + " 经营数据链上存证完整，AI 风险评估综合可信评分 CCI " + s.cci +
         "（" + s.grade + "），违约概率 " + s.pd.toFixed(1) + "%，未触发重大红旗。" +
         "建议授予授信额度 " + fmtInt(s.credit) + " test USDC，并纳入动态风控监控体系。";
     }
+    var isWatch = vk === "watch";
     var tiles =
       kpi("CCI · 综合可信评分", esc(s.cci) + ' <small>/ 1000</small>',
-        "等级 " + esc(s.grade) + " · 五锚加权计算", s.veto ? "rpt-v-red" : "rpt-v-green") +
+        "等级 " + esc(s.grade) + " · 五锚加权计算",
+        s.veto ? "rpt-v-red" : (isWatch ? "" : "rpt-v-green")) +
       kpi("PD · 违约概率", s.pd.toFixed(1) + "%",
         "Logistic 标定 PD = 1/(1+e^(0.01156*CCI-5.433))", s.veto ? "rpt-v-red" : "") +
-      kpi("建议授信额度", s.veto ? "0 test USDC" : fmtInt(s.credit) + " test USDC",
-        s.veto ? "REJECTED · VETO" : "审计后额度 · Post-audit Limit", s.veto ? "rpt-v-red" : "rpt-v-green") +
+      kpi("建议授信额度",
+        s.veto ? "0 test USDC" : fmtInt(s.credit) + " test USDC",
+        s.veto ? "REJECTED · VETO" : (isWatch ? "谨慎额度 · 观察名单" : "审计后额度 · Post-audit Limit"),
+        s.veto ? "rpt-v-red" : (isWatch ? "" : "rpt-v-green")) +
       kpi("重大红旗 · Material Flags",
-        s.veto ? esc(d0.redflags.length) + " Material Flags" : "✓ No material flag",
-        s.veto ? "硬规则命中 · 一票否决" : "五锚核验全部通过 · 未触发一票否决",
-        s.veto ? "rpt-v-red" : "rpt-v-green");
+        s.veto ? esc(d0.redflags.length) + " Material Flags" : "No hard flag",
+        s.veto ? "硬规则命中 · 一票否决"
+          : (isWatch ? "source gaps · coverage incomplete" : "✓ 五锚核验通过 · 未触发否决"),
+        s.veto ? "rpt-v-red" : (isWatch ? "" : "rpt-v-green"));
     return '<h2 class="rpt-h2">执行摘要 · Executive Summary</h2>' +
       '<p class="rpt-p">' + esc(lead) + "</p>" +
       '<p class="rpt-p rpt-concl">' + esc(concl) + "</p>" +
@@ -431,16 +452,24 @@
 
   function p1Html(s) {
     var d0 = s.d;
+    function srcStatus(id) {
+      var is = (s.sourceIssues || {})[id];
+      if (!is) { return signed(); }
+      var bad = is.level === "bad";
+      return '<span class="rpt-st ' + (bad ? "rpt-st-fail" : "rpt-st-warn") + '">' +
+        (bad ? icon("x", 11) : icon("alert", 11)) + " " + esc(is.text) + "</span>";
+    }
     var rows = [
-      ["GPU / 算力", "GPU 型号、运行时长、利用率、SCU 折算", signed(),
+      ["GPU / 算力", "GPU 型号、运行时长、利用率、SCU 折算", srcStatus("gpu"),
         fmtInt(d0.gpuHours) + " GPU·h / util " + intPct(d0.util) + "%"],
-      ["API / Token", "模型调用量、Raw Token、任务类型权重", signed(),
+      ["API / Token", "模型调用量、Raw Token、任务类型权重", srcStatus("billing"),
         esc(d0.l0.compute.Raw) + " → NT " + d0.rawNT_M.toFixed(1) + "M"],
-      ["资金 / 回款", "收付款流水、客户回款率、账期分布", signed(),
+      ["资金 / 回款", "收付款流水、客户回款率、账期分布", srcStatus("treasury"),
         "回款率 " + esc(d0.l0.business.Repayment) + " · 月支出 " + esc(d0.money)],
-      ["链上 / 交易", "链上地址交互、交易频率、对手方聚类", signed(),
+      ["链上 / 交易", "链上地址交互、交易频率、对手方聚类", srcStatus("chain"),
         d0.R.length + " 期记录 · 循环率 " + esc(d0.l0.business.Loop) +
-        (s.veto ? " · 女巫聚类检出" : " · 女巫检测通过")]
+        (s.veto ? " · 女巫聚类检出"
+          : (s.verdictKind === "watch" ? " · 覆盖部分历史" : " · 女巫检测通过"))]
     ];
     var proof;
     if (s.anchored && s.anchor) {
@@ -451,9 +480,9 @@
         '<span class="rpt-proof-l">锚定时间 · Anchored</span><span class="rpt-proof-v">' + esc(s.anchor.time) + "</span>" +
         '<span class="rpt-proof-l">规则版本 · Rule</span><span class="rpt-proof-v">flowcredit.audit_result / v0.1</span>' +
         '<span class="rpt-proof-l">Nonce</span><span class="rpt-proof-v rpt-mono">#' + pad6(s.anchor.nonce) + "</span>" +
-        '<span class="rpt-proof-l">哈希匹配 · Hash</span><span class="rpt-proof-v rpt-txt-ok">✓ true · root matches P1 anchor</span>' +
+        '<span class="rpt-proof-l">哈希匹配 · Hash</span><span class="rpt-proof-v rpt-txt-ok">local match · ✓ true · root matches P1 anchor</span>' +
         "</div>" +
-        '<button type="button" class="rpt-vbtn" data-rpt-verify>' + icon("shield", 13) + " Verify On-Chain</button>" +
+        '<button type="button" class="rpt-vbtn" data-rpt-verify>' + icon("shield", 13) + " Verify Proof</button>" +
         "</div>";
     } else {
       proof = '<div class="rpt-proof-card rpt-proof-muted">' +
@@ -477,7 +506,19 @@
   function l0L5Rows(s) {
     var d0 = s.d;
     var validPct = intPct(d0.validRate);
-    var l3 = s.veto ? "四项 Fail（效率/回款/客户/女巫）" : "五项全绿";
+    var l3;
+    if (s.veto) {
+      l3 = "四项 Fail（效率/回款/客户/女巫）";
+    } else if (s.verdictKind === "watch") {
+      var gCount = 0, yCount = 0;
+      for (var i = 0; i < d0.anchors.length; i++) {
+        if (d0.anchors[i][5] === "g") { gCount++; }
+        else if (d0.anchors[i][5] === "y") { yCount++; }
+      }
+      l3 = gCount + " pass · " + yCount + " warn";
+    } else {
+      l3 = "五项全绿";
+    }
     return [
       ["L0", "可信接入", "四源自动采集，每条带时间戳与来源签名", "四源齐全 · 口径匹配"],
       ["L1", "标准化", "折算 NT（标准 Token）与 SCU（标准算力）",
@@ -530,6 +571,7 @@
     var cciH = App.fn.cci(h), cciS = App.fn.cci(sy);
     var pdH = App.fn.pd(cciH), pdS = App.fn.pd(cciS);
     var gH = App.fn.gradeOf(h), gS = App.fn.gradeOf(sy);
+    var devH = App.fn.deviation(h), devS = App.fn.deviation(sy), devNow = App.fn.deviation(d0);
     var ratio = effS > 0 && effH > 0 ? Math.round(effS / effH) : 0;
     var compare = [
       pair("毛 Token / 折算 NT",
@@ -548,8 +590,8 @@
       pair("CCI / 等级", cciH + " / " + gH, cciS + " / " + gS),
       pair("PD 违约概率", pdH.toFixed(1) + "%", pdS.toFixed(1) + "%"),
       pair("双价值背离 D",
-        "+" + h.deviationPct + "%（正常贴合）",
-        "+" + sy.deviationPct + "%（越 2σ 告警）"),
+        "+" + devH.pct + "%（正常贴合）",
+        "+" + devS.pct + "%（越 2σ 告警）"),
       pair("建议授信额度",
         '<span class="rpt-txt-ok">' + fmtInt(App.fn.creditLine(h)) + " test USDC</span>",
         '<span class="rpt-txt-red">0（REJECTED · VETO）</span>'),
@@ -559,7 +601,7 @@
     ];
     for (var q = 0; q < compare.length; q++) { compare[q][2] = '<span class="rpt-vs-sy">' + compare[q][2] + "</span>"; }
 
-    var dev = d0.devAlert ? '<span class="rpt-txt-red">越 2σ 告警 · 数据粉饰风险</span>'
+    var dev = devNow.alert ? '<span class="rpt-txt-red">越 2σ 告警 · 数据粉饰风险</span>'
       : '<span class="rpt-txt-ok">正常贴合</span>';
     return '<h2 class="rpt-h2">二、AI 风险评估 · P2 AI Risk Assessment</h2>' +
       '<p class="rpt-p">AI 引擎通过 L0→L5 六层流水线对链上存证数据进行深度加工：从可信接入开始，经标准化度量、' +
@@ -585,7 +627,7 @@
       '<div class="rpt-div-cell"><div class="rpt-div-l">报表声明价值 R</div><div class="rpt-div-v rpt-mono">' +
       range(d0.R) + "</div><div class=\"rpt-div-n\">declared · 企业申报</div></div>" +
       '<div class="rpt-div-cell rpt-div-mid"><div class="rpt-div-l">背离度 D</div><div class="rpt-div-v rpt-mono">+' +
-      d0.deviationPct + "%</div><div class=\"rpt-div-n\">" + dev + "</div></div>" +
+      devNow.pct + "%</div><div class=\"rpt-div-n\">" + dev + "</div></div>" +
       '<div class="rpt-div-cell"><div class="rpt-div-l">链上可信价值 C</div><div class="rpt-div-v rpt-mono">' +
       range(d0.C) + "</div><div class=\"rpt-div-n\">on-chain trusted · 链上可信</div></div>" +
       "</div>";
@@ -603,6 +645,13 @@
       crBox = '<div class="rpt-hf-box"><div class="rpt-hf-l">当前授信额度</div>' +
         '<div class="rpt-hf-v rpt-txt-red">0 test USDC</div>' +
         '<div class="rpt-hf-n">REJECTED · VETO</div></div>';
+    } else if (s.verdictKind === "watch") {
+      hfBox = '<div class="rpt-hf-box"><div class="rpt-hf-l">当前健康因子 (HF)</div>' +
+        '<div class="rpt-hf-v rpt-txt-muted">Watchlist</div>' +
+        '<div class="rpt-hf-n">基线盯市 · 暂不开放完整压力测试</div></div>';
+      crBox = '<div class="rpt-hf-box"><div class="rpt-hf-l">当前授信额度</div>' +
+        '<div class="rpt-hf-v rpt-mono">' + fmtInt(s.credit) + " test USDC</div>" +
+        '<div class="rpt-hf-n">谨慎额度 · 观察名单</div></div>';
     } else {
       var marginNote = (m.hf - frames.liquidationHf) >= 0.4 ? "安全边际充足"
         : (m.hf - frames.liquidationHf) >= 0.15 ? "安全边际承压" : "逼近清算线";
@@ -637,8 +686,11 @@
       '<h3 class="rpt-h3">3.2 压力测试与动态响应 · Stress &amp; Dynamic Response</h3>' +
       '<p class="rpt-p">压力测试模拟市场价值剧烈波动（Value Shock）场景，验证主体在极端行情下的抗风险能力与系统动态响应机制。' +
       "测试过程分为五个阶段，全程自动执行并上链留痕：</p>" +
-      tbl(["阶段", "触发条件", "系统动作", "HF / 额度变化"], steps) +
-      (s.veto ? '<p class="rpt-p rpt-txt-warn">该主体已触发 VETO：授信额度为 0，不进入压力测试。</p>' : "");
+      (s.verdictKind === "watch"
+        ? '<p class="rpt-p rpt-txt-warn">观察名单（Watchlist）主体：当前为基线 HF 盯市与周度复评；' +
+          "补齐缺失数据并经独立核验前，不开放完整压力测试情景。</p>"
+        : tbl(["阶段", "触发条件", "系统动作", "HF / 额度变化"], steps) +
+          (s.veto ? '<p class="rpt-p rpt-txt-warn">该主体已触发 VETO：授信额度为 0，不进入压力测试。</p>' : ""));
   }
 
   function p4Html(s) {
@@ -648,19 +700,30 @@
       s.anchored
         ? "（1）四源经营数据采集完整，Merkle 指纹已上链存证，数据完整性可独立验证；"
         : "（1）四源经营数据采集完成；当前会话尚未执行 P1 Merkle 锚定，可在 P1 补做后复验；");
-    if (s.veto) {
+    var vk4 = s.verdictKind || (s.veto ? "reject" : "approve");
+    var devPct4 = s.dev ? s.dev.pct : App.fn.deviation(d0).pct;
+    if (vk4 === "reject") {
       lines.push(
         "（2）L0→L5 流水线执行完成，五锚核验命中 " + d0.redflags.length + " 项红旗（效率越界 / Top-5 集中 / 回款过低 / 女巫簇），触发一票否决 VETO；",
         "（3）综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率 PD " + s.pd.toFixed(1) +
-          "%，双价值背离 +" + d0.deviationPct + "% 越 2σ 告警；",
+          "%，双价值背离 +" + devPct4 + "% 越 2σ 告警；",
         "（4）建议不授予授信额度（0 test USDC），主体转入观察名单并持续链上监控，防止刷量模式迁移。");
+    } else if (vk4 === "watch") {
+      lines.push(
+        s.auditDone
+          ? "（2）L0→L5 流水线评估完成，无硬性红旗；锚点 2 pass / 3 warn（数据覆盖与集中度待观察）；"
+          : "（2）L0→L5 流水线尚未在本会话完整跑完，可在 P2 重新运行审计后刷新本报告；",
+        "（3）综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率约 " + s.pd.toFixed(1) +
+          "%，双价值背离 +" + devPct4 + "% 无告警；",
+        "（4）建议小额谨慎授信 " + fmtInt(s.credit) + " test USDC，纳入观察名单（HF 盯市 + 周度复评），" +
+          "暂不开放完整压力情景与提额。");
     } else {
       lines.push(
         s.auditDone
           ? "（2）L0→L5 流水线评估通过，五锚核验全部达标，未触发重大红旗；"
           : "（2）L0→L5 流水线尚未在本会话完整跑完，可在 P2 重新运行审计后刷新本报告；",
         "（3）综合可信评分 CCI " + s.cci + "（" + s.grade + "），违约概率 PD " + s.pd.toFixed(1) +
-          "%，双价值背离 +" + d0.deviationPct + "% 处于正常范围；",
+          "%，双价值背离 +" + devPct4 + "% 处于正常范围；",
         "（4）主体纳入动态风控监控体系，可在价值冲击时执行压力测试并自动响应，保护头寸安全。");
     }
     var risks = [
@@ -674,12 +737,19 @@
       riskHtml += '<div class="rpt-risk">' + icon("alert", 13) + "<b>" + (i + 1) + ".</b> " + esc(risks[i]) + "</div>";
     }
     var measures;
-    if (s.veto) {
+    if (vk4 === "reject") {
       measures = [
         "不授予授信额度（0 test USDC），主体列入观察名单并持续链上监控。",
         "要求主体提供真实业务材料与实名信息，完成复核前不重新发起授信评估。",
         "对链上交互持续聚类监测，防止刷量/洗交易模式迁移或复活。",
         "若后续数据转真，可按标准流程重新发起 P1→P3 全链路审计。"
+      ];
+    } else if (vk4 === "watch") {
+      measures = [
+        "授予小额谨慎授信 " + fmtInt(s.credit) + " test USDC，纳入观察名单（HF 盯市 + 周度复评）。",
+        "要求补齐 Treasury 缺失周期，并对 GPU 利用率引入独立交叉核验。",
+        "持续复评客户集中度与回款趋势，恶化即下调额度。",
+        "数据补齐并通过复评前，不开放完整压力测试与提额申请。"
       ];
     } else {
       measures = [
@@ -692,8 +762,10 @@
     }
     var meaHtml = "";
     for (var j = 0; j < measures.length; j++) {
-      meaHtml += '<div class="rpt-mea' + (s.veto ? " rpt-mea-v" : " rpt-mea-ok") + '">' +
-        (s.veto ? icon("x", 13) : icon("check", 13)) + "<b>" + (j + 1) + ".</b> " + esc(measures[j]) + "</div>";
+      var meaCls = s.veto ? " rpt-mea-v" : (vk4 === "watch" ? "" : " rpt-mea-ok");
+      var meaIc = s.veto ? icon("x", 13) : (vk4 === "watch" ? icon("clock", 13) : icon("check", 13));
+      meaHtml += '<div class="rpt-mea' + meaCls + '">' +
+        meaIc + "<b>" + (j + 1) + ".</b> " + esc(measures[j]) + "</div>";
     }
     return '<h2 class="rpt-h2">四、审计结论与建议 · Conclusion &amp; Recommendation</h2>' +
       '<h3 class="rpt-h3">4.1 综合结论 · Overall Verdict</h3>' +
@@ -726,6 +798,29 @@
     for (var w = 0; w < ANCHOR_W.length; w++) {
       weights.push(Math.round(ANCHOR_W[w] * 100) + "%");
     }
+    var elRows = SUBJECT_ORDER.map(function (k) {
+      var dk = SUBJECTS[k];
+      var ck = App.fn.cci(dk);
+      return [
+        dk.label,
+        fmtInt(App.fn.creditLine(dk)) + " test USDC",
+        App.fn.pd(ck).toFixed(1) + "%",
+        "45%（demo）",
+        String(App.fn.expectedLoss(dk))
+      ];
+    });
+    var regTexts = [
+      "四源签名采集、L0→L5 决策留痕与结论指纹存证，对应监管要求的可审计性与可解释性；",
+      "Merkle 根存证可作为监管报送与事后稽核的链上完整性证据；",
+      "FlowCredit 为 RegTech 工具，不吸储、不放贷、不托管资金、不作最终授信决定；",
+      "原始明细链下存储、基于企业授权使用，呼应数据隐私与最小上链原则。"
+    ];
+    var regSuffix = "具体合规要求以香港当地法规与专业意见为准。";
+    var regHtml = "";
+    for (var r = 0; r < regTexts.length; r++) {
+      regHtml += '<p class="rpt-p"><b>' + (r + 1) + ".</b> " +
+        esc(regTexts[r] + regSuffix) + "</p>";
+    }
     return '<h2 class="rpt-h2">附录 · Appendix</h2>' +
       '<h3 class="rpt-h3">A. 术语表 · Glossary</h3>' +
       tbl(["术语", "定义"], glossary) +
@@ -741,7 +836,9 @@
       "CCI 由五锚子分加权现算（效率 " + weights[0] + " / 回款 " + weights[1] + " / 客户 " + weights[2] +
       " / 成本 " + weights[3] + " / 时序 " + weights[4] + "），PD 由公式 PD = 1/(1+e^(0.01156*CCI-5.433)) 标定。" +
       "锚点权重与 PD 系数为 Demo 校准值，真实部署需经金融专业确认并基于历史数据训练。" +
-      "L1 口径：Raw Token 取自 L0 原始采集值，rawNT_M 为已乘 w_model/w_task 后的折算 NT，L2 毛 NT 采用 rawNT_M。</p>" +
+      "L1 口径：Raw Token 取自 L0 原始采集值，rawNT_M 为已乘 w_model/w_task 后的折算 NT，L2 毛 NT 采用 rawNT_M。" +
+      "波动率为链上可信序列 C 的 8 期环比收益率样本标准差现算（非年化、演示校准）；" +
+      "背离度 D 采用 R/C 序列均值口径 D=(meanR−meanC)/meanC，与页面展示一致。</p>" +
       '<h3 class="rpt-h3">D. 审计局限性与免责声明 · Limitations &amp; Disclaimer</h3>' +
       '<p class="rpt-p">本审计报告存在以下局限性，使用者应予以充分关注：（1）数据范围局限：审计仅覆盖授权采集的四源数据' +
       "（算力、API、资金、链上），未涵盖企业全部经营活动，表外业务、关联交易等可能未被纳入；（2）模型局限：CCI/PD 模型为 " +
@@ -752,7 +849,13 @@
       '<p class="rpt-p">免责声明：本报告由 FlowCredit 链上 AI 信用风控引擎自动生成，仅供演示与参考用途。' +
       "报告中的评估结果、评分、额度建议均基于测试网模拟数据与示例标定模型，不构成任何金融建议、投资建议、授信决策或法律意见。" +
       "FlowCredit 为 RegTech 工具，不吸储、不放贷、不碰资金、不做最终授信决定。使用者应结合自身判断与专业咨询，独立做出决策。" +
-      "本报告内容受知识产权保护，未经授权不得复制、分发或用于商业用途。</p>";
+      "本报告内容受知识产权保护，未经授权不得复制、分发或用于商业用途。</p>" +
+      '<h3 class="rpt-h3">E. 预期损失 · Expected Loss（demo）</h3>' +
+      '<p class="rpt-p">预期损失按 EL = EAD × PD × LGD 现算（三主体遍历现算，不写死结果）；' +
+      "LGD=45% 为演示假设（非拟合、非金融建议）。</p>" +
+      tbl(["主体", "EAD · 建议额度", "PD", "LGD", "EL（现算）"], elRows) +
+      '<h3 class="rpt-h3">F. 合规与监管映射 · RegTech Mapping</h3>' +
+      '<p class="rpt-p">FlowCredit 平台定位与流程的监管科技映射如下：</p>' + regHtml;
   }
 
   function footerHtml(s) {
@@ -760,26 +863,29 @@
       '<span class="rpt-engine-cell"><b>生成引擎 · Engine</b><br>FlowCredit AI Engine v0.1</span>' +
       '<span class="rpt-engine-cell"><b>报告生成时间 · Generated</b><br>' + esc(s.iso) + " " + esc(s.short) + "</span>" +
       '<span class="rpt-engine-cell rpt-engine-v"><b>链上验证 · On-chain</b><br>' +
-      '<button type="button" class="rpt-vbtn" data-rpt-verify>' + icon("shield", 13) + " Verify on-chain</button></span>" +
+      '<button type="button" class="rpt-vbtn" data-rpt-verify>' + icon("shield", 13) + " Verify Proof</button></span>" +
       "</div>";
   }
 
   function proofResultHtml() {
     var a = SNAP.anchor;
     var rows = [
-      ["status", "verified"],
+      ["status", "local match · testnet mock"],
       ["rule", "v0.1 · flowcredit.audit_result"],
       ["timestamp", a.time],
       ["nonce", "#" + pad6(a.nonce)],
-      ["hash match", "true · root matches P1 anchor"]
+      ["root match", "true · equals this session P1 root"]
     ];
     var body = "";
     for (var i = 0; i < rows.length; i++) {
       body += '<div class="rpt-vrow"><span>' + esc(rows[i][0]) + '</span><b class="rpt-mono">' + esc(rows[i][1]) + "</b></div>";
     }
     return '<div class="rpt-proof-card rpt-proof-done">' +
-      '<div class="rpt-proof-head">' + icon("check", 14) + " On-chain verification · verified</div>" + body +
-      '<div class="rpt-mono rpt-rootline">' + esc(a.root) + "</div></div>";
+      '<div class="rpt-proof-head">' + icon("check", 14) + " Proof · local session match</div>" + body +
+      '<div class="rpt-mono rpt-rootline">' + esc(a.root) + "</div>" +
+      '<p class="rpt-p" style="font-size:10.5px;color:#7A848E">Testnet mock: the match is computed locally in this session. ' +
+      "Production path — the root is written by an on-chain contract and any third party can independently verify it " +
+      "through a block explorer; FlowCredit holds no funds and is not the verifier.</p></div>";
   }
 
   function navHtml() {
@@ -947,7 +1053,7 @@
     var slot = overlay.querySelector(".rpt-proof-slot");
     if (!slot) { return; }
     slot.innerHTML = proofResultHtml();
-    if (App.ui && App.ui.toast) { App.ui.toast("Verified · root matches P1 anchor"); }
+    if (App.ui && App.ui.toast) { App.ui.toast("Proof verified · local session match"); }
   }
 
   App.report = {
