@@ -2130,3 +2130,49 @@ html{scrollbar-color:rgba(120,200,205,.28) transparent}
   .nld-badge,.nld-pills{animation:none}
   .nld-cursor{display:none}
 }
+
+/* ============================================================
+   Landing hero ask bar (Ask the risk desk) — appended.
+   Live AI Q&A via FC_AI client; hidden entirely when the
+   sidecar probe fails (offline parity).
+   ============================================================ */
+.nld-ask{max-width:560px;margin:0 0 30px}
+.nld-ask[hidden]{display:none}
+.nld-ask-head{font:700 9.5px var(--mono);letter-spacing:.16em;color:var(--teal);margin-bottom:9px}
+.nld-ask-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.nld-ask-chip{border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--text2);
+  font:600 10px var(--mono);letter-spacing:.02em;padding:4px 10px;border-radius:999px;cursor:pointer;
+  transition:color .2s,border-color .2s}
+.nld-ask-chip:hover{color:var(--text);border-color:rgba(45,212,191,.4)}
+.nld-ask-chip:disabled{opacity:.45;cursor:default}
+.nld-ask-row{display:flex;gap:7px;margin-bottom:10px}
+#nld-ask-input{flex:1;min-width:0;background:rgba(0,0,0,.22);border:1px solid var(--line);
+  border-radius:8px;color:var(--text);font:600 12px var(--mono);padding:8px 11px}
+#nld-ask-input:focus{outline:none;border-color:rgba(45,212,191,.55)}
+#nld-ask-input::placeholder{color:var(--text3)}
+#nld-ask-input:disabled{opacity:.45}
+#nld-ask-send{flex:none;width:34px;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.4);
+  border-radius:8px;color:var(--teal);cursor:pointer;display:flex;align-items:center;justify-content:center}
+#nld-ask-send:hover{background:rgba(45,212,191,.18)}
+#nld-ask-send:disabled{opacity:.45;cursor:default}
+.nld-ask-log{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+.nld-ask-q{align-self:flex-end;max-width:86%;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.28);
+  color:#C9FAF1;border-radius:10px 10px 3px 10px;padding:7px 10px;font-size:12px;line-height:1.45}
+.nld-ask-a{align-self:stretch;background:var(--card);border:1px solid var(--line);border-left:2px solid var(--teal);
+  border-radius:10px;padding:10px 12px;animation:nldAskUp .25s ease both}
+.nld-ask-meta{font:600 9px var(--mono);color:var(--text3);letter-spacing:.08em;margin-bottom:6px}
+.nld-ask-body{font-size:12.5px;line-height:1.6;color:var(--text);margin:0}
+.nld-ask-cites{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.nld-ask-cite{font:700 9px var(--mono);color:var(--teal);border:1px solid rgba(45,212,191,.35);
+  background:rgba(45,212,191,.07);padding:2px 7px;border-radius:5px}
+.nld-ask-dl{display:inline-block;margin-top:8px;font:600 10.5px var(--mono);color:var(--teal);text-decoration:none}
+.nld-ask-dl:hover{text-decoration:underline}
+.nld-ask-status{font:600 10px var(--mono);color:var(--teal);padding-left:2px}
+@keyframes nldAskUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .nld-ask-a{animation:none}
+}
+@media (max-width:560px){
+  .nld-ask{margin-bottom:24px}
+  .nld-ask-row input{font-size:11.5px;padding:8px 9px}
+}
