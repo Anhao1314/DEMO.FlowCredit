@@ -772,7 +772,7 @@
     }
     return '<h2 class="rpt-h2">四、评估结论与建议 · Conclusion &amp; Recommendation</h2>' +
       '<h3 class="rpt-h3">4.1 综合结论 · Overall Verdict</h3>' +
-      '<p class="rpt-p">经 FlowCredit 链上 AI 信用风控引擎全流程风险评估，' + esc(d0.label) + " 在审计周期内：" +
+      '<p class="rpt-p">经 FlowCredit 链上 AI 信用风控引擎全流程风险评估，' + esc(d0.label) + " 在评估周期内：" +
       esc(lines.join(" ")) + "</p>" +
       '<h3 class="rpt-h3">4.2 风险提示 · Risk Warnings</h3>' + riskHtml +
       '<h3 class="rpt-h3">4.3 建议措施 · Recommended Actions</h3>' + meaHtml;
@@ -843,7 +843,7 @@
       "波动率为链上可信序列 C 的 8 期环比收益率样本标准差现算（非年化、演示校准）；" +
       "背离度 D 采用 R/C 序列均值口径 D=(meanR−meanC)/meanC，与页面展示一致。</p>" +
       '<h3 class="rpt-h3">D. 评估局限性与免责声明 · Limitations &amp; Disclaimer</h3>' +
-      '<p class="rpt-p">本评估报告存在以下局限性，使用者应予以充分关注：（1）数据范围局限：审计仅覆盖授权采集的四源数据' +
+      '<p class="rpt-p">本评估报告存在以下局限性，使用者应予以充分关注：（1）数据范围局限：评估仅覆盖授权采集的四源数据' +
       "（算力、API、资金、链上），未涵盖企业全部经营活动，表外业务、关联交易等可能未被纳入；（2）模型局限：CCI/PD 模型为 " +
       "Demo 校准版本，锚点权重与 Logistic 系数未经真实历史数据训练，AI 算力/Token 消耗作为信用指标的合理性尚需金融专业验证；" +
       "（3）存证局限：链上存证仅保证上链后数据不可篡改，原始数据来源真实性依赖企业授权与多源交叉验证，不排除数据源本身存在造假" +
@@ -874,7 +874,7 @@
     var a = SNAP.anchor;
     var rows = [
       ["status", "local match · testnet mock"],
-      ["rule", "v0.1 · flowcredit.audit_result"],
+      ["rule", "v0.1 · flowcredit.risk_result"],
       ["timestamp", a.time],
       ["nonce", "#" + pad6(a.nonce)],
       ["root match", "true · 4-leaf Merkle proof verified locally"]
