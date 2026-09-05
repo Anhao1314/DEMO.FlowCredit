@@ -7,10 +7,88 @@
   var ui = null; // resolved lazily (App.ui exists before first render)
   var local = { busy: false };
   var CARD_ICON = { billing: "db", gpu: "cpu", treasury: "cash", chain: "link" };
+  var LEAF_NAMES = ["Billing", "GPU", "Treasury", "On-chain"];
+  var LEAF_IDS = ["billing", "gpu", "treasury", "chain"];
+  var PROOF_STEP_MS = 280;
 
   function short(fp, n) {
     n = n || 12;
     return fp ? fp.slice(0, n) + "…" : "—";
+  }
+  function sh2(fp) { return fp ? fp.slice(0, 8) + "…" + fp.slice(-6) : "—"; }
+  function motionOn() {
+    try { return !window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+    catch (e) { return true; }
+  }
+  function txStatusText(stage, st) {
+    if (stage === "signing") { return "Signing attestation · gas est. 0.00001 test ETH"; }
+    if (stage === "submitted") { return "Submitted · mempool (simulated)"; }
+    if (stage === "mined") { return "Block #" + (st.blockHeight + 2) + " mined"; }
+    if (stage === "confirmed") { return "3 confirmations · anchored ✓"; }
+    return "";
+  }
+  function txStatusCls(stage) {
+    if (stage === "signing") { return "tx-sign"; }
+    if (stage === "submitted") { return "tx-sub"; }
+    if (stage === "mined") { return "tx-mine"; }
+    if (stage === "confirmed") { return "tx-conf"; }
+    return "";
+  }
+  // Static seam reference — the production adapter contract, verbatim.
+  var ARCH_PRE = [
+    "// Production seam — not compiled or deployed in this demo.",
+    "// interface IAttestationRegistry {",
+    "//   event Attested(address indexed attester, bytes32 indexed root,",
+    "//                  uint16 ruleVersion, uint256 blockNumber, bytes32 subjectHash);",
+    "//   function attest(bytes32 root, uint16 ruleVersion, bytes32 subjectHash)",
+    "//       external returns (uint256 id);",
+    "// }",
+    "// Preferred path: Ethereum Attestation Service (EAS) on Sepolia/mainnet.",
+    "// EAS schema: bytes32 merkleRoot, uint16 ruleVersion, bytes32 subjectHash,",
+    "//             string gradeBand, uint32 cci   (revocable: false)",
+    "// Raw source data stays off-chain (encrypted store / IPFS); only the root is anchored."
+  ].join("\n");
+  function archNode(t, nowTxt, prodTxt, ic) {
+    return '<div class="arch-node"><span class="arch-ic">' + App.ui.icon(ic, 13) + "</span>" +
+      '<div class="arch-t">' + t + "</div>" +
+      '<div class="arch-now">now · ' + nowTxt + "</div>" +
+      '<div class="arch-prod">prod · ' + prodTxt + "</div></div>";
+  }
+  function archCardHtml() {
+    var u = App.ui;
+    var flow =
+      archNode("Off-chain sources &amp; AI scoring (private)", "mock · local record set", "signed enterprise ledgers", "db") +
+      '<span class="arch-arrow">→</span>' +
+      archNode("Merkle commit (local)", "mockHash in this session", "deterministic tree · one root", "layers") +
+      '<span class="arch-arrow">→</span>' +
+      archNode("On-chain anchor · root only (EAS / Registry)", "simulated anchor · block +2", "EAS attest() / IAttestationRegistry", "anchor") +
+      '<span class="arch-arrow">→</span>' +
+      archNode("Anyone verifies (explorer / recompute)", "proof panel below", "block explorer / recompute", "shield");
+    return '<div class="card">' +
+      '<details class="arch"><summary>' + u.icon("layers", 13) +
+      " Web3 reference architecture · mock → production</summary>" +
+      '<div class="arch-body"><div class="arch-flow">' + flow + "</div>" +
+      '<pre class="arch-pre">' + ARCH_PRE + "</pre></div>" +
+      "</details></div>";
+  }
+  function proofPanelHtml(st) {
+    var u = App.ui;
+    var chips = "";
+    for (var i = 0; i < LEAF_NAMES.length; i++) {
+      chips += '<button type="button" class="pf-chip' + (i === local.leafIdx ? " on" : "") + '" data-leaf="' + i +
+        '" title="' + u.esc(sh2(st.anchor.levels[0][i])) + '">' +
+        u.icon(CARD_ICON[LEAF_IDS[i]] || "db", 11) + " " + LEAF_NAMES[i] + "</button>";
+    }
+    return '<div class="proof-panel">' +
+      '<div class="proof-bar">' + u.icon("shield", 13) + "<b>Verify Merkle Proof</b>" +
+      '<span class="proof-note num">leaf path · recompute with shared combine</span>' +
+      '<span class="spacer"></span>' +
+      '<button type="button" class="btn btn-sm btn-primary" id="proof-verify">' + u.icon("check", 12) + " Verify Proof</button>" +
+      '<button type="button" class="btn btn-sm btn-ghost" id="proof-reset">' + u.icon("x", 12) + " Reset</button>" +
+      "</div>" +
+      '<div class="proof-leaves">' + chips + "</div>" +
+      '<div class="proof-out num" id="proof-out"></div>' +
+      "</div>";
   }
 
   function cardHtml(card, idx, signed, fp) {
