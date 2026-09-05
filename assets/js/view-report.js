@@ -392,7 +392,7 @@
     }
     return '<div class="rpt-brandrow">' +
       '<span class="rpt-brand">' + icon("mark", 20) +
-      "<b>FlowCredit 流信</b><span class=\"rpt-brand-sub\">On-chain AI Credit Risk Intelligence</span></span>" +
+      '<span class="rpt-brand-sub">On-chain AI Credit Risk Intelligence</span></span>' +
       '<span class="rpt-brand-side">链上 AI 信用风控 · RegTech</span></div>' +
       '<div class="rpt-title">链上 AI 信用风控审计报告</div>' +
       '<div class="rpt-kicker">On-chain Attestation · AI Risk Scoring · Dynamic Response</div>' +
@@ -1011,7 +1011,7 @@
     root.innerHTML =
       '<div class="report-frame">' +
       '<div class="report-chrome">' +
-      '<span class="rc-brand">' + icon("mark", 16) + " <b>FlowCredit</b> · On-chain Audit Report</span>" +
+      '<span class="rc-brand">' + icon("mark", 16) + " · On-chain Audit Report</span>" +
       '<span class="rc-tag">testnet demo</span>' +
       '<span class="spacer"></span>' +
       '<button type="button" class="btn btn-ghost btn-sm" data-rpt-close>' + icon("x", 13) + " Close</button>" +
