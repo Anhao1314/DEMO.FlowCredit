@@ -1999,3 +1999,42 @@ html{scrollbar-color:rgba(120,200,205,.28) transparent}
   .content{padding:16px 14px 90px}
   .page-title{font-size:18px}
 }
+
+/* ============================================================
+   Live-AI enhancer (view-ai-live.js) — session-only UI.
+   Appended: row re-run button, status line, Ask-the-AI box.
+   ============================================================ */
+.ai-live-btn{display:inline-flex;align-items:center;gap:5px;margin-left:auto;
+  border:1px solid rgba(45,212,191,.32);background:rgba(45,212,191,.06);color:#9BE8DC;
+  font:600 9.5px var(--mono);letter-spacing:.08em;padding:3px 9px;border-radius:7px;cursor:pointer}
+.ai-live-btn:hover{background:rgba(45,212,191,.14);color:#C9FAF1}
+.ai-live-btn:disabled{opacity:.5;cursor:default}
+.ai-live-status{flex-basis:100%;font:600 9.5px var(--mono);letter-spacing:.06em;color:var(--text2);min-height:12px}
+.ai-live-status[data-state="busy"]{color:var(--teal)}
+.ai-live-status[data-state="ok"]{color:var(--green)}
+
+.ask-ai{margin-top:12px;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--card);padding:14px}
+.ask-head{font:700 9.5px var(--mono);letter-spacing:.16em;color:var(--teal);margin-bottom:9px}
+.ask-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ask-chip{border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--text2);
+  font:600 10px var(--mono);padding:4px 10px;border-radius:999px;cursor:pointer}
+.ask-chip:hover{color:var(--text);border-color:rgba(45,212,191,.4)}
+.ask-row{display:flex;gap:8px;margin-bottom:10px}
+.ask-row input{flex:1;min-width:0;background:rgba(0,0,0,.22);border:1px solid var(--line);
+  border-radius:8px;color:var(--text);font:600 12px var(--mono);padding:8px 10px}
+.ask-row input:focus{outline:none;border-color:rgba(45,212,191,.55)}
+.ask-log{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+.ask-q{align-self:flex-end;max-width:82%;background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.28);
+  color:#C9FAF1;border-radius:10px 10px 3px 10px;padding:7px 10px;font-size:12px}
+.ask-a{align-self:flex-start;max-width:96%;background:rgba(255,255,255,.025);border:1px solid var(--line);
+  border-radius:10px 10px 10px 3px;padding:9px 11px;font-size:12.5px;line-height:1.55;color:var(--text)}
+.ask-cites{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px}
+.ask-cite{font:700 9px var(--mono);color:var(--teal);border:1px solid rgba(45,212,191,.35);
+  background:rgba(45,212,191,.07);padding:2px 7px;border-radius:5px}
+.ask-status{font:600 10px var(--mono);color:var(--teal);padding:2px 2px 4px}
+
+@media (max-width:560px){
+  .ai-live-btn{margin-left:0}
+  .ask-ai{padding:11px}
+}
