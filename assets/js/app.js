@@ -161,6 +161,7 @@
       if (l2 && !walletConnected) { l2.textContent = "Connect Wallet"; }
     });
     highlightTabs();
+    highlightFlow();
 
   }
 
@@ -201,6 +202,21 @@
     }
   }
 
+  function highlightFlow() {
+    var route = currentRoute();
+    var map = { workspace: "p1", ingest: "p1", audit: "p2", report: "p3" };
+    var active = map[route] || "";
+    document.body.setAttribute("data-route", route || "");
+    var steps = rootEl.querySelectorAll(".df-step");
+    for (var i = 0; i < steps.length; i++) {
+      var on = steps[i].getAttribute("data-flow") === active;
+      steps[i].classList.toggle("on", on);
+      if (on) { steps[i].setAttribute("aria-current", "step"); } else { steps[i].removeAttribute("aria-current"); }
+    }
+    var strip = rootEl.querySelector(".demo-flow");
+    if (strip) { strip.classList.toggle("is-off", route === "landing"); }
+  }
+
   function highlightTabs() {
     var route = currentRoute();
     var links = rootEl.querySelectorAll(".nav-tab");
@@ -226,6 +242,7 @@
     var view = App.views[route] || App.views.ingest;
     view.render(mainEl);
     highlightTabs();
+    highlightFlow();
 
     if (mainEl.scrollTop) { window.scrollTo(0, 0); }
     revealOnce();
