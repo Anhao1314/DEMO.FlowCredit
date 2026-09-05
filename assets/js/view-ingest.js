@@ -143,6 +143,68 @@
       "</div>";
   }
 
+  /* ---------- read-only dictionary overview card (display only) ---------- */
+  function dictOverviewHtml() {
+    try {
+      if (!ui) { ui = App.ui; }
+      var esc2 = (ui && ui.esc) ? ui.esc : function (s) { return String(s == null ? "" : s); };
+      // Frozen-array guard: 29 rows / 19 live / 10 next must hold, otherwise
+      // the list was corrupted — refuse to render rather than show stale counts.
+      var liveN = 0;
+      for (var gi = 0; gi < P0_SIGNALS.length; gi++) { if (P0_SIGNALS[gi].live) { liveN++; } }
+      var total = P0_SIGNALS.length;
+      var nextN = total - liveN;
+      if (total !== 29 || liveN !== 19 || nextN !== 10) { return ""; }
+      var layerHtml = "";
+      for (var i = 0; i < DICT_LAYERS.length; i++) {
+        var L = DICT_LAYERS[i];
+        layerHtml += '<div class="dict-layer dict-layer-' + L[4] + '">' +
+          '<div class="dict-l-top"><b>' + esc2(L[0]) + "</b>" +
+          '<span class="dict-l-count">' + esc2(L[1]) + "</span></div>" +
+          '<div class="dict-l-sub">' + esc2(L[2]) + "</div>" +
+          '<div class="dict-l-note">' + esc2(L[3]) + "</div></div>";
+      }
+      var domHtml = "";
+      for (var j = 0; j < DICT_DOMAINS.length; j++) {
+        domHtml += '<span class="dict-dom"><b>' + esc2(DICT_DOMAINS[j][0]) + "</b> " +
+          esc2(DICT_DOMAINS[j][1]) + ' <i class="num">' + DICT_DOMAINS[j][2] + "</i></span>";
+      }
+      var groups = "";
+      for (var k = 0; k < DICT_DOMAINS.length; k++) {
+        var code = DICT_DOMAINS[k][0];
+        var cnt = 0;
+        var rows = "";
+        for (var m = 0; m < P0_SIGNALS.length; m++) {
+          if (P0_SIGNALS[m].domain !== code) { continue; }
+          cnt++;
+          var sig = P0_SIGNALS[m];
+          rows += '<div class="dict-row"><span class="dict-label">' + esc2(sig.label) + "</span>" +
+            '<span class="dict-id">' + esc2(sig.id) + "</span>" +
+            (sig.live
+              ? '<span class="tag tag-success">live</span>'
+              : '<span class="tag tag-warning">MVP</span>') + "</div>";
+        }
+        groups += '<div class="dict-group"><div class="dict-group-t">' + esc2(code) + " · " +
+          esc2(DICT_DOMAINS[k][1]) + " (" + cnt + ")</div>" + rows + "</div>";
+      }
+      return '<div class="card dict-card" id="dict-overview">' +
+        '<div class="dict-head"><div class="dict-title">Assessment Framework</div>' +
+        '<div class="dict-sub">Data dictionary v0.2 · ' + TOTAL_SIGNALS + " signals</div></div>" +
+        '<div class="dict-layers">' + layerHtml + "</div>" +
+        '<div class="dict-domains">' + domHtml + "</div>" +
+        '<p class="dict-quote">Raw token volume is only one signal: it can be faked. ' +
+        "Credit needs legacy fundamentals, and every claim must survive cross-source consistency checks.</p>" +
+        '<details class="dict-details"><summary>P0 required signals · ' + total + " (" + liveN +
+        " live in this demo · " + nextN + " next in MVP)</summary>" +
+        '<div class="dict-groups">' + groups + "</div></details>" +
+        '<div class="dict-foot">Display-only overview · not part of this batch\'s Merkle root · ' +
+        "scoring weights frozen for the demo</div>" +
+        "</div>";
+    } catch (e) {
+      return ""; // the four source cards and the anchor flow must keep working
+    }
+  }
+
   function cardHtml(card, idx, signed, fp) {
     var u = App.ui;
     var fields = card.fields.map(function (f) {
