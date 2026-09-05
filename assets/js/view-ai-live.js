@@ -225,10 +225,23 @@
     }).then(function (r) {
       if (r && r.ok) {
         window.FC_LIVE = true;
+        window.FC_AI = {
+          ask: function (subject, question) {
+            return fetchTimeout(BASE + "/ask", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ subject: subject, question: question })
+            }, 36000).then(function (res) {
+              return res.json().then(function (j) { return { ok: res.ok, data: j }; });
+            });
+          }
+        };
+        try { document.dispatchEvent(new Event("fc:live")); } catch (e) { /* consumer polls FC_AI */ }
         if (lastHost && lastCtx) refreshPanel();
       }
     }, function () {
       window.FC_LIVE = false;
+      try { document.dispatchEvent(new Event("fc:live-off")); } catch (e) { /* consumer reads FC_AI absence */ }
     });
   }
   boot();
