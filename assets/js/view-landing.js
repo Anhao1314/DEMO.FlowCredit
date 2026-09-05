@@ -224,7 +224,7 @@
     function barRow(name, val, pct, tone) {
       return '<div class="ld-cmp-row">' +
         '<span class="ld-cmp-k">' + name + "</span>" +
-        '<span class="ld-cmp-track"><span class="ld-bar ' + tone + '" data-w="' + pct + '"></span></span>" +
+        '<span class="ld-cmp-track"><span class="ld-bar ' + tone + '" data-w="' + pct + '"></span></span>' +
         '<span class="ld-cmp-v num">' + fmtNum(val) + " M</span></div>";
     }
     return '<section class="ld-sec ld-rv" style="transition-delay:60ms">' +
