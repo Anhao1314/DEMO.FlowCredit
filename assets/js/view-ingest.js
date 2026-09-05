@@ -11,6 +11,58 @@
   var LEAF_IDS = ["billing", "gpu", "treasury", "chain"];
   var PROOF_STEP_MS = 280;
 
+  /* ---------- read-only assessment framework dictionary (v0.2) ----------
+     Display-only static data for the P1 dictionary overview card. Never
+     feeds sourceCards()/leafDigest()/merkleBuild — the anchor root is
+     byte-identical with or without this card. 29/19/10 below are COMPUTED
+     from P0_SIGNALS at render time; if the array is ever edited so the
+     counts stop matching (29 total / 19 live / 10 next), the card refuses
+     to render instead of showing stale numbers. */
+  var TOTAL_SIGNALS = 70; // v0.2 full dictionary size (display only)
+  var DICT_LAYERS = [     // title, count text, sub line, note line, tone
+    ["Legacy Credit Foundation", "31 signals", "Financials · Customers · Credit history & KYB",
+      "ability & willingness to repay", "l1"],
+    ["AI-native Metering", "25 signals", "Tokens · GPU / infrastructure",
+      "real AI operating activity, leading signal", "l2"],
+    ["On-chain & Cross-check", "14 signals + 7 rules", "declared vs verifiable · wash / sybil",
+      "X1–X7 cross-source consistency", "l3"]
+  ];
+  var DICT_DOMAINS = [   // F-code, name, signal count (v0.2; sums to 70)
+    ["F1", "Financials", 12], ["F2", "Customers", 11], ["F3", "Credit·KYB", 8],
+    ["F4", "Tokens", 16], ["F5", "GPU", 9], ["F6", "On-chain", 14]
+  ];
+  var P0_SIGNALS = [     // {domain,label,id,live} — order + live flags frozen
+    { domain: "F1", label: "Revenue (MRR/ARR)", id: "fin_revenue", live: false },
+    { domain: "F1", label: "Operating Cash Flow", id: "fin_op_cashflow", live: false },
+    { domain: "F1", label: "Cash & stablecoin balance", id: "fin_cash_balance", live: false },
+    { domain: "F2", label: "Paying customers", id: "cust_paying", live: true },
+    { domain: "F2", label: "Top-5 concentration", id: "cust_top5", live: true },
+    { domain: "F3", label: "Days past due", id: "crh_dpd", live: false },
+    { domain: "F3", label: "Historical repay rate", id: "crh_hist_repay", live: false },
+    { domain: "F4", label: "Input tokens", id: "cmp_input_tokens", live: true },
+    { domain: "F4", label: "Output tokens", id: "cmp_output_tokens", live: true },
+    { domain: "F4", label: "Raw tokens", id: "cmp_raw_tokens", live: true },
+    { domain: "F4", label: "Requests", id: "cmp_requests", live: true },
+    { domain: "F4", label: "Model tier", id: "cmp_model", live: true },
+    { domain: "F4", label: "Task type", id: "cmp_task_type", live: true },
+    { domain: "F4", label: "Idle-loop waste", id: "cmp_waste_idle", live: true },
+    { domain: "F4", label: "Duplicate waste", id: "cmp_waste_dup", live: true },
+    { domain: "F4", label: "Pulse-spike waste", id: "cmp_waste_pulse", live: true },
+    { domain: "F4", label: "Valid token rate", id: "cmp_valid_rate", live: true },
+    { domain: "F5", label: "GPU-hours", id: "infra_gpu_hours", live: true },
+    { domain: "F5", label: "GPU model", id: "infra_gpu_model", live: true },
+    { domain: "F5", label: "Utilization", id: "infra_util", live: true },
+    { domain: "F5", label: "Unit cost $/GPU·h", id: "infra_unit_cost", live: false },
+    { domain: "F5", label: "Cloud/compute bill", id: "infra_cloud_bill", live: false },
+    { domain: "F6", label: "Subject address", id: "chn_address", live: true },
+    { domain: "F6", label: "On-chain balance", id: "chn_balance", live: false },
+    { domain: "F6", label: "Inflow", id: "chn_inflow", live: false },
+    { domain: "F6", label: "Inflow retention", id: "chn_inflow_retention", live: false },
+    { domain: "F6", label: "Loop ratio", id: "chn_loop_ratio", live: true },
+    { domain: "F6", label: "R declared series", id: "chn_R_series", live: true },
+    { domain: "F6", label: "C credible series", id: "chn_C_series", live: true }
+  ];
+
   function short(fp, n) {
     n = n || 12;
     return fp ? fp.slice(0, n) + "…" : "—";
