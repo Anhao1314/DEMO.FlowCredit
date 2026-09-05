@@ -83,6 +83,28 @@
       })(els[i]);
     }
   }
+  // S2 comparison bars start at width 0 and transition to their computed
+  // width on the next frame (reduced-motion renders the final state at once).
+  function measureBars(host) {
+    if (typeof host.querySelectorAll !== "function" ||
+        typeof App.fn === "undefined" || !App.fn) { return; }
+    var bars = host.querySelectorAll(".ld-bar[data-w]");
+    if (!bars.length) { return; }
+    function applyAll() {
+      for (var i = 0; i < bars.length; i++) {
+        bars[i].style.width = bars[i].getAttribute("data-w");
+      }
+    }
+    var reduced = false;
+    try {
+      reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    } catch (e) { /* motion assumed on */ }
+    if (typeof window === "undefined" || reduced || typeof App.fn.raf !== "function") {
+      applyAll();
+      return;
+    }
+    App.fn.raf(applyAll);
+  }
 
   function esc(s) {
     return String(s == null ? "" : s)
