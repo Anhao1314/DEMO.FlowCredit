@@ -319,6 +319,7 @@
         '<span class="chip">subject · ' + ui.esc(d.label) + "</span>" +
         '<span class="chip subj-addr num">' + ui.esc(App.fn.shortAddr(d.address)) + "</span>" +
         "</div>" +
+        dictOverviewHtml() +
         '<div class="ingest-cols">' +
         '<div class="col-main">' +
         '<div class="card"><div class="card-h"><div class="card-title">' + ui.icon("layers", 15) + " Data sources</div>" +
