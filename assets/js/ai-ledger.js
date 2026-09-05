@@ -2,7 +2,7 @@
    External LLM verdicts (deepseek-chat). Display-only data; App.fn untouched. */
 window.AI_LEDGER = {
  "meta": {
-  "builtAtUtc": "2026-09-05 14:10:33 UTC",
+  "builtAtUtc": "2026-09-05 14:18:30 UTC",
   "model": "deepseek-chat",
   "dshVersion": "0.1.2-rc.1"
  },
@@ -10,10 +10,10 @@ window.AI_LEDGER = {
   "healthy": {
    "subjectId": "healthy-merchant",
    "verdict": "approve",
-   "cci": 846,
-   "pdPct": 3.0,
+   "cci": 872,
+   "pdPct": 2.0,
    "grade": "A",
-   "creditSuggestedUsd": 16000,
+   "creditSuggestedUsd": 18000,
    "redflags": [],
    "anchors": [
     {
@@ -21,93 +21,162 @@ window.AI_LEDGER = {
      "score": 85,
      "state": "g",
      "evidence": [
-      "F2",
-      "F3"
+      "F3",
+      "F2"
      ],
-     "note": "22,857 NT/h within peer band; efficient."
+     "note": "22.9k NT/GPUh firmly inside peer band"
     },
     {
      "name": "repayment",
-     "score": 92,
+     "score": 88,
      "state": "g",
      "evidence": [
-      "F4"
+      "F4",
+      "F7"
      ],
-     "note": "96% collected; strong repayment."
+     "note": "96% repayment; 92% real transactions, reliable"
     },
     {
      "name": "customer_concentration",
-     "score": 72,
+     "score": 90,
      "state": "g",
      "evidence": [
       "F5"
      ],
-     "note": "168 customers; top-5 36%, diversified."
+     "note": "168 clients, top-5 only 36% diversified"
     },
     {
      "name": "cost_stability",
-     "score": 88,
-     "state": "g",
-     "evidence": [
-      "F6",
-      "F9"
-     ],
-     "note": "Stable spend; waste ~5% only."
-    },
-    {
-     "name": "time_sybil",
      "score": 85,
      "state": "g",
      "evidence": [
-      "F7",
-      "F8",
-      "F10",
-      "F11"
+      "F6",
+      "F9",
+      "F10"
      ],
-     "note": "92% real txn, smooth, no Sybil."
+     "note": "58k steady; 5% waste; smooth series"
+    },
+    {
+     "name": "time_sybil",
+     "score": 88,
+     "state": "g",
+     "evidence": [
+      "F8",
+      "F11",
+      "F12"
+     ],
+     "note": "no Sybil; no red flags; flagship mix"
     }
    ],
-   "trace": "Efficiency 22,857 NT/h sits squarely inside the 8,000-30,000 peer band, so no extreme-multiple hard flag (F3). Repayment of 96% (F4) and low ~5% aggregate waste inventory (F9) confirm a covering, economical merchant. Concentration is well contained at 36% top-5 across 168 customers (F5), far from the 80%-related-party threshold. Volume is smooth with no shock spikes (F10), 92% real transactions on high-value flagship reasoning (F7, F11), and no Sybil cluster or custody flags (F8, F12). Residual caveats are self-reported 85% utilization (F2) and mild concentration (F5), which compress pricing but do not destabilize any anchor. All anchors sit in the green band with no 50-59 warning states, so the merchant earns a clean approve under the verdict doctrine.",
+   "trace": "No hard threshold triggered, so no reject (rules). Efficiency anchors the case: 22,857 NT per GPU-hour (F3) sits mid peer band, far below the extreme-multiple flag, though utilization is self-reported (F2). Repayment of 96% of billed revenue (F4) is clean; customer base is broad (168, top-5=36%, F5), removing related-party concentration concerns. Cost profile is stable at 58k/month with only ~5% total inventory waste and smooth volume (F6,F9,F10); time/Sybil checks clear through 92% real transactions, absence of Sybil clusters, and no regulatory/custodial flags (F7,F8,F12). Minor 92%-real and self-reported-only items are warnings and mildly temper scores, but no anchor falls below the 60 green line. Grade A, near-clean PD, generous credit within demo cap.",
    "factsSha256": "4dbcfda80d888cba",
    "promptSha256": "1fa26bf995f5cef5"
   },
   "watch": {
    "subjectId": "watch-merchant",
    "verdict": "watch",
-   "cci": 557,
-   "pdPct": 9.0,
+   "cci": 637,
+   "pdPct": 12.0,
    "grade": "C",
-   "creditSuggestedUsd": 8000,
+   "creditSuggestedUsd": 5000,
    "redflags": [],
    "anchors": [
     {
      "name": "efficiency",
-     "score": 57,
-     "state": "y",
+     "score": 78,
+     "state": "g",
      "evidence": [
-      "F2",
       "F3",
-      "F12"
+      "F7",
+      "F9"
      ],
-     "note": "Above band but hrs self-reported (F12), no cross-check"
+     "note": "Above-band flow but 68% real tx, ~22% waste"
     },
     {
      "name": "repayment",
-     "score": 55,
+     "score": 58,
      "state": "y",
      "evidence": [
       "F4"
      ],
-     "note": "78% repayment, softening trend, still well above 20%"
+     "note": "78% repayments, softening trend = warning"
     },
     {
      "name": "customer_concentration",
-     "score": 55,
+     "score": 57,
      "state": "y",
      "evidence": [
       "F5"
      ],
-     "note": "Top-5 64%, elevated but below 80%, no related parties"
+     "note": "Top-5 64% elevated, not >80% flag"
+    },
+    {
+     "name": "cost_stability",
+     "score": 52,
+     "state": "y",
+     "evidence": [
+      "F6",
+      "F10",
+      "F9"
+     ],
+     "note": "Treasury gaps, idle/duplicate/pulse waste"
+    },
+    {
+     "name": "time_sybil",
+     "score": 70,
+     "state": "g",
+     "evidence": [
+      "F8"
+     ],
+     "note": "No Sybil cluster; partial chain history tempers"
+    }
+   ],
+   "trace": "No hard red flag met: F3 efficiency (33,750 NT/h) sits just ~12% above the 8,000-30,000 band — marginal, not an extreme multiple — F5 top-5=64% stays below the 80% threshold, F4 repayment 78% is well above the 20% floor, and F8 shows no Sybil cluster. Efficiency is the clean high anchor (F3). Decisive negatives are warnings: F4 softening repayment, F5 elevated 64% top-five share, F10 partial treasury with two missing periods, F7 68% real-transaction ratio and F9 ~22% waste, plus F12 self-reported utilization with no independent cross-check. These push repayment, concentration, and cost-stability anchors into the 50-59 y band, warranting a watchlist verdict with compressed credit rather than approval.",
+   "factsSha256": "746262da39f4e952",
+   "promptSha256": "932346456a0a9f01"
+  },
+  "sybil": {
+   "subjectId": "sybil-address",
+   "verdict": "reject",
+   "cci": 168,
+   "pdPct": 85.0,
+   "grade": "F",
+   "creditSuggestedUsd": 0,
+   "redflags": [
+    "Efficiency 514,284 NT per GPU-hour, an extreme hundreds-of-thousands multiple beyond the 8,000-30,000 peer band and its top (F1,F2,F3)",
+    "Customer repayments only 12% of billed, under the 20% hard floor (F4)",
+    "Top-5 share 91% with mostly related parties, exceeding the >80% related-party reject threshold (F5)",
+    "Sybil cluster detected, a hard red flag (F8)"
+   ],
+   "anchors": [
+    {
+     "name": "efficiency",
+     "score": 0,
+     "state": "r",
+     "evidence": [
+      "F1",
+      "F2",
+      "F3"
+     ],
+     "note": "514,284 NT/h far above hundreds-of-thousands threshold"
+    },
+    {
+     "name": "repayment",
+     "score": 15,
+     "state": "r",
+     "evidence": [
+      "F4"
+     ],
+     "note": "12% customer repayments below 20% reject floor"
+    },
+    {
+     "name": "customer_concentration",
+     "score": 20,
+     "state": "r",
+     "evidence": [
+      "F5"
+     ],
+     "note": "Top-5 91%, mostly related parties"
     },
     {
      "name": "cost_stability",
@@ -115,93 +184,22 @@ window.AI_LEDGER = {
      "state": "y",
      "evidence": [
       "F6",
-      "F9",
-      "F10"
-     ],
-     "note": "Spend stable but waste plus treasury gaps (F10)"
-    },
-    {
-     "name": "time_sybil",
-     "score": 56,
-     "state": "y",
-     "evidence": [
-      "F7",
-      "F8",
-      "F9"
-     ],
-     "note": "No Sybil, but 68% real-transaction; partial chain history"
-    }
-   ],
-   "trace": "No hard red flag met: efficiency 33,750 NT/h is only modestly above the peer band (F3), not an extreme multiple; top-5 concentration is 64% (F5), below the 80% related-party threshold; repayment 78% (F4) stays far above 20%; no Sybil cluster (F8). However, material warnings accumulate: softening repayment (F4), GPU hours and utilization only self-reported with no independent check (F2,F12), elevated concentration (F5), waste inventory and two missing treasury periods (F9,F10), plus a 68% real-transaction ratio with partial on-chain history (F7,F8). These drive every anchor into the 50-59 bracket and compress credit, so verdict is watch with credit compressed into the 4,000-10,000 band.",
-   "factsSha256": "746262da39f4e952",
-   "promptSha256": "932346456a0a9f01"
-  },
-  "sybil": {
-   "subjectId": "sybil-address",
-   "verdict": "reject",
-   "cci": 38,
-   "pdPct": 87.0,
-   "grade": "F",
-   "creditSuggestedUsd": 0,
-   "redflags": [
-    "Efficiency 514,286 NT per GPU-hour is an extreme multiple of the ~8,000-30,000 peer band (F3).",
-    "Top-5 customer share 91% exceeds 80% and is mostly related parties (F5).",
-    "Customer repayments at 12% of billed revenue, below the 20% floor (F4).",
-    "Sybil cluster detected (F8)."
-   ],
-   "anchors": [
-    {
-     "name": "efficiency",
-     "score": 0,
-     "state": "r",
-     "evidence": [
-      "F3",
-      "F10",
-      "F9"
-     ],
-     "note": "514K NT/h is extreme multiple; loop pulse spikes show fabrication"
-    },
-    {
-     "name": "repayment",
-     "score": 5,
-     "state": "r",
-     "evidence": [
-      "F4"
-     ],
-     "note": "12% repayment far under 20% floor"
-    },
-    {
-     "name": "customer_concentration",
-     "score": 5,
-     "state": "r",
-     "evidence": [
-      "F5"
-     ],
-     "note": "91% top-5 share, mostly related parties"
-    },
-    {
-     "name": "cost_stability",
-     "score": 10,
-     "state": "r",
-     "evidence": [
-      "F2",
-      "F9",
-      "F10"
-     ],
-     "note": "High spend amid idle/duplicate waste, unverified utilization"
-    },
-    {
-     "name": "time_sybil",
-     "score": 0,
-     "state": "r",
-     "evidence": [
-      "F8",
       "F7"
      ],
-     "note": "Sybil cluster; only 21% real-transaction ratio"
+     "note": "Recurring bill stable yet funds synthetic flow"
+    },
+    {
+     "name": "time_sybil",
+     "score": 5,
+     "state": "r",
+     "evidence": [
+      "F8",
+      "F10"
+     ],
+     "note": "Sybil cluster plus isolated pulse spikes"
     }
    ],
-   "trace": "Reject on four independent hard flags. Efficiency at 514,286 NT/h (F3) is an extreme multiple of the peer band, unsupported by organic demand; volume lands as isolated pulse spikes, 67% loop pattern (F10), amid idle-loop, duplicate and spike waste (F9), flagging synthetic traffic. Top-5 concentration is 91%, mostly related parties (F5), so no genuine diversification. Repayment is only 12%, far under the 20% floor (F4). A Sybil cluster was detected (F8) with a real-transaction ratio of just 21% (F7). Self-reported 41% utilization (F2) is unverified and inconsistent. Every anchor collapses into the red zone; CCI is minimal, PD very high, and offered credit is zero.",
+   "trace": "Efficiency of 514,284 NT/h (F3) is a huge hundreds-of-thousands multiple over peer 8,000-30,000 and compresses the token-per-GPU-hour footprint under 41% utilization (F2,F1): a hard flag. Repayment at 12% (F4) breaches the 20% default floor. Top-5 concentration is 91% with mostly related parties (F5). A Sybil cluster (F8) and isolated pulse spikes (F10) expose identity spoofing. Waste inventory shows 42% idle loops, 16% duplicates, 8% pulse spikes (F9); real-transaction ratio is only 21% (F7), no regulatory/custody data (F12). These are independent reject screens, so credit is zero.",
    "factsSha256": "c9319c7c404adb4a",
    "promptSha256": "2842981b5d8e6d76"
   }
