@@ -1768,3 +1768,18 @@ pre.arch-pre{margin:0;padding:11px 13px;border:1px solid var(--line-soft);border
     transition:none !important}
   .ld-bar{transition:none !important}
 }
+
+/* ============================================================
+   Brand logo swap (assets/img/logo.png) — appended only.
+   Height-driven image so every call site keeps its former size;
+   width auto preserves the 1206:583 lockup ratio.
+   ============================================================ */
+.lc-logo{display:inline-block;vertical-align:middle;border-radius:8px;
+  object-fit:contain;box-shadow:0 0 0 1px rgba(120,200,205,.16),0 0 18px rgba(45,212,191,.07)}
+.brand .lc-logo{height:28px;width:auto;border-radius:7px}
+.rpt-brand .lc-logo{height:22px;width:auto;border-radius:6px}
+.rc-brand .lc-logo{height:17px;width:auto;border-radius:5px;margin-right:2px}
+.rpt-brand-sub,.rpt-brand-side{vertical-align:middle}
+@media (max-width:420px){
+  .brand .lc-logo{height:24px;border-radius:6px}
+}
