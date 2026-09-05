@@ -170,11 +170,13 @@
   function render(host) {
     if (!ui) { ui = App.ui; }
     local.busy = false;
+    local.proofBusy = false;
     try {
       var st = App.state;
       var d = SUBJECTS[st.subject];
       var cards = App.fn.sourceCards(d);
       var anchored = !!st.anchor;
+      var txOn = anchored && st.txStage === "confirmed";
       var cardHtmls = cards.map(function (card, i) {
         var fp = anchored && st.anchor.levels && st.anchor.levels[0] ? st.anchor.levels[0][i] : "";
         return cardHtml(card, i, anchored, fp);
@@ -189,6 +191,10 @@
           '<span class="mono" style="font-size:11px;color:var(--text2)">block ' + ui.fmtInt(st.anchor.block) +
           " · " + ui.esc(st.anchor.time) + " · nonce " + st.anchor.nonce + "</span></div>"
         : '<div class="anchor-state"><span class="chip chip-amber">not anchored yet</span></div>';
+      var proofHtml = txOn ? proofPanelHtml(st) : "";
+      var archHtml = archCardHtml();
+      var statusHtml = '<div id="tx-status" class="tx-status' + (txOn ? " tx-conf" : "") + '">' +
+        (txOn ? txStatusText("confirmed", st) : "") + "</div>";
 
       host.innerHTML =
         '<div class="view-wrap">' +
@@ -197,6 +203,7 @@
         '<div class="page-title">' + ui.icon("db", 22) + " P1 · Truth Ingest</div>" +
         '<div class="page-sub">Four signed sources → one Merkle root. Only the fingerprint goes on-chain.</div></div>' +
         '<span class="chip">subject · ' + ui.esc(d.label) + "</span>" +
+        '<span class="chip subj-addr num">' + ui.esc(App.fn.shortAddr(d.address)) + "</span>" +
         "</div>" +
         '<div class="ingest-cols">' +
         '<div class="col-main">' +
@@ -212,14 +219,17 @@
         (anchored ? "" : "") +
         '<span id="anchor-btn-label">' + (anchored ? "Anchor Again" : "Connect &amp; Anchor") + "</span></button>" +
         '<span class="note-italic" style="margin-left:10px">repeatable · each anchor uses a fresh nonce · logs accumulate</span></div>' +
+        statusHtml +
         treeHtml +
         '<div class="sec-l">Chain log · latest first</div><div id="chain-log"></div>' +
+        proofHtml +
         '<details class="how"><summary>How it works</summary><div class="how-body">' +
         '<span class="fml">root = Merkle( 4 × source digest(data | timestamp | nonce) )</span><br>' +
         "Each leaf digests one signed source record together with the anchor timestamp and an incrementing nonce, " +
         "so every anchor produces a different root. Interior nodes hash their two children; the root is the " +
         "testnet fingerprint. No raw detail, no key material — mock only.</div></details>" +
         "</div></div>" +
+        archHtml +
         "</div>" +
         "</div>";
 
